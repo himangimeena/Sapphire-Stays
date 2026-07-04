@@ -15,6 +15,7 @@ import Offers from './pages/Offers';
 import Gallery from './pages/Gallery';
 import About from './pages/About';
 import Contact from './pages/Contact';
+import Profile from './pages/Profile';
 
 // Role Portals
 import CustomerPortal from './pages/portals/CustomerPortal';
@@ -40,6 +41,7 @@ export default function App() {
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/login" element={<Auth />} />
+          <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
 
           {/* Role-Protected Portals */}
           <Route 
