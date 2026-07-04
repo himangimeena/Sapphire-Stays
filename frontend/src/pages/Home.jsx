@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Sparkles, MapPin, Calendar, Users, Star, ArrowRight, CheckCircle, Shield } from 'lucide-react';
@@ -7,16 +7,52 @@ import GuestSelector from '../components/GuestSelector';
 export default function Home() {
   const [branches, setBranches] = useState([]);
   const [searchDestination, setSearchDestination] = useState('');
+  const [suggestions, setSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const [checkIn, setCheckIn] = useState('2026-07-15');
   const [checkOut, setCheckOut] = useState('2026-07-18');
   const [guests, setGuests] = useState('2 Adults, 0 Children');
   const navigate = useNavigate();
+  const destRef = useRef(null);
 
   useEffect(() => {
     axios.get('http://localhost:5000/api/branches')
       .then(res => setBranches(res.data.branches || []))
       .catch(err => console.error('Fetch branches failed:', err));
   }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (destRef.current && !destRef.current.contains(e.target)) {
+        setShowSuggestions(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleDestChange = (e) => {
+    const val = e.target.value;
+    setSearchDestination(val);
+    if (val.trim().length > 0) {
+      const lower = val.toLowerCase();
+      const matched = branches.filter(b =>
+        (b.city || '').toLowerCase().includes(lower) ||
+        (b.name || '').toLowerCase().includes(lower) ||
+        (b.state || '').toLowerCase().includes(lower)
+      );
+      setSuggestions(matched);
+      setShowSuggestions(true);
+    } else {
+      setSuggestions(branches);
+      setShowSuggestions(true);
+    }
+  };
+
+  const handleSelectDest = (val) => {
+    setSearchDestination(val);
+    setShowSuggestions(false);
+  };
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -26,12 +62,14 @@ export default function Home() {
   return (
     <div className="min-h-screen animate-fade-in">
       {/* Luxury Hero Section matching reference design */}
-      <section className="relative min-h-[85vh] flex flex-col justify-center items-center text-center px-4 overflow-hidden">
+      <section className="relative min-h-[85vh] flex flex-col justify-center items-center text-center px-4">
         {/* Background Image with Overlay */}
-        <div 
-          className="absolute inset-0 bg-cover bg-center z-0 scale-105 transition-transform duration-[10s]"
-          style={{ backgroundImage: `url('https://images.unsplash.com/photo-1585543805890-6051f7829f98?auto=format&fit=crop&w=2000&q=85')` }}
-        />
+        <div className="absolute inset-0 overflow-hidden z-0">
+          <div 
+            className="w-full h-full bg-cover bg-center scale-105 transition-transform duration-[10s]"
+            style={{ backgroundImage: `url('https://images.unsplash.com/photo-1585543805890-6051f7829f98?auto=format&fit=crop&w=2000&q=85')` }}
+          />
+        </div>
         <div className="absolute inset-0 bg-gradient-to-b from-[#08203E]/80 via-[#08203E]/60 to-[#08203E]/95 z-10" />
 
         <div className="relative z-20 max-w-5xl mx-auto space-y-6 pt-12">
@@ -50,23 +88,42 @@ export default function Home() {
             onSubmit={handleSearch} 
             className="mt-12 p-4 md:p-5 rounded-3xl max-w-4xl mx-auto shadow-2xl border-2 border-[#D4AF37]/50 bg-[#051224] text-white grid grid-cols-1 md:grid-cols-4 gap-4 text-left relative z-30"
           >
-            {/* Destination Selector */}
-            <div className="p-3.5 rounded-2xl bg-[#0B1D3A] border border-[#D4AF37]/30 hover:border-[#D4AF37] transition flex flex-col justify-center">
+            {/* Destination Autocomplete */}
+            <div className="p-3.5 rounded-2xl bg-[#0B1D3A] border border-[#D4AF37]/30 hover:border-[#D4AF37] transition flex flex-col justify-center relative z-50" ref={destRef}>
               <label className="text-[11px] text-[#D4AF37] font-bold uppercase tracking-wider block mb-1 flex items-center gap-1.5">
                 <MapPin className="w-3.5 h-3.5" /> Destination
               </label>
-              <select 
-                value={searchDestination} 
-                onChange={(e) => setSearchDestination(e.target.value)}
-                className="bg-transparent text-white text-sm font-semibold focus:outline-none cursor-pointer w-full"
-              >
-                <option value="" className="bg-[#08203E] text-white">All India Sanctuaries</option>
-                <option value="Udaipur" className="bg-[#08203E] text-white">Udaipur Royal Palace</option>
-                <option value="Mumbai" className="bg-[#08203E] text-white">Mumbai Marine Skyline</option>
-                <option value="Goa" className="bg-[#08203E] text-white">South Goa Beach Villa</option>
-                <option value="Delhi" className="bg-[#08203E] text-white">New Delhi Imperial</option>
-                <option value="Jaipur" className="bg-[#08203E] text-white">Jaipur Heritage Fort</option>
-              </select>
+              <input
+                type="text"
+                placeholder="All India Sanctuaries..."
+                value={searchDestination}
+                onChange={handleDestChange}
+                onFocus={() => {
+                  setSuggestions(searchDestination.trim() ? branches.filter(b => (b.city||'').toLowerCase().includes(searchDestination.toLowerCase()) || (b.name||'').toLowerCase().includes(searchDestination.toLowerCase())) : branches);
+                  setShowSuggestions(true);
+                }}
+                className="bg-transparent text-white text-sm font-semibold focus:outline-none w-full placeholder-gray-400"
+              />
+              {showSuggestions && (
+                <div className="absolute left-0 right-0 top-full mt-2 bg-[#0B1D3A] rounded-2xl border border-[#D4AF37]/50 shadow-2xl overflow-hidden z-50 max-h-60 overflow-y-auto">
+                  <div
+                    onClick={() => handleSelectDest('')}
+                    className="px-4 py-2.5 hover:bg-[#13284c] cursor-pointer text-xs font-bold text-[#D4AF37] border-b border-gray-800 flex items-center gap-2"
+                  >
+                    <Sparkles className="w-3.5 h-3.5" /> All India Sanctuaries
+                  </div>
+                  {suggestions.map(b => (
+                    <div
+                      key={b.id}
+                      onClick={() => handleSelectDest(b.city)}
+                      className="px-4 py-2.5 hover:bg-[#13284c] cursor-pointer text-xs transition border-b last:border-0 border-gray-800/50 flex flex-col"
+                    >
+                      <span className="font-bold text-white">{b.name}</span>
+                      <span className="text-[10px] text-gray-400">{b.city}, {b.state}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Check In / Out Dates Box */}
@@ -94,7 +151,7 @@ export default function Home() {
             </div>
 
             {/* Guests Selection */}
-            <div className="p-3.5 rounded-2xl bg-[#0B1D3A] border border-[#D4AF37]/30 hover:border-[#D4AF37] transition flex flex-col justify-center">
+            <div className="p-3.5 rounded-2xl bg-[#0B1D3A] border border-[#D4AF37]/30 hover:border-[#D4AF37] transition flex flex-col justify-center relative z-50">
               <label className="text-[11px] text-[#D4AF37] font-bold uppercase tracking-wider block mb-1 flex items-center gap-1.5">
                 <Users className="w-3.5 h-3.5" /> Guests
               </label>

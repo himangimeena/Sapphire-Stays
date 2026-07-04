@@ -6,6 +6,7 @@ import { Star, Filter, CheckCircle, MapPin, Sparkles, Compass, ArrowLeft, Refres
 export default function Rooms() {
   const [searchParams] = useSearchParams();
   const cityParam = searchParams.get('city') || '';
+  const couponParam = searchParams.get('coupon') || '';
   const [roomTypes, setRoomTypes] = useState([]);
   const [selectedTier, setSelectedTier] = useState('ALL');
   const [loading, setLoading] = useState(true);
@@ -24,7 +25,12 @@ export default function Rooms() {
   }, []);
 
   const filteredByCity = cityParam
-    ? roomTypes.filter(r => (r.branch_name || '').toLowerCase().includes(cityParam.toLowerCase()) || (r.city || '').toLowerCase().includes(cityParam.toLowerCase()))
+    ? roomTypes.filter(r => 
+        (r.branch_name || '').toLowerCase().includes(cityParam.toLowerCase()) || 
+        (r.branch_city || '').toLowerCase().includes(cityParam.toLowerCase()) || 
+        (r.branch_state || '').toLowerCase().includes(cityParam.toLowerCase()) ||
+        (r.city || '').toLowerCase().includes(cityParam.toLowerCase())
+      )
     : roomTypes;
 
   const filtered = selectedTier === 'ALL'
@@ -63,6 +69,29 @@ export default function Rooms() {
         </div>
       </div>
 
+      {/* Privilege Activated Banner when coming from Offers */}
+      {couponParam && (
+        <div className="p-6 rounded-2xl bg-[#08203E] border-2 border-[#D4AF37] text-white shadow-2xl flex flex-col sm:flex-row items-center justify-between gap-4 animate-fade-in">
+          <div className="flex items-center gap-4">
+            <div className="p-3 rounded-full bg-[#D4AF37]/20 text-[#D4AF37] shrink-0">
+              <Sparkles className="w-6 h-6 animate-pulse" />
+            </div>
+            <div>
+              <span className="text-[10px] uppercase font-bold tracking-widest text-[#D4AF37] block">Privilege Activated</span>
+              <h3 className="font-serif text-lg sm:text-xl font-bold text-white">
+                Promo Code: <span className="text-amber-300 font-mono tracking-wider">{couponParam}</span>
+              </h3>
+              <p className="text-xs sm:text-sm text-gray-300 font-light mt-0.5">
+                Your exclusive seasonal benefit will be automatically applied during checkout reservation.
+              </p>
+            </div>
+          </div>
+          <div className="text-xs font-bold px-4 py-2.5 rounded-full bg-[#D4AF37] text-[#08203E] uppercase tracking-wider shrink-0 shadow-lg">
+            ✓ VIP Offer Applied
+          </div>
+        </div>
+      )}
+
       {loading ? (
         <div className="text-center py-24 font-serif text-xl">Loading Sanctuary Suites...</div>
       ) : filtered.length === 0 ? (
@@ -78,7 +107,7 @@ export default function Rooms() {
               We're currently not available in this location.
             </h2>
             <p className="text-gray-600 dark:text-gray-300 text-sm sm:text-base leading-relaxed max-w-lg mx-auto font-light">
-              We're continuously expanding Sapphire Stays to new destinations and hope to serve this location soon. Please try searching another destination.
+              We're continuously expanding Sapphire Stays to new destinations across India and hope to serve this location soon. Please try searching another destination.
             </p>
           </div>
 
@@ -129,7 +158,7 @@ export default function Rooms() {
                   <span className="font-serif font-bold text-xl text-[#0F3D6E] dark:text-amber-300">₹{Number(rt.base_price).toLocaleString('en-IN')}</span>
                   <span className="text-xs text-gray-400"> + GST</span>
                 </div>
-                <Link to={`/checkout?roomTypeId=${rt.id}&branchId=${rt.branch_id}`} className="btn-luxury !py-2.5 !px-5 text-xs">
+                <Link to={`/checkout?roomTypeId=${rt.id}&branchId=${rt.branch_id}${couponParam ? `&coupon=${couponParam}` : ''}`} className="btn-luxury !py-2.5 !px-5 text-xs">
                   Reserve Suite
                 </Link>
               </div>

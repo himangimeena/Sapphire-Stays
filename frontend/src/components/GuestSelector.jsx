@@ -1,11 +1,28 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Users, Plus, Minus, Check, Building2 } from 'lucide-react';
+import { Users, Plus, Minus } from 'lucide-react';
+
+// Custom inline Paw Print SVG matching the exact reference design
+const PawIcon = ({ className }) => (
+  <svg viewBox="0 0 24 24" fill="currentColor" className={className} xmlns="http://www.w3.org/2000/svg">
+    {/* Main pad */}
+    <path d="M12 13.5C9.5 13.5 7.5 15.5 7.5 18C7.5 20.2 9.5 21.5 12 21.5C14.5 21.5 16.5 20.2 16.5 18C16.5 15.5 14.5 13.5 12 13.5Z" />
+    {/* Toe 1 (far left) */}
+    <circle cx="6.5" cy="11.5" r="2.2" />
+    {/* Toe 2 (inner left) */}
+    <circle cx="9.5" cy="8" r="2.2" />
+    {/* Toe 3 (inner right) */}
+    <circle cx="14.5" cy="8" r="2.2" />
+    {/* Toe 4 (far right) */}
+    <circle cx="17.5" cy="11.5" r="2.2" />
+  </svg>
+);
 
 export default function GuestSelector({ value, onChange, className }) {
   const [open, setOpen] = useState(false);
   const [adults, setAdults] = useState(2);
   const [children, setChildren] = useState(0);
   const [rooms, setRooms] = useState(1);
+  const [travelingWithPets, setTravelingWithPets] = useState(false);
   const popoverRef = useRef(null);
 
   useEffect(() => {
@@ -16,6 +33,7 @@ export default function GuestSelector({ value, onChange, className }) {
       if (aMatch) setAdults(Math.max(1, Math.min(20, parseInt(aMatch[1], 10))));
       if (cMatch) setChildren(Math.max(0, Math.min(10, parseInt(cMatch[1], 10))));
       if (rMatch) setRooms(Math.max(1, Math.min(10, parseInt(rMatch[1], 10))));
+      if (value.includes('Pets') || value.includes('🐾')) setTravelingWithPets(true);
     }
   }, []);
 
@@ -29,26 +47,21 @@ export default function GuestSelector({ value, onChange, className }) {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const updateAll = (newA, newC, newR) => {
+  const updateAll = (newA, newC, newR, newPets) => {
     const validA = Math.max(1, Math.min(20, isNaN(newA) ? 1 : Math.floor(newA)));
     const validC = Math.max(0, Math.min(10, isNaN(newC) ? 0 : Math.floor(newC)));
     const validR = Math.max(1, Math.min(10, isNaN(newR) ? 1 : Math.floor(newR)));
+    const validPets = typeof newPets === 'boolean' ? newPets : travelingWithPets;
+
     setAdults(validA);
     setChildren(validC);
     setRooms(validR);
+    setTravelingWithPets(validPets);
+
     const totalG = validA + validC;
-    const str = `${validA} ${validA === 1 ? 'Adult' : 'Adults'}, ${validC} ${validC === 1 ? 'Child' : 'Children'} • ${validR} ${validR === 1 ? 'Room' : 'Rooms'}`;
-    if (onChange) onChange(str, { adults: validA, children: validC, rooms: validR, totalGuests: totalG });
+    const str = `${validA} ${validA === 1 ? 'Adult' : 'Adults'}, ${validC} ${validC === 1 ? 'Child' : 'Children'} • ${validR} ${validR === 1 ? 'Room' : 'Rooms'}${validPets ? ' • 🐾 Pets' : ''}`;
+    if (onChange) onChange(str, { adults: validA, children: validC, rooms: validR, totalGuests: totalG, travelingWithPets: validPets });
   };
-
-  const handleInput = (type, rawValue) => {
-    const val = parseInt(rawValue.replace(/\D/g, ''), 10);
-    if (type === 'adults') updateAll(!isNaN(val) ? val : 1, children, rooms);
-    if (type === 'children') updateAll(adults, !isNaN(val) ? val : 0, rooms);
-    if (type === 'rooms') updateAll(adults, children, !isNaN(val) ? val : 1);
-  };
-
-  const totalGuests = adults + children;
 
   return (
     <div className="relative w-full" ref={popoverRef}>
@@ -59,180 +72,136 @@ export default function GuestSelector({ value, onChange, className }) {
       >
         <span className="text-white text-xs sm:text-sm font-semibold truncate flex items-center gap-2">
           <Users className="w-4 h-4 text-[#D4AF37] shrink-0" />
-          <span className="truncate">{adults}A, {children}C • {rooms} {rooms === 1 ? 'Room' : 'Rooms'}</span>
+          <span className="truncate">
+            {adults}A, {children}C • {rooms} {rooms === 1 ? 'Room' : 'Rooms'}{travelingWithPets ? ' • 🐾' : ''}
+          </span>
         </span>
         <span className="text-[10px] text-[#D4AF37] font-bold uppercase ml-1 shrink-0">{open ? '▲' : '▼'}</span>
       </button>
 
       {open && (
-        <div className="absolute right-0 sm:left-0 top-full mt-3 z-50 w-[300px] sm:w-[360px] p-5 rounded-2xl bg-[#08203E] border-2 border-[#D4AF37] shadow-2xl space-y-4 text-white animate-fade-in max-h-[85vh] overflow-y-auto">
-          <div className="flex items-center justify-between border-b border-white/10 pb-2">
-            <span className="text-xs uppercase tracking-wider text-[#D4AF37] font-bold">Royal Occupancy</span>
-            <span className="text-xs bg-white/10 px-2 py-0.5 rounded font-mono">Total: {totalGuests} Guests</span>
-          </div>
-
-          {/* Adults Section */}
-          <div className="space-y-1.5">
-            <div className="flex justify-between items-center">
-              <div>
-                <span className="text-xs font-bold block">Adults</span>
-                <span className="text-[10px] text-gray-400">Ages 12+ (Max 20)</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <button
-                  type="button"
-                  onClick={() => updateAll(adults - 1, children, rooms)}
-                  disabled={adults <= 1}
-                  className="w-7 h-7 rounded-lg bg-white/10 hover:bg-white/20 disabled:opacity-30 flex items-center justify-center font-bold text-xs"
-                >
-                  <Minus className="w-3 h-3" />
-                </button>
-                <input
-                  type="number"
-                  min="1"
-                  max="20"
-                  value={adults}
-                  onChange={(e) => handleInput('adults', e.target.value)}
-                  className="w-12 py-1 px-1 text-center bg-[#051329] border border-[#D4AF37]/50 rounded-lg text-xs font-bold text-white focus:outline-none focus:border-[#D4AF37]"
-                />
-                <button
-                  type="button"
-                  onClick={() => updateAll(adults + 1, children, rooms)}
-                  disabled={adults >= 20}
-                  className="w-7 h-7 rounded-lg bg-white/10 hover:bg-white/20 disabled:opacity-30 flex items-center justify-center font-bold text-xs"
-                >
-                  <Plus className="w-3 h-3" />
-                </button>
-              </div>
-            </div>
-            <div className="flex gap-1.5">
-              {[1, 2, 3, 4].map((num) => (
-                <button
-                  key={num}
-                  type="button"
-                  onClick={() => updateAll(num, children, rooms)}
-                  className={`flex-1 py-1 rounded text-[10px] font-bold transition ${
-                    adults === num ? 'bg-[#D4AF37] text-[#08203E]' : 'bg-white/5 hover:bg-white/10 text-gray-300'
-                  }`}
-                >
-                  {num}
-                </button>
-              ))}
+        <div className="absolute right-0 sm:left-auto sm:right-0 top-full mt-2 z-[100] w-[320px] sm:w-[440px] p-6 rounded-2xl bg-[#0B1D3A] border border-[#D4AF37]/50 shadow-2xl space-y-5 text-white animate-fade-in max-h-[85vh] overflow-y-auto">
+          
+          {/* Room Row */}
+          <div className="flex items-center justify-between">
+            <span className="text-sm sm:text-base font-bold text-white">Room</span>
+            <div className="flex items-center border border-[#D4AF37]/40 rounded-xl p-1 bg-[#08172E] shadow-inner">
+              <button
+                type="button"
+                onClick={() => updateAll(adults, children, rooms - 1, travelingWithPets)}
+                disabled={rooms <= 1}
+                className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-300 hover:bg-white/10 hover:text-white font-bold transition disabled:opacity-30"
+              >
+                <Minus className="w-4 h-4" />
+              </button>
+              <span className="w-8 text-center font-bold text-white text-base font-mono">{rooms}</span>
+              <button
+                type="button"
+                onClick={() => updateAll(adults, children, rooms + 1, travelingWithPets)}
+                disabled={rooms >= 10}
+                className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-300 hover:bg-white/10 hover:text-white font-bold transition disabled:opacity-30"
+              >
+                <Plus className="w-4 h-4" />
+              </button>
             </div>
           </div>
 
-          <div className="border-t border-white/10" />
-
-          {/* Children Section */}
-          <div className="space-y-1.5">
-            <div className="flex justify-between items-center">
-              <div>
-                <span className="text-xs font-bold block">Children</span>
-                <span className="text-[10px] text-gray-400">Ages 0–11 (Max 10)</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <button
-                  type="button"
-                  onClick={() => updateAll(adults, children - 1, rooms)}
-                  disabled={children <= 0}
-                  className="w-7 h-7 rounded-lg bg-white/10 hover:bg-white/20 disabled:opacity-30 flex items-center justify-center font-bold text-xs"
-                >
-                  <Minus className="w-3 h-3" />
-                </button>
-                <input
-                  type="number"
-                  min="0"
-                  max="10"
-                  value={children}
-                  onChange={(e) => handleInput('children', e.target.value)}
-                  className="w-12 py-1 px-1 text-center bg-[#051329] border border-[#D4AF37]/50 rounded-lg text-xs font-bold text-white focus:outline-none focus:border-[#D4AF37]"
-                />
-                <button
-                  type="button"
-                  onClick={() => updateAll(adults, children + 1, rooms)}
-                  disabled={children >= 10}
-                  className="w-7 h-7 rounded-lg bg-white/10 hover:bg-white/20 disabled:opacity-30 flex items-center justify-center font-bold text-xs"
-                >
-                  <Plus className="w-3 h-3" />
-                </button>
-              </div>
-            </div>
-            <div className="flex gap-1.5">
-              {[0, 1, 2, 3].map((num) => (
-                <button
-                  key={num}
-                  type="button"
-                  onClick={() => updateAll(adults, num, rooms)}
-                  className={`flex-1 py-1 rounded text-[10px] font-bold transition ${
-                    children === num ? 'bg-[#D4AF37] text-[#08203E]' : 'bg-white/5 hover:bg-white/10 text-gray-300'
-                  }`}
-                >
-                  {num}
-                </button>
-              ))}
+          {/* Adults Row */}
+          <div className="flex items-center justify-between">
+            <span className="text-sm sm:text-base font-bold text-white">Adults</span>
+            <div className="flex items-center border border-[#D4AF37]/40 rounded-xl p-1 bg-[#08172E] shadow-inner">
+              <button
+                type="button"
+                onClick={() => updateAll(adults - 1, children, rooms, travelingWithPets)}
+                disabled={adults <= 1}
+                className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-300 hover:bg-white/10 hover:text-white font-bold transition disabled:opacity-30"
+              >
+                <Minus className="w-4 h-4" />
+              </button>
+              <span className="w-8 text-center font-bold text-white text-base font-mono">{adults}</span>
+              <button
+                type="button"
+                onClick={() => updateAll(adults + 1, children, rooms, travelingWithPets)}
+                disabled={adults >= 20}
+                className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-300 hover:bg-white/10 hover:text-white font-bold transition disabled:opacity-30"
+              >
+                <Plus className="w-4 h-4" />
+              </button>
             </div>
           </div>
 
-          <div className="border-t border-white/10" />
-
-          {/* Rooms Section */}
-          <div className="space-y-1.5">
-            <div className="flex justify-between items-center">
-              <div>
-                <span className="text-xs font-bold block">Suites / Rooms</span>
-                <span className="text-[10px] text-gray-400">Required accommodation</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <button
-                  type="button"
-                  onClick={() => updateAll(adults, children, rooms - 1)}
-                  disabled={rooms <= 1}
-                  className="w-7 h-7 rounded-lg bg-white/10 hover:bg-white/20 disabled:opacity-30 flex items-center justify-center font-bold text-xs"
-                >
-                  <Minus className="w-3 h-3" />
-                </button>
-                <input
-                  type="number"
-                  min="1"
-                  max="10"
-                  value={rooms}
-                  onChange={(e) => handleInput('rooms', e.target.value)}
-                  className="w-12 py-1 px-1 text-center bg-[#051329] border border-[#D4AF37]/50 rounded-lg text-xs font-bold text-white focus:outline-none focus:border-[#D4AF37]"
-                />
-                <button
-                  type="button"
-                  onClick={() => updateAll(adults, children, rooms + 1)}
-                  disabled={rooms >= 10}
-                  className="w-7 h-7 rounded-lg bg-white/10 hover:bg-white/20 disabled:opacity-30 flex items-center justify-center font-bold text-xs"
-                >
-                  <Plus className="w-3 h-3" />
-                </button>
-              </div>
+          {/* Children Row */}
+          <div className="flex items-center justify-between">
+            <div>
+              <span className="text-sm sm:text-base font-bold text-white block">Children</span>
+              <span className="text-xs text-gray-400 font-normal">0 - 17 Years Old</span>
             </div>
-            <div className="flex gap-1.5">
-              {[1, 2, 3, 4].map((num) => (
-                <button
-                  key={num}
-                  type="button"
-                  onClick={() => updateAll(adults, children, num)}
-                  className={`flex-1 py-1 rounded text-[10px] font-bold transition ${
-                    rooms === num ? 'bg-[#D4AF37] text-[#08203E]' : 'bg-white/5 hover:bg-white/10 text-gray-300'
-                  }`}
-                >
-                  {num}
-                </button>
-              ))}
+            <div className="flex items-center border border-[#D4AF37]/40 rounded-xl p-1 bg-[#08172E] shadow-inner">
+              <button
+                type="button"
+                onClick={() => updateAll(adults, children - 1, rooms, travelingWithPets)}
+                disabled={children <= 0}
+                className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-300 hover:bg-white/10 hover:text-white font-bold transition disabled:opacity-30"
+              >
+                <Minus className="w-4 h-4" />
+              </button>
+              <span className="w-8 text-center font-bold text-white text-base font-mono">{children}</span>
+              <button
+                type="button"
+                onClick={() => updateAll(adults, children + 1, rooms, travelingWithPets)}
+                disabled={children >= 10}
+                className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-300 hover:bg-white/10 hover:text-white font-bold transition disabled:opacity-30"
+              >
+                <Plus className="w-4 h-4" />
+              </button>
             </div>
           </div>
 
-          {/* Done Button */}
-          <button
-            type="button"
-            onClick={() => setOpen(false)}
-            className="w-full btn-gold !py-2.5 text-xs font-bold flex items-center justify-center gap-1.5 shadow-lg mt-2"
-          >
-            <Check className="w-4 h-4" /> Apply ({totalGuests} Guests • {rooms} {rooms === 1 ? 'Room' : 'Rooms'})
-          </button>
+          {/* Explanatory Text */}
+          <p className="text-xs text-gray-300 pt-1 leading-relaxed font-normal">
+            Please provide right number of children along with their right age for best options and prices.
+          </p>
+
+          {/* Divider */}
+          <div className="border-t border-[#D4AF37]/20 my-4" />
+
+          {/* Traveling with Pets Card */}
+          <div className="border border-[#D4AF37]/30 rounded-2xl p-4 sm:p-5 flex items-start sm:items-center justify-between gap-4 bg-[#08172E]/80">
+            <label className="flex items-start gap-3.5 cursor-pointer min-w-0">
+              <input
+                type="checkbox"
+                checked={travelingWithPets}
+                onChange={(e) => {
+                  const val = e.target.checked;
+                  setTravelingWithPets(val);
+                  updateAll(adults, children, rooms, val);
+                }}
+                className="w-5 h-5 rounded border-[#D4AF37]/50 bg-[#051329] text-[#0B63E5] focus:ring-[#0B63E5] cursor-pointer shrink-0 mt-0.5"
+              />
+              <div className="min-w-0">
+                <span className="text-sm font-bold text-white block">Are you travelling with pets?</span>
+                <span className="text-xs text-gray-300 leading-relaxed mt-1 block">
+                  Selecting this option will show only pet-friendly properties. Please review the pet policies & applicable fees, if any.
+                </span>
+              </div>
+            </label>
+            <PawIcon className="w-9 h-9 text-[#D4AF37]/60 shrink-0 ml-2" />
+          </div>
+
+          {/* Apply Button Footer */}
+          <div className="pt-2 flex justify-end">
+            <button
+              type="button"
+              onClick={() => {
+                updateAll(adults, children, rooms, travelingWithPets);
+                setOpen(false);
+              }}
+              className="bg-[#0B63E5] hover:bg-[#0952C2] text-white font-bold text-sm px-8 py-3 rounded-full shadow-lg transition transform active:scale-95 tracking-wide"
+            >
+              APPLY
+            </button>
+          </div>
+
         </div>
       )}
     </div>
