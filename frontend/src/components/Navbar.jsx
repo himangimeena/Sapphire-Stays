@@ -1,5 +1,5 @@
 import React, { useContext, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { Sun, Moon, Shield, User, LogOut, Menu, X, Sparkles } from 'lucide-react';
 import RoleSwitcherModal from './RoleSwitcherModal';
@@ -9,6 +9,7 @@ export default function Navbar() {
   const [modalOpen, setModalOpen] = useState(false);
   const [mobileMenu, setMobileMenu] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
 
   const getPortalLink = () => {
     if (!user) return '/login';
@@ -21,6 +22,23 @@ export default function Navbar() {
       default: return '/portal/customer';
     }
   };
+
+  const isActive = (path) => {
+    if (path === '/') return location.pathname === '/';
+    return location.pathname.startsWith(path);
+  };
+
+  const navLinkClass = (path) => `py-2 transition duration-300 font-medium relative ${
+    isActive(path)
+      ? 'text-[#D4AF37] font-bold after:content-[""] after:absolute after:left-0 after:right-0 after:-bottom-1.5 after:h-0.5 after:bg-[#D4AF37] after:shadow-[0_0_10px_#D4AF37]'
+      : 'text-white/90 hover:text-[#D4AF37]'
+  }`;
+
+  const mobileLinkClass = (path) => `py-2 px-3 rounded-lg transition duration-300 font-medium ${
+    isActive(path)
+      ? 'bg-[#D4AF37]/20 text-[#D4AF37] font-bold border-l-4 border-[#D4AF37]'
+      : 'text-white/90 hover:text-[#D4AF37] hover:bg-white/5'
+  }`;
 
   return (
     <>
@@ -37,16 +55,17 @@ export default function Navbar() {
             </div>
           </Link>
 
-          {/* Desktop Navigation Links with generous luxury spacing */}
-          <nav className="hidden lg:flex items-center gap-6 xl:gap-10 text-sm font-medium tracking-wider">
-            <Link to="/" className="hover:text-[#D4AF37] transition py-2">Sanctuaries</Link>
-            <Link to="/branches" className="hover:text-[#D4AF37] transition py-2">Palaces</Link>
-            <Link to="/rooms" className="hover:text-[#D4AF37] transition py-2">Suites</Link>
-            <Link to="/offers" className="hover:text-[#D4AF37] transition flex items-center gap-1.5 py-2">
-              Offers <span className="px-2 py-0.5 text-[9px] bg-[#D4AF37] text-[#08203E] rounded font-bold uppercase tracking-normal">Royal</span>
+          {/* Desktop Navigation Links (Suites removed per Req 3, dynamic highlight added per Req 2) */}
+          <nav className="hidden lg:flex items-center gap-8 xl:gap-10 text-sm tracking-wider">
+            <Link to="/" className={navLinkClass('/')}>Sanctuaries</Link>
+            <Link to="/branches" className={navLinkClass('/branches')}>Palaces</Link>
+            <Link to="/offers" className={navLinkClass('/offers')}>
+              <span className="flex items-center gap-1.5">
+                Offers <span className="px-1.5 py-0.5 text-[9px] bg-[#D4AF37] text-[#08203E] rounded font-bold uppercase tracking-normal">Royal</span>
+              </span>
             </Link>
-            <Link to="/gallery" className="hover:text-[#D4AF37] transition py-2">Gallery</Link>
-            <Link to="/about" className="hover:text-[#D4AF37] transition py-2">Heritage</Link>
+            <Link to="/gallery" className={navLinkClass('/gallery')}>Gallery</Link>
+            <Link to="/about" className={navLinkClass('/about')}>Heritage</Link>
           </nav>
 
           {/* Right Action Bar spaced comfortably */}
@@ -73,8 +92,10 @@ export default function Navbar() {
             {/* User Account / Portal Link */}
             {user ? (
               <div className="flex items-center gap-3 pl-3 border-l border-white/20">
-                <Link to={getPortalLink()} className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#14355E] hover:bg-[#1A5494] transition border border-[#D4AF37]/40 shadow-md">
-                  {user.role !== 'CUSTOMER' ? <Shield className="w-4 h-4 text-[#D4AF37]" /> : <User className="w-4 h-4 text-[#D4AF37]" />}
+                <Link to={getPortalLink()} className={`flex items-center gap-2 px-4 py-2 rounded-lg transition border shadow-md ${
+                  location.pathname.startsWith('/portal') ? 'bg-[#D4AF37] text-[#08203E] font-bold border-[#D4AF37]' : 'bg-[#14355E] hover:bg-[#1A5494] border-[#D4AF37]/40 text-white'
+                }`}>
+                  {user.role !== 'CUSTOMER' ? <Shield className="w-4 h-4 shrink-0" /> : <User className="w-4 h-4 shrink-0" />}
                   <span className="text-xs font-semibold truncate max-w-[130px]">{user.name.split(' ')[0]}</span>
                 </Link>
                 <button
@@ -86,7 +107,7 @@ export default function Navbar() {
                 </button>
               </div>
             ) : (
-              <Link to="/login" className="btn-gold !py-2.5 !px-6 text-xs shadow-lg">
+              <Link to="/login" className={`btn-gold !py-2.5 !px-6 text-xs shadow-lg ${isActive('/login') ? 'ring-2 ring-white' : ''}`}>
                 Reserve Sanctuary
               </Link>
             )}
@@ -108,13 +129,12 @@ export default function Navbar() {
 
         {/* Mobile Dropdown */}
         {mobileMenu && (
-          <div className="lg:hidden bg-[#08203E] border-t border-[#D4AF37]/20 px-6 py-6 flex flex-col gap-4">
-            <Link to="/" onClick={() => setMobileMenu(false)} className="hover:text-[#D4AF37] py-1 font-medium">Sanctuaries</Link>
-            <Link to="/branches" onClick={() => setMobileMenu(false)} className="hover:text-[#D4AF37] py-1 font-medium">Palaces & Resorts</Link>
-            <Link to="/rooms" onClick={() => setMobileMenu(false)} className="hover:text-[#D4AF37] py-1 font-medium">Curated Suites</Link>
-            <Link to="/offers" onClick={() => setMobileMenu(false)} className="hover:text-[#D4AF37] py-1 font-medium">Offers & Privileges</Link>
-            <Link to="/gallery" onClick={() => setMobileMenu(false)} className="hover:text-[#D4AF37] py-1 font-medium">Gallery</Link>
-            <Link to="/about" onClick={() => setMobileMenu(false)} className="hover:text-[#D4AF37] py-1 font-medium">Heritage</Link>
+          <div className="lg:hidden bg-[#08203E] border-t border-[#D4AF37]/20 px-6 py-6 flex flex-col gap-3">
+            <Link to="/" onClick={() => setMobileMenu(false)} className={mobileLinkClass('/')}>Sanctuaries</Link>
+            <Link to="/branches" onClick={() => setMobileMenu(false)} className={mobileLinkClass('/branches')}>Palaces & Resorts</Link>
+            <Link to="/offers" onClick={() => setMobileMenu(false)} className={mobileLinkClass('/offers')}>Offers & Privileges</Link>
+            <Link to="/gallery" onClick={() => setMobileMenu(false)} className={mobileLinkClass('/gallery')}>Gallery</Link>
+            <Link to="/about" onClick={() => setMobileMenu(false)} className={mobileLinkClass('/about')}>Heritage</Link>
             <div className="border-t border-white/10 pt-4 flex items-center justify-between">
               {user ? (
                 <div className="flex items-center justify-between w-full">

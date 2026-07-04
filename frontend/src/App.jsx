@@ -2,6 +2,7 @@ import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+import ProtectedRoute from './components/ProtectedRoute';
 
 // Public & Customer Pages
 import Home from './pages/Home';
@@ -40,13 +41,55 @@ export default function App() {
           <Route path="/contact" element={<Contact />} />
           <Route path="/login" element={<Auth />} />
 
-          {/* Portals */}
-          <Route path="/portal/customer" element={<CustomerPortal />} />
-          <Route path="/portal/superadmin" element={<SuperAdminPortal />} />
-          <Route path="/portal/branchadmin" element={<BranchAdminPortal />} />
-          <Route path="/portal/reception" element={<ReceptionPortal />} />
-          <Route path="/portal/housekeeping" element={<HousekeepingPortal />} />
-          <Route path="/portal/maintenance" element={<MaintenancePortal />} />
+          {/* Role-Protected Portals */}
+          <Route 
+            path="/portal/customer" 
+            element={
+              <ProtectedRoute allowedRoles={['CUSTOMER']}>
+                <CustomerPortal />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/portal/superadmin" 
+            element={
+              <ProtectedRoute allowedRoles={['SUPER_ADMIN']}>
+                <SuperAdminPortal />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/portal/branchadmin" 
+            element={
+              <ProtectedRoute allowedRoles={['BRANCH_ADMIN']}>
+                <BranchAdminPortal />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/portal/reception" 
+            element={
+              <ProtectedRoute allowedRoles={['RECEPTIONIST']}>
+                <ReceptionPortal />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/portal/housekeeping" 
+            element={
+              <ProtectedRoute allowedRoles={['HOUSEKEEPING']}>
+                <HousekeepingPortal />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/portal/maintenance" 
+            element={
+              <ProtectedRoute allowedRoles={['MAINTENANCE']}>
+                <MaintenancePortal />
+              </ProtectedRoute>
+            } 
+          />
         </Routes>
       </main>
       <Footer />
