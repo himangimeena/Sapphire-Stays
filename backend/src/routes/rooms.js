@@ -7,7 +7,7 @@ const { authenticate, requireRoles } = require('../middleware/auth');
 router.get('/types', async (req, res) => {
   try {
     const { branchId, tier, minPrice, maxPrice } = req.query;
-    let sqlText = 'SELECT rt.*, b.name as branch_name, b.city as branch_city FROM RoomTypes rt JOIN Branches b ON rt.branch_id = b.id WHERE 1=1';
+    let sqlText = 'SELECT rt.*, b.name as branch_name, b.city as branch_city, b.state as branch_state FROM RoomTypes rt JOIN Branches b ON rt.branch_id = b.id WHERE 1=1';
     const params = [];
 
     if (branchId) {

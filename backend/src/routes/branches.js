@@ -11,8 +11,8 @@ router.get('/', async (req, res) => {
     const params = [];
 
     if (city) {
-      sqlText += ' AND (LOWER(city) LIKE ? OR LOWER(name) LIKE ?)';
-      params.push(`%${city.toLowerCase()}%`, `%${city.toLowerCase()}%`);
+      sqlText += ' AND (LOWER(city) LIKE ? OR LOWER(name) LIKE ? OR LOWER(state) LIKE ? OR LOWER(address) LIKE ? OR LOWER(description) LIKE ?)';
+      params.push(`%${city.toLowerCase()}%`, `%${city.toLowerCase()}%`, `%${city.toLowerCase()}%`, `%${city.toLowerCase()}%`, `%${city.toLowerCase()}%`);
     }
     if (minPrice) {
       sqlText += ' AND starting_price >= ?';

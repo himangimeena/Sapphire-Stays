@@ -135,7 +135,7 @@ async function seedDatabase() {
   }
 
   // Assign amenities to branches
-  const allBranches = await query('SELECT id FROM Branches');
+  const allBranches = await query('SELECT * FROM Branches');
   const allAmenities = await query('SELECT id FROM Amenities');
   const existingBranchAmenities = await query('SELECT * FROM BranchAmenities');
   if (existingBranchAmenities.length === 0 && allBranches.length > 0 && allAmenities.length > 0) {
@@ -146,38 +146,81 @@ async function seedDatabase() {
     }
   }
 
-  // 4. Seed Room Types & Rooms for Udaipur (Branch 1) & Mumbai (Branch 2)
-  const existingRoomTypes = await query('SELECT id FROM RoomTypes');
-  if (existingRoomTypes.length === 0 && allBranches.length > 0) {
-    const b1 = allBranches[0].id; // Udaipur
-    const b2 = allBranches[1] ? allBranches[1].id : b1; // Mumbai
+  // 4. Seed Room Types & Rooms for All Branches (Udaipur, Mumbai, Goa, Delhi, Jaipur, Munnar)
+  if (allBranches.length > 0) {
+    const branchTypesData = {
+      // Udaipur
+      'Udaipur': [
+        ['Lakeview Standard Haven', 'Essential Luxury', 45000.00, 10, 2, 1, 48, 'King Bed', 1, 1, 'Refined comfort with private jharokha balcony views over Lake Pichola and artisanal marble bath.'],
+        ['Royal Courtyard Suite', 'Most Popular', 68000.00, 15, 3, 2, 75, 'Grand King Bed', 1, 1, 'Expansive suite featuring sunken soaking tub, carved archways, and private butler service.'],
+        ['Maharaja Imperial Pavilion', 'The Signature', 125000.00, 0, 4, 2, 140, 'Imperial Master Bed', 1, 1, 'Panoramic heritage pavilion with private plunge pool, dining parlor, and direct boat dock access.']
+      ],
+      // Mumbai
+      'Mumbai': [
+        ['Marine Skyline King', 'Essential Luxury', 35000.00, 5, 2, 1, 42, 'King Bed', 0, 1, 'Overlooking Mumbai skyline and Arabian Sea promenade with acoustic glass and rainfall shower.'],
+        ['Gateway Grand Suite', 'Most Popular', 58000.00, 10, 3, 1, 68, 'King Bed', 1, 1, 'Corner suite offering dual vistas of the Gateway of India and harbor sunsets.'],
+        ['Presidential Penthouse Sanctuary', 'The Signature', 140000.00, 0, 4, 2, 180, 'Custom King Bed', 1, 1, 'Top-floor sanctuary with private elevator access, private chef kitchen, and jacuzzi terrace.']
+      ],
+      // Goa
+      'Goa': [
+        ['Beachfront Villa Haven', 'Essential Luxury', 38000.00, 10, 2, 1, 55, 'King Bed', 1, 1, 'Steps away from the silver sands of Cavelossim Beach with private sun deck and outdoor rain shower.'],
+        ['Private Pool Villa Suite', 'Most Popular', 62000.00, 15, 3, 2, 85, 'Grand King Bed', 1, 1, 'Secluded tropical villa featuring temperature-controlled private plunge pool and cabana lounge.'],
+        ['Presidential Ocean Villa Sanctuary', 'The Signature', 135000.00, 0, 4, 2, 160, 'Imperial Master Bed', 1, 1, 'Expansive oceanfront compound with dedicated butler, private infinity pool, and sunset dining pavilion.']
+      ],
+      // Delhi
+      'Delhi': [
+        ['Diplomatic Enclave Deluxe', 'Essential Luxury', 34000.00, 5, 2, 1, 48, 'King Bed', 0, 1, 'High-security executive sanctuary in Lutyens Delhi with biometric access and soundproof acoustics.'],
+        ['Lutyens Heritage Executive Suite', 'Most Popular', 56000.00, 10, 3, 1, 72, 'King Bed', 1, 1, 'Overlooking manicured diplomatic lawns with private study parlor and executive lounge access.'],
+        ['Ambassador Royal Penthouse', 'The Signature', 125000.00, 0, 4, 2, 150, 'Custom King Bed', 1, 1, 'Palatial top-floor suite with private elevator, boardroom suite, and 24/7 security detail.']
+      ],
+      // Jaipur
+      'Jaipur': [
+        ['Aravali Hillview Haven', 'Essential Luxury', 42000.00, 10, 2, 1, 50, 'King Bed', 1, 1, 'Carved stone jali balconies overlooking the Aravali hills with regal Rajasthani silk interiors.'],
+        ['Rajputana Royal Fort Suite', 'Most Popular', 65000.00, 15, 3, 2, 78, 'Grand King Bed', 1, 1, 'Fortified luxury suite featuring sunken marble bath, gold-leaf ceiling frescoes, and royal dining table.'],
+        ['Maharaja Palace Solitaire Pavilion', 'The Signature', 140000.00, 0, 4, 2, 170, 'Imperial Master Bed', 1, 1, 'The crown jewel of Pink City hospitality with private courtyard, heated pool, and royal elephant welcome.']
+      ],
+      // Munnar
+      'Munnar': [
+        ['Highland Tea Estate Solitude', 'Essential Luxury', 26000.00, 10, 2, 1, 45, 'King Bed', 1, 1, 'Suspended wooden pavilion floating above emerald tea plantations with fireplace and mountain views.'],
+        ['Cloud Mist Ayurvedic Pavilion', 'Most Popular', 48000.00, 15, 3, 2, 68, 'King Bed', 1, 1, 'Holistic wellness suite featuring in-room Ayurvedic treatment area and organic herbal steam bath.'],
+        ['Imperial Mountain Villa Sanctuary', 'The Signature', 95000.00, 0, 4, 2, 130, 'Custom King Bed', 1, 1, 'Secluded mountain fortress with infinity heated pool overlooking cloud valleys and private tea tasting room.']
+      ]
+    };
 
-    const types = [
-      // Branch 1 - Udaipur
-      [b1, 'Lakeview Standard Haven', 'Essential Luxury', 45000.00, 10, 2, 1, 48, 'King Bed', 1, 1, 'Refined comfort with private jharokha balcony views over Lake Pichola and artisanal marble bath.'],
-      [b1, 'Royal Courtyard Suite', 'Most Popular', 68000.00, 15, 3, 2, 75, 'Grand King Bed', 1, 1, 'Expansive suite featuring sunken soaking tub, carved archways, and private butler service.'],
-      [b1, 'Maharaja Imperial Pavilion', 'The Signature', 125000.00, 0, 4, 2, 140, 'Imperial Master Bed', 1, 1, 'Panoramic heritage pavilion with private plunge pool, dining parlor, and direct boat dock access.'],
-      // Branch 2 - Mumbai
-      [b2, 'Marine Skyline King', 'Essential Luxury', 35000.00, 5, 2, 1, 42, 'King Bed', 0, 1, 'Overlooking Mumbai skyline and Arabian Sea promenade with acoustic glass and rainfall shower.'],
-      [b2, 'Gateway Grand Suite', 'Most Popular', 58000.00, 10, 3, 1, 68, 'King Bed', 1, 1, 'Corner suite offering dual vistas of the Gateway of India and harbor sunsets.'],
-      [b2, 'Presidential Penthouse Sanctuary', 'The Signature', 140000.00, 0, 4, 2, 180, 'Custom King Bed', 1, 1, 'Top-floor sanctuary with private elevator access, private chef kitchen, and jacuzzi terrace.']
-    ];
+    for (const br of allBranches) {
+      const existingForBranch = await query('SELECT id FROM RoomTypes WHERE branch_id = ?', [br.id]);
+      if (existingForBranch.length === 0) {
+        // Determine which city data to use
+        const cityStr = (br.city || '').toLowerCase();
+        const nameStr = (br.name || '').toLowerCase();
+        const stateStr = (br.state || '').toLowerCase();
+        let branchKey = 'Udaipur';
+        if (cityStr.includes('mumbai') || nameStr.includes('mumbai')) branchKey = 'Mumbai';
+        else if (cityStr.includes('goa') || stateStr.includes('goa')) branchKey = 'Goa';
+        else if (cityStr.includes('delhi') || stateStr.includes('delhi')) branchKey = 'Delhi';
+        else if (cityStr.includes('jaipur') || nameStr.includes('jaipur')) branchKey = 'Jaipur';
+        else if (cityStr.includes('munnar') || nameStr.includes('munnar')) branchKey = 'Munnar';
 
-    for (const rt of types) {
-      const res = await query(
-        'INSERT INTO RoomTypes (branch_id, name, tier, base_price, discount_percentage, capacity_adults, capacity_children, size_sqm, bed_type, has_balcony, has_breakfast, description) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-        rt
-      );
-      const rtId = res.insertId || 1;
+        const typesToSeed = branchTypesData[branchKey] || branchTypesData['Udaipur'];
 
-      // Add rooms for each type
-      const statusList = ['AVAILABLE', 'AVAILABLE', 'OCCUPIED', 'CLEANING', 'MAINTENANCE'];
-      for (let i = 101; i <= 104; i++) {
-        const st = statusList[(i + rtId) % statusList.length];
-        await query(
-          'INSERT INTO Rooms (branch_id, room_type_id, room_number, floor, status) VALUES (?, ?, ?, ?, ?)',
-          [rt[0], rtId, `${rt[0] === b1 ? 'PALACE-' : 'GRAND-'}${i}`, `Floor ${Math.floor(i/100)}`, st]
-        );
+        for (const rtData of typesToSeed) {
+          const res = await query(
+            'INSERT INTO RoomTypes (branch_id, name, tier, base_price, discount_percentage, capacity_adults, capacity_children, size_sqm, bed_type, has_balcony, has_breakfast, description) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            [br.id, ...rtData]
+          );
+          const rtId = res.insertId || 1;
+
+          // Add rooms for each type
+          const statusList = ['AVAILABLE', 'AVAILABLE', 'OCCUPIED', 'CLEANING', 'MAINTENANCE'];
+          const prefix = br.city.substring(0, 3).toUpperCase() + '-';
+          for (let i = 101; i <= 104; i++) {
+            const st = statusList[(i + rtId) % statusList.length];
+            await query(
+              'INSERT INTO Rooms (branch_id, room_type_id, room_number, floor, status) VALUES (?, ?, ?, ?, ?)',
+              [br.id, rtId, `${prefix}${i}`, `Floor ${Math.floor(i/100)}`, st]
+            );
+          }
+        }
       }
     }
   }
