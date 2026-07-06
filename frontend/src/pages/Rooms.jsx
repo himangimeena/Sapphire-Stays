@@ -157,9 +157,9 @@ export default function Rooms() {
 
               <div className="p-6 pt-0 flex items-center justify-between border-t border-gray-100 dark:border-gray-800/50 mt-4">
                 <div>
-                  <span className="text-[10px] text-gray-400 uppercase block">Nightly Rate</span>
+                  <span className="text-[10px] text-gray-600 dark:text-gray-400 font-semibold uppercase block">Nightly Rate</span>
                   <span className="font-serif font-bold text-xl text-[#0F3D6E] dark:text-amber-300">₹{Number(rt.base_price).toLocaleString('en-IN')}</span>
-                  <span className="text-xs text-gray-400"> + GST</span>
+                  <span className="text-xs text-gray-600 dark:text-gray-400 font-semibold"> + GST</span>
                 </div>
                 <Link to={`/checkout?roomTypeId=${rt.id}&branchId=${rt.branch_id}${couponParam ? `&coupon=${couponParam}` : ''}`} className="btn-luxury !py-2.5 !px-5 text-xs">
                   Reserve Suite

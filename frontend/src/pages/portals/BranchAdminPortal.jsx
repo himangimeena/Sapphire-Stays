@@ -32,15 +32,15 @@ export default function BranchAdminPortal() {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="glass-card p-6 rounded-2xl border border-gray-200 dark:border-gray-800 space-y-1">
-          <span className="text-xs text-gray-400 uppercase font-bold">Total Suites</span>
+          <span className="text-xs text-gray-600 dark:text-gray-400 uppercase font-bold">Total Suites</span>
           <span className="font-serif text-3xl font-bold">42</span>
         </div>
         <div className="glass-card p-6 rounded-2xl border border-gray-200 dark:border-gray-800 space-y-1">
-          <span className="text-xs text-gray-400 uppercase font-bold">Occupied Today</span>
+          <span className="text-xs text-gray-600 dark:text-gray-400 uppercase font-bold">Occupied Today</span>
           <span className="font-serif text-3xl font-bold text-[#0F3D6E] dark:text-amber-300">36</span>
         </div>
         <div className="glass-card p-6 rounded-2xl border border-gray-200 dark:border-gray-800 space-y-1">
-          <span className="text-xs text-gray-400 uppercase font-bold">Average Nightly Rate</span>
+          <span className="text-xs text-gray-600 dark:text-gray-400 uppercase font-bold">Average Nightly Rate</span>
           <span className="font-serif text-3xl font-bold">₹58,500</span>
         </div>
       </div>
@@ -59,7 +59,7 @@ export default function BranchAdminPortal() {
                   {r.status}
                 </span>
               </div>
-              <p className="text-xs text-gray-500">{r.type_name}</p>
+              <p className="text-xs text-gray-600 dark:text-gray-400 font-medium">{r.type_name}</p>
               <div className="pt-2 border-t flex justify-between text-xs font-semibold">
                 <span>Rate</span>
                 <span className="text-[#0F3D6E] dark:text-amber-300">₹{Number(r.nightly_rate).toLocaleString('en-IN')}</span>

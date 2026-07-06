@@ -57,8 +57,8 @@ export default function MaintenancePortal() {
               </div>
               <h3 className="font-serif text-xl font-bold">{t.issue_title}</h3>
               <p className="text-xs text-gray-500">{t.description}</p>
-              <div className="text-[11px] text-gray-400 pt-2 border-t">
-                Reported by: <span className="font-semibold text-gray-600 dark:text-gray-300">{t.reported_by}</span>
+              <div className="text-[11px] text-gray-600 dark:text-gray-400 font-medium pt-2 border-t">
+                Reported by: <span className="font-semibold text-gray-800 dark:text-gray-300">{t.reported_by}</span>
               </div>
             </div>
 

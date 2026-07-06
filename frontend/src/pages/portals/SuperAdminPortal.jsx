@@ -145,7 +145,7 @@ export default function SuperAdminPortal() {
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead>
-              <tr className="border-b border-gray-200 dark:border-gray-800 text-gray-400 uppercase">
+              <tr className="border-b border-gray-200 dark:border-gray-800 text-gray-600 dark:text-gray-400 font-semibold uppercase">
                 <th className="py-3 px-4">Guest Name</th>
                 <th className="py-3 px-4">Branch Sanctuary</th>
                 <th className="py-3 px-4">Stay Dates</th>

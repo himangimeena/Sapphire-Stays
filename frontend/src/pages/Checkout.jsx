@@ -79,7 +79,7 @@ export default function Checkout() {
         
         <div className="glass-card p-6 rounded-2xl border border-[#D4AF37]/40 text-left space-y-4 shadow-xl">
           <div className="flex justify-between border-b border-gray-200 dark:border-gray-800 pb-4">
-            <span className="text-xs uppercase text-gray-400 font-semibold">Booking Reference</span>
+            <span className="text-xs uppercase text-gray-600 dark:text-gray-400 font-semibold">Booking Reference</span>
             <span className="font-mono font-bold text-base sm:text-lg text-[#0F3D6E] dark:text-amber-300">{confirmation.bookingRef}</span>
           </div>
           <div className="flex justify-between text-sm">
@@ -174,7 +174,7 @@ export default function Checkout() {
           <div className="glass-card p-5 sm:p-6 rounded-2xl border border-gray-200 dark:border-gray-800 space-y-6 shadow-sm">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-gray-200 dark:border-gray-800 pb-4 gap-2">
               <h2 className="font-serif text-2xl sm:text-3xl font-bold">Payment Information (India)</h2>
-              <div className="flex gap-2 text-gray-400">
+              <div className="flex gap-2 text-gray-600 dark:text-gray-400">
                 <CreditCard className="w-5 h-5" />
                 <Smartphone className="w-5 h-5" />
               </div>
@@ -264,7 +264,7 @@ export default function Checkout() {
               <span className="font-serif text-xl sm:text-2xl font-bold text-[#0F3D6E] dark:text-amber-300">
                 ₹{Number(calc?.totalAmount || 159300).toLocaleString('en-IN')}
               </span>
-              <span className="block text-[10px] text-gray-400">All India taxes included</span>
+              <span className="block text-[10px] text-gray-600 dark:text-gray-400 font-semibold">All India taxes included</span>
             </div>
           </div>
 

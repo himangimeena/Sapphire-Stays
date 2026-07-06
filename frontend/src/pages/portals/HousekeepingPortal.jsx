@@ -50,7 +50,7 @@ export default function HousekeepingPortal() {
           </button>
           <div className="text-right">
             <span className="font-bold text-sm text-[#0F3D6E] dark:text-amber-300 block">Shift: Morning</span>
-            <span className="text-xs text-gray-400">08:00 AM - 04:00 PM</span>
+            <span className="text-xs text-gray-600 dark:text-gray-400 font-semibold">08:00 AM - 04:00 PM</span>
           </div>
         </div>
       </div>
@@ -58,7 +58,7 @@ export default function HousekeepingPortal() {
       {/* KPI Status Boxes matching Screenshot 1 */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="glass-card p-6 rounded-2xl border border-gray-200 dark:border-gray-800 space-y-1">
-          <span className="text-xs uppercase font-bold text-gray-400 tracking-wider">PENDING</span>
+          <span className="text-xs uppercase font-bold text-gray-600 dark:text-gray-400 tracking-wider">PENDING</span>
           <span className="font-serif text-4xl font-bold block">12</span>
         </div>
         <div className="glass-card p-6 rounded-2xl border border-gray-200 dark:border-gray-800 space-y-1">
@@ -66,8 +66,8 @@ export default function HousekeepingPortal() {
           <span className="font-serif text-4xl font-bold block text-amber-600 dark:text-amber-400">04</span>
         </div>
         <div className="glass-card p-6 rounded-2xl border border-gray-200 dark:border-gray-800 space-y-1">
-          <span className="text-xs uppercase font-bold text-gray-400 tracking-wider">COMPLETED</span>
-          <span className="font-serif text-4xl font-bold block text-gray-400">28</span>
+          <span className="text-xs uppercase font-bold text-gray-600 dark:text-gray-400 tracking-wider">COMPLETED</span>
+          <span className="font-serif text-4xl font-bold block text-gray-600 dark:text-gray-400">28</span>
         </div>
         <div className="glass-card p-6 rounded-2xl border border-red-200 dark:border-red-900/50 space-y-1 bg-red-50/20">
           <span className="text-xs uppercase font-bold text-red-600 tracking-wider">URGENT</span>
@@ -127,7 +127,7 @@ export default function HousekeepingPortal() {
             </div>
 
             <div className={`p-4 border-t flex items-center justify-between ${t.priority === 'VIP' ? 'border-white/10 bg-white/5' : 'border-gray-100 dark:border-gray-800'}`}>
-              <span className={`text-xs font-semibold ${t.status === 'COMPLETED' ? 'text-emerald-500' : 'text-gray-400'}`}>
+              <span className={`text-xs font-semibold ${t.status === 'COMPLETED' ? 'text-emerald-600 dark:text-emerald-500' : 'text-gray-600 dark:text-gray-400'}`}>
                 {t.status === 'COMPLETED' ? 'Mark Completed' : 'Mark Cleaned'}
               </span>
               <button

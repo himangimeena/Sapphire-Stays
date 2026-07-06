@@ -139,7 +139,7 @@ export default function Profile() {
                 </div>
 
                 <div className="pt-4 mt-4 border-t border-gray-100 dark:border-gray-800/50 flex items-center justify-between">
-                  <span className={`text-[10px] uppercase font-bold tracking-wider ${isCurrent ? 'text-amber-300' : 'text-gray-400'}`}>
+                  <span className={`text-[10px] uppercase font-bold tracking-wider ${isCurrent ? 'text-amber-300' : 'text-gray-600 dark:text-gray-400'}`}>
                     {r.portal}
                   </span>
                   <button

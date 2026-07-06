@@ -99,7 +99,7 @@ export default function Branches() {
                   setFilterCity('');
                   setShowSuggestions(false);
                 }}
-                className="absolute right-4 top-3 text-xs text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+                className="absolute right-4 top-3 text-xs text-gray-500 dark:text-gray-400 font-medium hover:text-gray-800 dark:hover:text-gray-200"
               >
                 Clear
               </button>

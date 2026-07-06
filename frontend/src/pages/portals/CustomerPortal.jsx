@@ -96,7 +96,7 @@ export default function CustomerPortal() {
                       }`}>
                         {b.status}
                       </span>
-                      <span className="text-xs font-mono text-gray-400">Ref: {b.booking_ref}</span>
+                      <span className="text-xs font-mono text-gray-600 dark:text-gray-400 font-semibold">Ref: {b.booking_ref}</span>
                     </div>
                     <h3 className="font-serif text-2xl font-bold">{b.branch_name}</h3>
                     <p className="text-xs text-gray-500 flex items-center gap-4">
@@ -108,9 +108,9 @@ export default function CustomerPortal() {
 
                   <div className="flex flex-col md:items-end gap-3 w-full md:w-auto">
                     <div className="md:text-right">
-                      <span className="text-[10px] uppercase text-gray-400 block">Total Amount Paid</span>
+                      <span className="text-[10px] uppercase text-gray-600 dark:text-gray-400 font-semibold block">Total Amount Paid</span>
                       <span className="font-serif font-bold text-xl text-[#0F3D6E] dark:text-amber-300">₹{Number(b.total_amount).toLocaleString('en-IN')}</span>
-                      <span className="text-[10px] text-gray-400 block">Via {b.payment_method || 'UPI'}</span>
+                      <span className="text-[10px] text-gray-600 dark:text-gray-400 font-semibold block">Via {b.payment_method || 'UPI'}</span>
                     </div>
                     <div className="flex gap-2">
                       <button
@@ -142,15 +142,15 @@ export default function CustomerPortal() {
             <h3 className="font-serif text-2xl font-bold">Personal Details</h3>
             <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-6 text-sm">
               <div>
-                <label className="text-xs uppercase text-gray-400 block">Full Name</label>
+                <label className="text-xs uppercase text-gray-600 dark:text-gray-400 font-semibold block">Full Name</label>
                 <p className="font-semibold text-base mt-1">{user?.name}</p>
               </div>
               <div>
-                <label className="text-xs uppercase text-gray-400 block">Email Address</label>
+                <label className="text-xs uppercase text-gray-600 dark:text-gray-400 font-semibold block">Email Address</label>
                 <p className="font-semibold text-base mt-1">{user?.email}</p>
               </div>
               <div>
-                <label className="text-xs uppercase text-gray-400 block">Role Access</label>
+                <label className="text-xs uppercase text-gray-600 dark:text-gray-400 font-semibold block">Role Access</label>
                 <p className="font-semibold text-base mt-1 uppercase text-[#D4AF37]">{user?.role}</p>
               </div>
             </div>
@@ -210,7 +210,7 @@ export default function CustomerPortal() {
               <div>
                 <h3 className="font-serif text-2xl font-bold text-[#08203E] dark:text-white">Tax Invoice (India GST)</h3>
                 <p className="text-xs text-gray-500 mt-1">Invoice No: {selectedInvoice.invoice_number || 'INV-2026-IN0091'}</p>
-                <p className="text-[11px] font-mono text-gray-400">GSTIN: {selectedInvoice.gstin || '08AAACS9988H1Z5'}</p>
+                <p className="text-[11px] font-mono text-gray-600 dark:text-gray-400 font-semibold">GSTIN: {selectedInvoice.gstin || '08AAACS9988H1Z5'}</p>
               </div>
               <button onClick={() => setSelectedInvoice(null)} className="p-1 text-gray-400 hover:text-white">✕</button>
             </div>
