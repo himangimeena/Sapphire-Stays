@@ -24,12 +24,15 @@ export default function Rooms() {
       });
   }, []);
 
-  const filteredByCity = cityParam
+  const cleanCityParam = (cityParam || '').trim().toLowerCase();
+  const isAllIndia = cleanCityParam === '' || cleanCityParam.includes('all india') || cleanCityParam === 'india';
+
+  const filteredByCity = !isAllIndia
     ? roomTypes.filter(r => 
-        (r.branch_name || '').toLowerCase().includes(cityParam.toLowerCase()) || 
-        (r.branch_city || '').toLowerCase().includes(cityParam.toLowerCase()) || 
-        (r.branch_state || '').toLowerCase().includes(cityParam.toLowerCase()) ||
-        (r.city || '').toLowerCase().includes(cityParam.toLowerCase())
+        (r.branch_name || '').toLowerCase().includes(cleanCityParam) || 
+        (r.branch_city || '').toLowerCase().includes(cleanCityParam) || 
+        (r.branch_state || '').toLowerCase().includes(cleanCityParam) ||
+        (r.city || '').toLowerCase().includes(cleanCityParam)
       )
     : roomTypes;
 
