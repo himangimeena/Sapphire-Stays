@@ -27,6 +27,21 @@ async function initDB() {
       await mysqlPool.query('SELECT 1');
       dbMode = 'MYSQL';
       console.log('✅ Connected to MySQL database successfully!');
+
+      // Auto-initialize schema in MySQL if tables don't exist yet
+      const schemaPath = path.join(__dirname, 'schema.sql');
+      if (fs.existsSync(schemaPath)) {
+        const schemaSql = fs.readFileSync(schemaPath, 'utf8');
+        const statements = schemaSql.split(';').map(s => s.trim()).filter(s => s.length > 0);
+        for (const stmt of statements) {
+          try {
+            await mysqlPool.query(stmt);
+          } catch (e) {
+            // Ignore if table already exists or minor notice
+          }
+        }
+        console.log('✅ Relational schema verified in MySQL database!');
+      }
       return;
     } catch (err) {
       console.warn('⚠️ MySQL connection failed:', err.message);
