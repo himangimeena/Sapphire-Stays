@@ -49,7 +49,7 @@ export default function Offers() {
               <p className="text-xs text-gray-500 leading-relaxed">{o.desc}</p>
             </div>
             <div className="pt-4 border-t border-gray-100 dark:border-gray-800 flex flex-col gap-4">
-              <span className="text-[11px] text-gray-400">{o.validity}</span>
+              <span className="text-[11px] text-gray-600 dark:text-gray-400 font-medium">{o.validity}</span>
               <Link to={`/rooms?coupon=${o.code}`} className="btn-luxury text-center !py-3 text-xs">
                 Claim Privilege →
               </Link>

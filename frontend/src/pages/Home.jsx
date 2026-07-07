@@ -198,9 +198,9 @@ export default function Home() {
                 <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-2 leading-relaxed">{b.description}</p>
                 <div className="pt-4 border-t border-gray-200 dark:border-gray-800 flex justify-between items-center">
                   <div>
-                    <span className="text-[10px] uppercase text-gray-400 font-semibold block">Starting From</span>
+                    <span className="text-[10px] uppercase text-gray-500 dark:text-gray-400 font-semibold block">Starting From</span>
                     <span className="font-serif font-bold text-lg text-[#0F3D6E] dark:text-amber-300">₹{Number(b.starting_price).toLocaleString('en-IN')}</span>
-                    <span className="text-xs text-gray-400"> / night</span>
+                    <span className="text-xs text-gray-500 dark:text-gray-400 font-medium"> / night</span>
                   </div>
                   <span className="text-xs font-bold text-[#D4AF37] flex items-center gap-1">Explore Sanctuary →</span>
                 </div>

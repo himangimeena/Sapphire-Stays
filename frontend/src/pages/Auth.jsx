@@ -146,11 +146,11 @@ export default function Auth() {
               <div
                 key={rc.id}
                 onClick={() => handleSelectRoleCard(rc)}
-                className="glass-card p-6 sm:p-7 rounded-3xl border border-gray-200 dark:border-gray-800 hover:border-[#D4AF37] dark:hover:border-[#D4AF37] transition-all duration-300 hover:-translate-y-1.5 hover:shadow-2xl hover:shadow-amber-500/10 cursor-pointer flex flex-col justify-between group bg-[#051329] text-white"
+                className="glass-card p-6 sm:p-7 rounded-3xl border border-gray-200 dark:border-gray-800 hover:border-[#D4AF37] dark:hover:border-[#D4AF37] transition-all duration-300 hover:-translate-y-1.5 hover:shadow-2xl hover:shadow-amber-500/10 cursor-pointer flex flex-col justify-between group bg-white/90 dark:bg-[#051329] text-gray-900 dark:text-white"
               >
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <div className="p-3.5 rounded-2xl bg-[#08203E] border border-[#D4AF37]/30 group-hover:border-[#D4AF37] group-hover:scale-110 transition duration-300">
+                    <div className="p-3.5 rounded-2xl bg-amber-50 dark:bg-[#08203E] border border-[#D4AF37]/30 group-hover:border-[#D4AF37] group-hover:scale-110 transition duration-300">
                       {rc.icon}
                     </div>
                     <span className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-[#D4AF37]/20 text-[#D4AF37] border border-[#D4AF37]/30">
@@ -159,16 +159,16 @@ export default function Auth() {
                   </div>
 
                   <div>
-                    <h3 className="font-serif text-xl sm:text-2xl font-bold group-hover:text-[#D4AF37] transition">
+                    <h3 className="font-serif text-xl sm:text-2xl font-bold text-gray-900 dark:text-white group-hover:text-[#D4AF37] transition">
                       {rc.title}
                     </h3>
-                    <p className="text-xs text-gray-400 mt-2 leading-relaxed">
+                    <p className="text-xs text-gray-600 dark:text-gray-400 mt-2 leading-relaxed">
                       {rc.desc}
                     </p>
                   </div>
                 </div>
 
-                <div className="pt-6 border-t border-white/10 mt-6 flex items-center justify-between text-xs font-bold text-[#D4AF37] group-hover:translate-x-1 transition">
+                <div className="pt-6 border-t border-gray-200 dark:border-white/10 mt-6 flex items-center justify-between text-xs font-bold text-[#D4AF37] group-hover:translate-x-1 transition">
                   <span>Enter {rc.title} Portal</span>
                   <span>→</span>
                 </div>
@@ -186,44 +186,44 @@ export default function Auth() {
             <ArrowLeft className="w-4 h-4" /> Choose a different portal role
           </button>
 
-          <div className="glass-card p-8 sm:p-10 rounded-3xl border-2 border-[#D4AF37]/40 shadow-2xl space-y-6 bg-[#08203E] text-white">
+          <div className="glass-card p-8 sm:p-10 rounded-3xl border-2 border-[#D4AF37]/40 shadow-2xl space-y-6 bg-white/95 dark:bg-[#08203E] text-gray-900 dark:text-white">
             <div className="text-center space-y-3">
-              <div className="w-14 h-14 rounded-2xl bg-[#051329] border border-[#D4AF37] flex items-center justify-center mx-auto shadow-lg">
+              <div className="w-14 h-14 rounded-2xl bg-amber-50 dark:bg-[#051329] border border-[#D4AF37] flex items-center justify-center mx-auto shadow-lg">
                 {selectedRole.icon}
               </div>
               <div>
                 <span className="text-[10px] uppercase font-bold text-[#D4AF37] tracking-widest block">{selectedRole.badge}</span>
-                <h2 className="font-serif text-2xl sm:text-3xl font-bold">{selectedRole.title} Portal</h2>
+                <h2 className="font-serif text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">{selectedRole.title} Portal</h2>
               </div>
             </div>
 
             {errorMsg && (
-              <div className="p-4 rounded-xl bg-red-500/15 border border-red-500/40 text-red-300 text-xs flex items-start gap-2.5">
-                <AlertTriangle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
+              <div className="p-4 rounded-xl bg-red-500/15 border border-red-500/40 text-red-600 dark:text-red-300 text-xs flex items-start gap-2.5">
+                <AlertTriangle className="w-4 h-4 text-red-500 dark:text-red-400 shrink-0 mt-0.5" />
                 <span className="leading-relaxed">{errorMsg}</span>
               </div>
             )}
 
             {/* Guest Tab Switcher (Only visible for CUSTOMER role per Req 6) */}
             {selectedRole.allowSignUp ? (
-              <div className="grid grid-cols-2 p-1 rounded-xl bg-[#051329] border border-white/10">
+              <div className="grid grid-cols-2 p-1 rounded-xl bg-gray-100 dark:bg-[#051329] border border-gray-300 dark:border-white/10">
                 <button
                   type="button"
                   onClick={() => { setIsLogin(true); setErrorMsg(''); }}
-                  className={`py-2 rounded-lg text-xs font-bold transition ${isLogin ? 'bg-[#D4AF37] text-[#08203E]' : 'text-gray-400 hover:text-white'}`}
+                  className={`py-2 rounded-lg text-xs font-bold transition ${isLogin ? 'bg-[#D4AF37] text-[#08203E]' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}
                 >
                   Sign In
                 </button>
                 <button
                   type="button"
                   onClick={() => { setIsLogin(false); setErrorMsg(''); }}
-                  className={`py-2 rounded-lg text-xs font-bold transition ${!isLogin ? 'bg-[#D4AF37] text-[#08203E]' : 'text-gray-400 hover:text-white'}`}
+                  className={`py-2 rounded-lg text-xs font-bold transition ${!isLogin ? 'bg-[#D4AF37] text-[#08203E]' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}
                 >
                   Create Account
                 </button>
               </div>
             ) : (
-              <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-center text-[11px] text-amber-300">
+              <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-center text-[11px] text-amber-700 dark:text-amber-300">
                 <Lock className="w-3.5 h-3.5 inline mr-1 -mt-0.5" /> Staff & Admin accounts require corporate authorization. Sign-Up is disabled.
               </div>
             )}
@@ -232,50 +232,50 @@ export default function Auth() {
               {!isLogin && selectedRole.allowSignUp && (
                 <>
                   <div>
-                    <label className="text-xs uppercase font-semibold text-gray-300 block mb-1">Full Name</label>
+                    <label className="text-xs uppercase font-bold text-gray-700 dark:text-gray-300 block mb-1">Full Name</label>
                     <input
                       type="text"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       required
                       placeholder="Enter your full name"
-                      className="w-full px-4 py-3 rounded-xl border border-white/20 bg-[#051329] text-white text-sm focus:outline-none focus:border-[#D4AF37] box-border"
+                      className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-white/20 bg-white dark:bg-[#051329] text-gray-900 dark:text-white text-sm focus:outline-none focus:border-[#D4AF37] box-border placeholder-gray-400"
                     />
                   </div>
                   <div>
-                    <label className="text-xs uppercase font-semibold text-gray-300 block mb-1">Indian Mobile (+91)</label>
+                    <label className="text-xs uppercase font-bold text-gray-700 dark:text-gray-300 block mb-1">Indian Mobile (+91)</label>
                     <input
                       type="text"
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
                       required
-                      className="w-full px-4 py-3 rounded-xl border border-white/20 bg-[#051329] text-white text-sm focus:outline-none focus:border-[#D4AF37] box-border"
+                      className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-white/20 bg-white dark:bg-[#051329] text-gray-900 dark:text-white text-sm focus:outline-none focus:border-[#D4AF37] box-border placeholder-gray-400"
                     />
                   </div>
                 </>
               )}
 
               <div>
-                <label className="text-xs uppercase font-semibold text-gray-300 block mb-1">Email Address</label>
+                <label className="text-xs uppercase font-bold text-gray-700 dark:text-gray-300 block mb-1">Email Address</label>
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
                   placeholder={selectedRole.demoEmail}
-                  className="w-full px-4 py-3 rounded-xl border border-white/20 bg-[#051329] text-white text-sm focus:outline-none focus:border-[#D4AF37] box-border"
+                  className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-white/20 bg-white dark:bg-[#051329] text-gray-900 dark:text-white text-sm focus:outline-none focus:border-[#D4AF37] box-border placeholder-gray-400"
                 />
               </div>
 
               <div>
-                <label className="text-xs uppercase font-semibold text-gray-300 block mb-1">Password</label>
+                <label className="text-xs uppercase font-bold text-gray-700 dark:text-gray-300 block mb-1">Password</label>
                 <input
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   placeholder="••••••••"
-                  className="w-full px-4 py-3 rounded-xl border border-white/20 bg-[#051329] text-white text-sm focus:outline-none focus:border-[#D4AF37] box-border"
+                  className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-white/20 bg-white dark:bg-[#051329] text-gray-900 dark:text-white text-sm focus:outline-none focus:border-[#D4AF37] box-border placeholder-gray-400"
                 />
               </div>
 
@@ -288,12 +288,12 @@ export default function Auth() {
               </button>
             </form>
 
-            <div className="pt-4 border-t border-white/10 text-center space-y-2">
-              <span className="text-[10px] uppercase font-bold text-gray-400 block">Pre-loaded Test Credentials</span>
+            <div className="pt-4 border-t border-gray-200 dark:border-white/10 text-center space-y-2">
+              <span className="text-[10px] uppercase font-bold text-gray-600 dark:text-gray-400 block">Pre-loaded Test Credentials</span>
               <button
                 type="button"
                 onClick={() => { setEmail(selectedRole.demoEmail); setPassword(selectedRole.demoPass); }}
-                className="text-xs text-[#D4AF37] font-mono bg-white/5 hover:bg-white/10 py-1.5 px-3 rounded-lg border border-white/10 transition"
+                className="text-xs text-[#D4AF37] font-mono bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 py-1.5 px-3 rounded-lg border border-gray-300 dark:border-white/10 transition"
               >
                 Auto-fill: {selectedRole.demoEmail}
               </button>
