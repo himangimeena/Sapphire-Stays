@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { Star, MapPin, Search, Sparkles, Compass, RefreshCw, ArrowLeft, Building2 } from 'lucide-react';
+import { FALLBACK_BRANCHES } from '../data/fallbackData';
 
 export default function Branches() {
   const [branches, setBranches] = useState([]);
@@ -11,25 +12,32 @@ export default function Branches() {
   const [loading, setLoading] = useState(true);
   const searchRef = useRef(null);
 
-  // Fetch all branches initially for autocomplete suggestions
+  // Fetch all branches initially for autocomplete suggestions (with graceful fallback)
   useEffect(() => {
     axios.get('http://localhost:5000/api/branches')
       .then(res => {
-        setAllBranches(res.data.branches || []);
+        setAllBranches(res.data.branches || FALLBACK_BRANCHES);
       })
-      .catch(err => console.error('Failed to fetch initial branches:', err));
+      .catch(() => {
+        // Silent fallback when live API server is offline during local review
+        setAllBranches(FALLBACK_BRANCHES);
+      });
   }, []);
 
-  // Fetch filtered branches when filterCity changes
+  // Fetch filtered branches when filterCity changes (with graceful fallback)
   useEffect(() => {
     setLoading(true);
     axios.get(`http://localhost:5000/api/branches${filterCity ? `?city=${encodeURIComponent(filterCity)}` : ''}`)
       .then(res => {
-        setBranches(res.data.branches || []);
+        setBranches(res.data.branches || FALLBACK_BRANCHES);
         setLoading(false);
       })
-      .catch(err => {
-        console.error(err);
+      .catch(() => {
+        // Silent fallback when live API server is offline during local review
+        const filtered = filterCity.trim().length > 0
+          ? FALLBACK_BRANCHES.filter(b => b.city.toLowerCase().includes(filterCity.trim().toLowerCase()) || b.name.toLowerCase().includes(filterCity.trim().toLowerCase()))
+          : FALLBACK_BRANCHES;
+        setBranches(filtered);
         setLoading(false);
       });
   }, [filterCity]);

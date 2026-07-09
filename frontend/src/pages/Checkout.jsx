@@ -121,7 +121,7 @@ export default function Checkout() {
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="min-w-0 w-full">
-                <label className="text-[11px] font-semibold text-gray-500 uppercase block mb-1">Check-In Date</label>
+                <label className="text-[11px] font-bold text-gray-600 dark:text-gray-400 uppercase block mb-1">Check-In Date</label>
                 <input
                   type="date"
                   value={checkIn}
@@ -130,7 +130,7 @@ export default function Checkout() {
                 />
               </div>
               <div className="min-w-0 w-full">
-                <label className="text-[11px] font-semibold text-gray-500 uppercase block mb-1">Check-Out Date</label>
+                <label className="text-[11px] font-bold text-gray-600 dark:text-gray-400 uppercase block mb-1">Check-Out Date</label>
                 <input
                   type="date"
                   value={checkOut}
@@ -145,28 +145,28 @@ export default function Checkout() {
             <h2 className="font-serif text-2xl sm:text-3xl font-bold border-b border-gray-200 dark:border-gray-800 pb-4">Guest Details</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="min-w-0 w-full">
-                <label className="text-xs font-semibold text-gray-500 uppercase block mb-1">First Name</label>
+                <label className="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase block mb-1">First Name</label>
                 <input type="text" value={firstName} onChange={e => setFirstName(e.target.value)} required className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:outline-none focus:border-[#D4AF37] box-border" />
               </div>
               <div className="min-w-0 w-full">
-                <label className="text-xs font-semibold text-gray-500 uppercase block mb-1">Last Name</label>
+                <label className="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase block mb-1">Last Name</label>
                 <input type="text" value={lastName} onChange={e => setLastName(e.target.value)} required className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:outline-none focus:border-[#D4AF37] box-border" />
               </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="min-w-0 w-full">
-                <label className="text-xs font-semibold text-gray-500 uppercase block mb-1">Email Address</label>
+                <label className="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase block mb-1">Email Address</label>
                 <input type="email" value={email} onChange={e => setEmail(e.target.value)} required className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:outline-none focus:border-[#D4AF37] box-border" />
               </div>
               <div className="min-w-0 w-full">
-                <label className="text-xs font-semibold text-gray-500 uppercase block mb-1">Indian Mobile (+91)</label>
+                <label className="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase block mb-1">Indian Mobile (+91)</label>
                 <input type="text" value={phone} onChange={e => setPhone(e.target.value)} required className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:outline-none focus:border-[#D4AF37] box-border" />
               </div>
             </div>
 
             <div className="min-w-0 w-full">
-              <label className="text-xs font-semibold text-gray-500 uppercase block mb-1">Special Requests (Optional)</label>
+              <label className="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase block mb-1">Special Requests (Optional)</label>
               <textarea rows={3} value={specialRequests} onChange={e => setSpecialRequests(e.target.value)} className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:outline-none focus:border-[#D4AF37] box-border" />
             </div>
           </div>
@@ -188,7 +188,7 @@ export default function Checkout() {
                   key={pm}
                   onClick={() => setPaymentMethod(pm)}
                   className={`py-3 px-4 rounded-xl text-xs font-bold uppercase transition border text-center truncate ${
-                    paymentMethod === pm ? 'border-[#D4AF37] bg-[#D4AF37]/10 text-[#0F3D6E] dark:text-amber-300' : 'border-gray-200 dark:border-gray-700 text-gray-500'
+                    paymentMethod === pm ? 'border-[#D4AF37] bg-[#D4AF37]/10 text-[#0F3D6E] dark:text-amber-300' : 'border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300'
                   }`}
                 >
                   {pm}
@@ -239,11 +239,11 @@ export default function Checkout() {
 
           <div className="space-y-3 pt-4 border-t border-gray-100 dark:border-gray-800 text-xs">
             <div className="flex justify-between">
-              <span className="text-gray-500">Duration ({calc?.nights || 3} Nights)</span>
+              <span className="text-gray-600 dark:text-gray-400 font-medium">Duration ({calc?.nights || 3} Nights)</span>
               <span className="font-semibold">{checkIn} → {checkOut}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-500">Suite Rate (x{calc?.roomsCount || 1} Room)</span>
+              <span className="text-gray-600 dark:text-gray-400 font-medium">Suite Rate (x{calc?.roomsCount || 1} Room)</span>
               <span className="font-semibold">₹{Number(calc?.baseAmount || 135000).toLocaleString('en-IN')}</span>
             </div>
             {calc?.discountAmount > 0 && (
@@ -253,7 +253,7 @@ export default function Checkout() {
               </div>
             )}
             <div className="flex justify-between">
-              <span className="text-gray-500">India GST (CGST 9% + SGST 9%)</span>
+              <span className="text-gray-600 dark:text-gray-400 font-medium">India GST (CGST 9% + SGST 9%)</span>
               <span className="font-semibold">₹{Number((calc?.cgstAmount || 12150) + (calc?.sgstAmount || 12150)).toLocaleString('en-IN')}</span>
             </div>
           </div>

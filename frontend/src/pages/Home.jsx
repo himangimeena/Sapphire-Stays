@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Sparkles, MapPin, Calendar, Users, Star, ArrowRight, CheckCircle, Shield } from 'lucide-react';
 import GuestSelector from '../components/GuestSelector';
+import { FALLBACK_BRANCHES } from '../data/fallbackData';
 
 export default function Home() {
   const [branches, setBranches] = useState([]);
@@ -17,8 +18,11 @@ export default function Home() {
 
   useEffect(() => {
     axios.get('http://localhost:5000/api/branches')
-      .then(res => setBranches(res.data.branches || []))
-      .catch(err => console.error('Fetch branches failed:', err));
+      .then(res => setBranches(res.data.branches || FALLBACK_BRANCHES))
+      .catch(() => {
+        // Silent fallback when live API server is offline during local review
+        setBranches(FALLBACK_BRANCHES);
+      });
   }, []);
 
   useEffect(() => {

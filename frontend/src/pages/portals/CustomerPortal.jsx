@@ -61,7 +61,7 @@ export default function CustomerPortal() {
         <button
           onClick={() => setActiveTab('bookings')}
           className={`pb-4 text-sm font-semibold transition border-b-2 ${
-            activeTab === 'bookings' ? 'border-[#D4AF37] text-[#0F3D6E] dark:text-amber-300' : 'border-transparent text-gray-400 hover:text-gray-600'
+            activeTab === 'bookings' ? 'border-[#D4AF37] text-[#0F3D6E] dark:text-amber-300 font-bold' : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-[#0F3D6E] dark:hover:text-amber-300'
           }`}
         >
           My Reservations ({bookings.length})
@@ -69,7 +69,7 @@ export default function CustomerPortal() {
         <button
           onClick={() => setActiveTab('profile')}
           className={`pb-4 text-sm font-semibold transition border-b-2 ${
-            activeTab === 'profile' ? 'border-[#D4AF37] text-[#0F3D6E] dark:text-amber-300' : 'border-transparent text-gray-400 hover:text-gray-600'
+            activeTab === 'profile' ? 'border-[#D4AF37] text-[#0F3D6E] dark:text-amber-300 font-bold' : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-[#0F3D6E] dark:hover:text-amber-300'
           }`}
         >
           Account Profile & Preferences

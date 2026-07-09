@@ -2,6 +2,7 @@ import React, { useContext, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { Sparkles, User, Shield, CheckCircle, LogOut, ArrowRight } from 'lucide-react';
+import DemoSwitcher from '../components/DemoSwitcher';
 
 export default function Profile() {
   const { user, switchDemoRole, logout } = useContext(AuthContext);
@@ -93,70 +94,15 @@ export default function Profile() {
         <div className="border-b border-gray-200 dark:border-gray-800 pb-4 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-2">
           <div>
             <h3 className="font-serif text-2xl font-bold flex items-center gap-2 text-[#0F3D6E] dark:text-amber-300">
-              <Shield className="w-6 h-6 text-[#D4AF37]" /> Demo Role Switcher
+              <Shield className="w-6 h-6 text-[#D4AF37]" /> Seeded Test Accounts (Simulated JWT)
             </h3>
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-              Select any role below to instantly adjust your session privileges and explore the respective portal.
+              Select any seeded account below to issue a valid JWT (`sessionStorage`) and enter the respective role portal.
             </p>
           </div>
-          {switching && (
-            <span className="text-xs font-bold text-[#D4AF37] animate-pulse">Switching session privileges...</span>
-          )}
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {roles.map((r) => {
-            const isCurrent = user.role === r.id;
-            return (
-              <div
-                key={r.id}
-                onClick={() => handleRoleSwitch(r.id, r.portal)}
-                className={`glass-card p-6 rounded-2xl border transition cursor-pointer flex flex-col justify-between shadow-lg hover:shadow-2xl hover:scale-[1.02] ${
-                  isCurrent
-                    ? 'border-[#D4AF37] bg-[#08203E] text-white ring-2 ring-[#D4AF37]/50'
-                    : 'border-gray-200 dark:border-gray-800 hover:border-[#D4AF37]/50 bg-white dark:bg-[#0B1D3A]'
-                }`}
-              >
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center">
-                    <span className="text-3xl">{r.icon}</span>
-                    {isCurrent ? (
-                      <span className="px-3 py-1 rounded-full bg-[#D4AF37] text-[#08203E] text-[10px] font-bold uppercase tracking-wider flex items-center gap-1">
-                        <CheckCircle className="w-3 h-3" /> Active Role
-                      </span>
-                    ) : (
-                      <span className="text-xs text-[#D4AF37] font-semibold flex items-center gap-1 opacity-0 group-hover:opacity-100 transition">
-                        Switch <ArrowRight className="w-3 h-3" />
-                      </span>
-                    )}
-                  </div>
-                  <h4 className={`font-serif text-xl font-bold ${isCurrent ? 'text-white' : 'text-gray-900 dark:text-white'}`}>
-                    {r.label}
-                  </h4>
-                  <p className={`text-xs leading-relaxed ${isCurrent ? 'text-gray-300' : 'text-gray-500 dark:text-gray-400'}`}>
-                    {r.desc}
-                  </p>
-                </div>
-
-                <div className="pt-4 mt-4 border-t border-gray-100 dark:border-gray-800/50 flex items-center justify-between">
-                  <span className={`text-[10px] uppercase font-bold tracking-wider ${isCurrent ? 'text-amber-300' : 'text-gray-600 dark:text-gray-400'}`}>
-                    {r.portal}
-                  </span>
-                  <button
-                    type="button"
-                    className={`px-4 py-1.5 rounded-lg text-xs font-bold transition ${
-                      isCurrent
-                        ? 'bg-[#D4AF37] text-[#08203E]'
-                        : 'bg-[#08203E] text-white dark:bg-white/10 dark:text-white hover:bg-[#D4AF37] hover:text-[#08203E]'
-                    }`}
-                  >
-                    {isCurrent ? 'Enter Portal →' : 'Switch & Enter'}
-                  </button>
-                </div>
-              </div>
-            );
-          })}
-        </div>
+        <DemoSwitcher />
       </div>
     </div>
   );

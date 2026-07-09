@@ -76,7 +76,7 @@ export default function ReceptionPortal() {
                 <td className="py-4 px-6 font-mono font-bold text-[#0F3D6E] dark:text-amber-300">{b.booking_ref}</td>
                 <td className="py-4 px-6 font-semibold">{b.guest_name}</td>
                 <td className="py-4 px-6">{b.branch_name}</td>
-                <td className="py-4 px-6 text-gray-500">{b.check_in_date} → {b.check_out_date}</td>
+                <td className="py-4 px-6 text-gray-600 dark:text-gray-400 font-medium">{b.check_in_date} → {b.check_out_date}</td>
                 <td className="py-4 px-6">
                   <span className={`px-2.5 py-1 rounded text-[10px] font-bold uppercase ${
                     b.status === 'CHECKED_IN' ? 'bg-blue-500/20 text-blue-600' :
@@ -102,7 +102,7 @@ export default function ReceptionPortal() {
                       Check-Out
                     </button>
                   )}
-                  <button onClick={() => window.print()} className="px-2.5 py-1.5 rounded border border-gray-300 text-gray-500 hover:text-white hover:bg-gray-800 transition">
+                  <button onClick={() => window.print()} className="px-2.5 py-1.5 rounded border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:text-white hover:bg-gray-800 transition font-medium">
                     Print Invoice
                   </button>
                 </td>

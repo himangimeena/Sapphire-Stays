@@ -45,7 +45,7 @@ export default function SuperAdminPortal() {
             <span className="p-2.5 rounded-xl bg-amber-500/10 text-amber-500"><TrendingUp className="w-5 h-5" /></span>
             <span className="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-600 text-xs font-bold">+12.4%</span>
           </div>
-          <span className="text-xs text-gray-500 uppercase font-semibold block">Total Revenue</span>
+          <span className="text-xs text-gray-600 dark:text-gray-400 uppercase font-bold block">Total Revenue</span>
           <span className="font-serif text-3xl font-bold text-[#0F3D6E] dark:text-amber-300">₹4.2M</span>
         </div>
 
@@ -54,7 +54,7 @@ export default function SuperAdminPortal() {
             <span className="p-2.5 rounded-xl bg-blue-500/10 text-blue-500"><Home className="w-5 h-5" /></span>
             <span className="px-2 py-0.5 rounded bg-gray-500/10 text-gray-600 dark:text-gray-400 text-xs font-bold">Optimal</span>
           </div>
-          <span className="text-xs text-gray-500 uppercase font-semibold block">Avg. Occupancy</span>
+          <span className="text-xs text-gray-600 dark:text-gray-400 uppercase font-bold block">Avg. Occupancy</span>
           <span className="font-serif text-3xl font-bold">{data?.avgOccupancy || 84}%</span>
         </div>
 
@@ -62,7 +62,7 @@ export default function SuperAdminPortal() {
           <div className="flex justify-between items-center">
             <span className="p-2.5 rounded-xl bg-purple-500/10 text-purple-500"><Users className="w-5 h-5" /></span>
           </div>
-          <span className="text-xs text-gray-500 uppercase font-semibold block">Active Indian Palaces</span>
+          <span className="text-xs text-gray-600 dark:text-gray-400 uppercase font-bold block">Active Indian Palaces</span>
           <span className="font-serif text-3xl font-bold">{data?.activeBranches || 6}</span>
         </div>
 
@@ -71,7 +71,7 @@ export default function SuperAdminPortal() {
             <span className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-500"><CheckCircle className="w-5 h-5" /></span>
             <span className="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-600 text-xs font-bold">High</span>
           </div>
-          <span className="text-xs text-gray-500 uppercase font-semibold block">Daily Bookings</span>
+          <span className="text-xs text-gray-600 dark:text-gray-400 uppercase font-bold block">Daily Bookings</span>
           <span className="font-serif text-3xl font-bold">{data?.dailyBookings || 142}</span>
         </div>
       </div>
@@ -83,7 +83,7 @@ export default function SuperAdminPortal() {
           <div className="flex justify-between items-center">
             <div>
               <h3 className="font-serif text-xl font-bold">Branch Distribution</h3>
-              <p className="text-xs text-gray-500">Global footprint across iconic Indian destinations</p>
+              <p className="text-xs text-gray-600 dark:text-gray-400 font-medium">Global footprint across iconic Indian destinations</p>
             </div>
             <span className="text-xs text-[#0F3D6E] dark:text-amber-300 font-semibold cursor-pointer">Expand Map ↗</span>
           </div>
@@ -109,7 +109,7 @@ export default function SuperAdminPortal() {
         <div className="glass-card p-6 rounded-2xl border border-gray-200 dark:border-gray-800 space-y-6 flex flex-col justify-between">
           <div>
             <h3 className="font-serif text-xl font-bold">Revenue by Service</h3>
-            <p className="text-xs text-gray-500">Quarterly distribution</p>
+            <p className="text-xs text-gray-600 dark:text-gray-400 font-medium">Quarterly distribution</p>
 
             <div className="space-y-4 mt-6">
               {(data?.revenueByService || []).map((s, idx) => (
@@ -158,7 +158,7 @@ export default function SuperAdminPortal() {
                 <tr key={b.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-800/30">
                   <td className="py-3.5 px-4 font-semibold">{b.guest_name || 'Julian Thorne'}</td>
                   <td className="py-3.5 px-4">{b.branch_name}</td>
-                  <td className="py-3.5 px-4 text-gray-500">{b.check_in_date} → {b.check_out_date}</td>
+                  <td className="py-3.5 px-4 text-gray-600 dark:text-gray-400 font-medium">{b.check_in_date} → {b.check_out_date}</td>
                   <td className="py-3.5 px-4">
                     <span className="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-600 font-bold uppercase text-[10px]">
                       {b.status}
