@@ -1,12 +1,10 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
-import { Sparkles, User, Shield, CheckCircle, LogOut, ArrowRight } from 'lucide-react';
-import DemoSwitcher from '../components/DemoSwitcher';
+import { Sparkles, LogOut } from 'lucide-react';
 
 export default function Profile() {
-  const { user, switchDemoRole, logout } = useContext(AuthContext);
-  const [switching, setSwitching] = useState(false);
+  const { user, logout } = useContext(AuthContext);
   const navigate = useNavigate();
 
   if (!user) {
@@ -89,21 +87,6 @@ export default function Profile() {
         </div>
       </div>
 
-      {/* Demo Role Switcher Grid */}
-      <div className="space-y-6">
-        <div className="border-b border-gray-200 dark:border-gray-800 pb-4 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-2">
-          <div>
-            <h3 className="font-serif text-2xl font-bold flex items-center gap-2 text-[#0F3D6E] dark:text-amber-300">
-              <Shield className="w-6 h-6 text-[#D4AF37]" /> Seeded Test Accounts (Simulated JWT)
-            </h3>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-              Select any seeded account below to issue a valid JWT (`sessionStorage`) and enter the respective role portal.
-            </p>
-          </div>
-        </div>
-
-        <DemoSwitcher />
-      </div>
     </div>
   );
 }

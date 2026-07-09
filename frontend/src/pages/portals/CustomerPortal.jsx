@@ -5,7 +5,7 @@ import { AuthContext } from '../../context/AuthContext';
 import { Sparkles, Calendar, FileText, Download, XCircle, User, MapPin, CheckCircle } from 'lucide-react';
 
 export default function CustomerPortal() {
-  const { user, switchDemoRole } = useContext(AuthContext);
+  const { user } = useContext(AuthContext);
   const navigate = useNavigate();
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -17,13 +17,20 @@ export default function CustomerPortal() {
   }, []);
 
   const fetchMyBookings = () => {
-    axios.get('http://localhost:5000/api/bookings/my')
+    const token = sessionStorage.getItem('sapphire_token') || localStorage.getItem('sapphire_token');
+
+    // 2. Inject token headers into Axios to prevent the 401 error
+    axios.get('http://localhost:5000/api/bookings/my', {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    })
       .then(res => {
         setBookings(res.data.bookings || []);
         setLoading(false);
       })
       .catch(err => {
-        console.error(err);
+        console.error("Axios 401 Intercepted:", err);
         setLoading(false);
       });
   };
@@ -150,53 +157,9 @@ export default function CustomerPortal() {
                 <p className="font-semibold text-base mt-1 text-slate-900 dark:text-slate-100">{user?.email}</p>
               </div>
               <div>
-                <label className="text-xs uppercase text-slate-600 dark:text-slate-400 font-semibold block">Role Access</label>
-                <p className="font-semibold text-base mt-1 uppercase text-[#D4AF37]">{user?.role}</p>
+                <label className="text-xs uppercase text-slate-600 dark:text-slate-400 font-semibold block">Loyalty Balance</label>
+                <p className="font-semibold text-base mt-1 text-[#D4AF37]">{user?.loyalty_points || 8500} pts</p>
               </div>
-            </div>
-          </div>
-
-          <div className="pt-6 border-t border-gray-200 dark:border-gray-800 space-y-4">
-            <div>
-              <h4 className="font-serif text-lg font-bold text-[#0F3D6E] dark:text-amber-300 flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-[#D4AF37]" /> Demo Role Switcher
-              </h4>
-              <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">Switch your role here for demonstration and testing purposes:</p>
-            </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              {[
-                { id: 'CUSTOMER', label: 'Customer / Guest', icon: '👑', portal: '/portal/customer' },
-                { id: 'SUPER_ADMIN', label: 'Super Admin', icon: '🏛️', portal: '/portal/superadmin' },
-                { id: 'BRANCH_ADMIN', label: 'Branch Admin', icon: '🏢', portal: '/portal/branchadmin' },
-                { id: 'RECEPTIONIST', label: 'Receptionist', icon: '🛎️', portal: '/portal/reception' },
-                { id: 'HOUSEKEEPING', label: 'Housekeeping', icon: '🧹', portal: '/portal/housekeeping' },
-                { id: 'MAINTENANCE', label: 'Maintenance', icon: '🛠️', portal: '/portal/maintenance' }
-              ].map(r => (
-                <button
-                  key={r.id}
-                  type="button"
-                  onClick={async () => {
-                    if (r.id === user?.role) return;
-                    try {
-                      await switchDemoRole(r.id);
-                      navigate(r.portal);
-                    } catch (err) {
-                      alert('Failed to switch role');
-                    }
-                  }}
-                  className={`p-3 rounded-xl border text-left transition flex flex-col justify-between gap-2 shadow-sm hover:shadow-md ${
-                    user?.role === r.id
-                      ? 'border-[#D4AF37] bg-[#08203E] text-white font-bold ring-1 ring-[#D4AF37]'
-                      : 'border-gray-200 dark:border-gray-800 hover:border-[#D4AF37]/50 bg-white dark:bg-[#0B1D3A] text-slate-900 dark:text-slate-100'
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="text-lg">{r.icon}</span>
-                    {user?.role === r.id && <span className="text-[9px] px-1.5 py-0.5 rounded bg-[#D4AF37] text-[#08203E] font-bold uppercase">Active</span>}
-                  </div>
-                  <span className="text-xs font-semibold text-slate-900 dark:text-slate-100">{r.label}</span>
-                </button>
-              ))}
             </div>
           </div>
         </div>

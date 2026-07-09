@@ -161,3 +161,28 @@ button {
   background: var(--gold-primary);
   border-radius: 4px;
 }
+
+/* ===== Bulletproof contrast safety net =====
+   Catches any element that forgot its dark: pairing.
+   Scoped narrowly so it never fights an explicit color. */
+[data-theme="dark"] .glass-card:not([class*="dark:text-"]),
+[data-theme="dark"] table:not([class*="dark:text-"]) {
+  color: #F1F5F9; /* slate-100 */
+}
+
+[data-theme="dark"] input:not([class*="dark:text-"]),
+[data-theme="dark"] textarea:not([class*="dark:text-"]),
+[data-theme="dark"] select:not([class*="dark:text-"]) {
+  color: #F1F5F9;
+}
+
+/* Placeholder contrast in dark inputs */
+[data-theme="dark"] input::placeholder,
+[data-theme="dark"] textarea::placeholder {
+  color: #64748b; /* slate-500 */
+}
+
+/* Table header always readable regardless of bg */
+[data-theme="dark"] thead {
+  color: #F1F5F9 !important;
+}

@@ -12,35 +12,32 @@ export default function Branches() {
   const [loading, setLoading] = useState(true);
   const searchRef = useRef(null);
 
-  // Fetch all branches initially for autocomplete suggestions (with graceful fallback)
+  // Single source of truth: fetch once, filter entirely client-side.
   useEffect(() => {
     axios.get('http://localhost:5000/api/branches')
-      .then(res => {
-        setAllBranches(res.data.branches || FALLBACK_BRANCHES);
-      })
-      .catch(() => {
-        // Silent fallback when live API server is offline during local review
-        setAllBranches(FALLBACK_BRANCHES);
-      });
+      .then(res => setAllBranches(res.data.branches || FALLBACK_BRANCHES))
+      .catch(() => setAllBranches(FALLBACK_BRANCHES));
   }, []);
 
-  // Fetch filtered branches when filterCity changes (with graceful fallback)
+  // Debounce the typed query so we don't refilter on every keystroke burst
+  const [debouncedQuery, setDebouncedQuery] = useState('');
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedQuery(filterCity), 200);
+    return () => clearTimeout(t);
+  }, [filterCity]);
+
   useEffect(() => {
     setLoading(true);
-    axios.get(`http://localhost:5000/api/branches${filterCity ? `?city=${encodeURIComponent(filterCity)}` : ''}`)
-      .then(res => {
-        setBranches(res.data.branches || FALLBACK_BRANCHES);
-        setLoading(false);
-      })
-      .catch(() => {
-        // Silent fallback when live API server is offline during local review
-        const filtered = filterCity.trim().length > 0
-          ? FALLBACK_BRANCHES.filter(b => b.city.toLowerCase().includes(filterCity.trim().toLowerCase()) || b.name.toLowerCase().includes(filterCity.trim().toLowerCase()))
-          : FALLBACK_BRANCHES;
-        setBranches(filtered);
-        setLoading(false);
-      });
-  }, [filterCity]);
+    const q = debouncedQuery.trim().toLowerCase();
+    const filtered = q.length === 0
+      ? allBranches
+      : allBranches.filter(b =>
+          `${b.name} ${b.city} ${b.state} ${b.address}`.toLowerCase().includes(q)
+        );
+    // Simulate the async feel without a real network round-trip per keystroke
+    const t = setTimeout(() => { setBranches(filtered); setLoading(false); }, 150);
+    return () => clearTimeout(t);
+  }, [debouncedQuery, allBranches]);
 
   // Handle outside click to close autocomplete dropdown
   useEffect(() => {
@@ -53,16 +50,12 @@ export default function Branches() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Derived suggestions — always in sync with filterCity, nothing can desync
   const normalizedQuery = filterCity.trim().toLowerCase();
-
   const suggestions = normalizedQuery.length > 0
-    ? allBranches.filter(b => {
-        const haystack = `${b.name} ${b.city} ${b.state} ${b.address}`.toLowerCase();
-        return haystack.includes(normalizedQuery);
-      })
+    ? allBranches.filter(b =>
+        `${b.name} ${b.city} ${b.state} ${b.address}`.toLowerCase().includes(normalizedQuery)
+      ).slice(0, 6)
     : [];
-
   const showSuggestions = isSearchFocused && normalizedQuery.length > 0 && suggestions.length > 0;
 
   const handleSelectSuggestion = (branch) => {

@@ -38,7 +38,7 @@ router.patch('/housekeeping/:id', authenticate, requireRoles(['SUPER_ADMIN', 'BR
 router.get('/maintenance', authenticate, requireRoles(['SUPER_ADMIN', 'BRANCH_ADMIN', 'MAINTENANCE']), async (req, res) => {
   try {
     const tickets = await query(
-      `SELECT m.*, r.room_number, r.floor, rt.name as room_type_name, b.name as branch_name 
+      `SELECT m.*, r.room_number, r.floor, r.is_locked, rt.name as room_type_name, b.name as branch_name 
        FROM MaintenanceRequests m 
        JOIN Rooms r ON m.room_id = r.id 
        JOIN RoomTypes rt ON r.room_type_id = rt.id 

@@ -11,6 +11,7 @@ import BranchDetail from './pages/BranchDetail';
 import Rooms from './pages/Rooms';
 import Checkout from './pages/Checkout';
 import Auth from './pages/Auth';
+import StaffAuth from './pages/StaffAuth';
 import Offers from './pages/Offers';
 import Gallery from './pages/Gallery';
 import About from './pages/About';
@@ -41,6 +42,8 @@ export default function App() {
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/login" element={<Auth />} />
+          <Route path="/staff" element={<StaffAuth />} />
+          <Route path="/staff/login" element={<StaffAuth />} />
           <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
 
           {/* Role-Protected Portals */}

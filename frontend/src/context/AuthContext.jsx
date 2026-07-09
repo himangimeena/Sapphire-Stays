@@ -143,29 +143,54 @@ export const AuthProvider = ({ children }) => {
     setUser(newUser);
   };
 
+  // Helper to map specific email domains/addresses to designated RBAC roles securely
+  const getRoleByEmail = (email) => {
+    const cleanEmail = (email || '').trim().toLowerCase();
+    if (cleanEmail === 'superadmin@sapphirestays.in' || cleanEmail === 'superadmin@sapphirestays.com') {
+      return 'SUPER_ADMIN';
+    }
+    if (cleanEmail === 'udaipur.admin@sapphirestays.in' || cleanEmail === 'udaipur.admin@sapphirestays.com') {
+      return 'BRANCH_ADMIN';
+    }
+    if (cleanEmail === 'reception@sapphirestays.in' || cleanEmail === 'reception@sapphirestays.com') {
+      return 'RECEPTIONIST';
+    }
+    if (cleanEmail === 'housekeeping@sapphirestays.in' || cleanEmail === 'housekeeping@sapphirestays.com') {
+      return 'HOUSEKEEPING';
+    }
+    if (cleanEmail === 'maintenance@sapphirestays.in' || cleanEmail === 'maintenance@sapphirestays.com') {
+      return 'MAINTENANCE';
+    }
+    return 'CUSTOMER';
+  };
+
   // Production-minded login function verifying against seeded accounts or live backend API
   const login = async (email, password) => {
     setLoading(true);
     try {
+      const normalizedEmail = (email || '').trim().toLowerCase().replace('@sapphirestays.com', '@sapphirestays.in');
+      const targetRole = getRoleByEmail(normalizedEmail);
+
       // 1. Check Seeded Accounts Registry first for reliable reviewer & demo access
       const seeded = SEEDED_ACCOUNTS.find(
-        acc => acc.email.toLowerCase() === (email || '').toLowerCase() && acc.password === password
+        acc => acc.email.toLowerCase() === normalizedEmail && acc.password === password
       );
 
       if (seeded) {
+        const userToPersist = { ...seeded, role: targetRole };
         // Issue structurally valid simulated JWT token
-        const jwtToken = generateMockJWT(seeded);
-        persistSession(jwtToken, seeded);
-        return { token: jwtToken, user: seeded, method: 'SEEDED_JWT_SESSION' };
+        const jwtToken = generateMockJWT(userToPersist);
+        persistSession(jwtToken, userToPersist);
+        return { token: jwtToken, user: userToPersist, method: 'SEEDED_JWT_SESSION' };
       }
 
       // 2. If not seeded, attempt live backend API call
       try {
         const res = await axios.post(`${API_BASE}/auth/login`, { email, password });
-        const newToken = res.data.token || generateMockJWT(res.data.user);
-        const newUser = res.data.user;
-        persistSession(newToken, newUser);
-        return res.data;
+        const userToPersist = { ...res.data.user, role: targetRole };
+        const newToken = res.data.token || generateMockJWT(userToPersist);
+        persistSession(newToken, userToPersist);
+        return { token: newToken, user: userToPersist };
       } catch (apiErr) {
         throw new Error(apiErr.response?.data?.error || 'Invalid email or password provided.');
       }
@@ -210,10 +235,6 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const switchDemoRole = async (targetRole) => {
-    return await loginWithSeededAccount(targetRole);
-  };
-
   const logout = () => {
     sessionStorage.removeItem('sapphire_token');
     sessionStorage.removeItem('sapphire_user');
@@ -234,7 +255,6 @@ export const AuthProvider = ({ children }) => {
       login,
       loginWithSeededAccount,
       register,
-      switchDemoRole,
       logout,
       SEEDED_ACCOUNTS,
       API_BASE

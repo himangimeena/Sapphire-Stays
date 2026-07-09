@@ -13,7 +13,8 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ error: 'Email and password are required.' });
     }
 
-    const users = await query('SELECT * FROM Users WHERE email = ?', [email.trim().toLowerCase()]);
+    const cleanEmail = email.trim().toLowerCase().replace('@sapphirestays.com', '@sapphirestays.in');
+    const users = await query('SELECT * FROM Users WHERE email = ?', [cleanEmail]);
     if (users.length === 0) {
       return res.status(401).json({ error: 'Invalid email or password.' });
     }

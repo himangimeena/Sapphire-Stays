@@ -26,30 +26,18 @@ export default function Rooms() {
       });
   }, []);
 
-  // const cleanCityParam = (cityParam || '').trim().toLowerCase();
-  // const isAllIndia = cleanCityParam === '' || cleanCityParam.includes('all india') || cleanCityParam === 'india';
-
-  // const filteredByCity = !isAllIndia
-  //   ? roomTypes.filter(r => 
-  //       (r.branch_name || '').toLowerCase().includes(cleanCityParam) || 
-  //       (r.branch_city || '').toLowerCase().includes(cleanCityParam) || 
-  //       (r.branch_state || '').toLowerCase().includes(cleanCityParam) ||
-  //       (r.city || '').toLowerCase().includes(cleanCityParam)
-  //     )
-  //   : roomTypes;
-
   const normalize = (s) => (s || '').toString().trim().toLowerCase();
 
-const cleanCityParam = normalize(cityParam);
-const isAllIndia = cleanCityParam === '' || cleanCityParam.includes('all india') || cleanCityParam === 'india';
+  const cleanCityParam = normalize(cityParam);
+  const isAllIndia = cleanCityParam === '' || cleanCityParam.includes('all india') || cleanCityParam === 'india';
 
-const filteredByCity = isAllIndia
-  ? roomTypes
-  : roomTypes.filter(r => {
-      const haystack = normalize(`${r.branch_name} ${r.branch_city} ${r.branch_state}`);
-      const cityOnly = normalize(r.branch_city);
-      return haystack.includes(cleanCityParam) || (cityOnly && cleanCityParam.includes(cityOnly));
-    });
+  const filteredByCity = isAllIndia
+    ? roomTypes
+    : roomTypes.filter(r => {
+        const haystack = normalize(`${r.branch_name} ${r.branch_city} ${r.branch_state}`);
+        const cityOnly = normalize(r.branch_city);
+        return haystack.includes(cleanCityParam) || (cityOnly && cleanCityParam.includes(cityOnly));
+      });
 
   const filtered = selectedTier === 'ALL'
     ? filteredByCity

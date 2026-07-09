@@ -110,7 +110,7 @@ router.post('/', authenticate, async (req, res) => {
     if (guestDetails) {
       await query(
         'INSERT INTO BookingGuests (booking_id, first_name, last_name, email, phone) VALUES (?, ?, ?, ?, ?)',
-        [bookingId, guestDetails.firstName || req.user.name, guestDetails.lastName || '', guestDetails.email || req.user.email, guestDetails.phone || req.user.phone]
+        [bookingId, guestDetails.firstName || req.user.name || '', guestDetails.lastName || '', guestDetails.email || req.user.email || '', guestDetails.phone || req.user.phone || '']
       );
     }
 
@@ -183,26 +183,66 @@ router.get('/', authenticate, requireRoles(['SUPER_ADMIN', 'BRANCH_ADMIN', 'RECE
 router.patch('/:id/status', authenticate, requireRoles(['SUPER_ADMIN', 'BRANCH_ADMIN', 'RECEPTIONIST', 'CUSTOMER']), async (req, res) => {
   try {
     const { status, assigned_room_id } = req.body;
-    let sqlText = 'UPDATE Bookings SET status = ?';
-    const params = [status];
 
-    if (assigned_room_id) {
-      sqlText += ', assigned_room_id = ?';
-      params.push(assigned_room_id);
-      // Mark physical room as occupied
-      if (status === 'CHECKED_IN') {
-        await query("UPDATE Rooms SET status = 'OCCUPIED' WHERE id = ?", [assigned_room_id]);
-      } else if (status === 'CHECKED_OUT') {
-        await query("UPDATE Rooms SET status = 'CLEANING' WHERE id = ?", [assigned_room_id]);
+    if (status === 'CHECKED_IN') {
+      let roomId = assigned_room_id;
+      if (!roomId) {
+        // Find booking room type and branch
+        const bookings = await query('SELECT room_type_id, branch_id FROM Bookings WHERE id = ?', [req.params.id]);
+        if (bookings.length > 0) {
+          const b = bookings[0];
+          // Find first available room of this type in this branch that is NOT locked (LOTO)
+          const rooms = await query(
+            "SELECT id FROM Rooms WHERE room_type_id = ? AND branch_id = ? AND status = 'AVAILABLE' AND is_locked = 0 LIMIT 1",
+            [b.room_type_id, b.branch_id]
+          );
+          if (rooms.length > 0) {
+            roomId = rooms[0].id;
+          } else {
+            return res.status(400).json({ error: 'No vacant-clean suites of this category are currently available.' });
+          }
+        }
+      }
+      
+      if (roomId) {
+        await query("UPDATE Bookings SET status = 'CHECKED_IN', assigned_room_id = ? WHERE id = ?", [roomId, req.params.id]);
+        await query("UPDATE Rooms SET status = 'OCCUPIED' WHERE id = ?", [roomId]);
+        return res.json({ message: 'Guest checked in successfully and room assigned', roomId });
+      }
+    } else if (status === 'CHECKED_OUT') {
+      // Find the currently assigned room
+      const bookings = await query('SELECT assigned_room_id FROM Bookings WHERE id = ?', [req.params.id]);
+      if (bookings.length > 0 && bookings[0].assigned_room_id) {
+        const roomId = bookings[0].assigned_room_id;
+        await query("UPDATE Bookings SET status = 'CHECKED_OUT' WHERE id = ?", [req.params.id]);
+        await query("UPDATE Rooms SET status = 'CLEANING' WHERE id = ?", [roomId]);
+        
+        // Auto-dispatch cleaning task to Housekeeping queue
+        const existing = await query("SELECT id FROM HousekeepingTasks WHERE room_id = ? AND status != 'COMPLETED'", [roomId]);
+        if (existing.length === 0) {
+          await query(
+            "INSERT INTO HousekeepingTasks (room_id, task_type, status, priority, notes) VALUES (?, 'Standard Cleaning', 'PENDING', 'NORMAL', 'Checkout turnaround. Sanitize all high-touch surfaces, replace linen with Egyptian cotton.')",
+            [roomId]
+          );
+        }
+        return res.json({ message: 'Guest checked out. Room flagged for cleaning turnaround.', roomId });
       }
     }
 
+    // Default update fallback
+    let sqlText = 'UPDATE Bookings SET status = ?';
+    const params = [status];
+    if (assigned_room_id) {
+      sqlText += ', assigned_room_id = ?';
+      params.push(assigned_room_id);
+    }
     sqlText += ' WHERE id = ?';
     params.push(req.params.id);
 
     await query(sqlText, params);
     res.json({ message: `Booking status updated to ${status}` });
   } catch (err) {
+    console.error('Booking status update error:', err);
     res.status(500).json({ error: 'Failed to update booking status.' });
   }
 });
