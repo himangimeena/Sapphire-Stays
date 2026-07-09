@@ -36,13 +36,13 @@ export default function HousekeepingPortal() {
     }
   };
 
-  if (loading) return <div className="py-24 text-center font-serif text-xl">Loading Housekeeping Board...</div>;
+  if (loading) return <div className="py-24 text-center font-serif text-xl text-slate-900 dark:text-slate-100">Loading Housekeeping Board...</div>;
 
   return (
-    <div className="py-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 animate-fade-in space-y-10">
+    <div className="py-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 animate-fade-in space-y-10 text-slate-900 dark:text-slate-100">
       {/* Top Bar matching Screenshot 1 */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-gray-200 dark:border-gray-800 pb-6">
-        <h1 className="font-serif text-4xl font-bold">Maintenance & Housekeeping</h1>
+        <h1 className="font-serif text-4xl font-bold text-slate-900 dark:text-slate-100">Maintenance & Housekeeping</h1>
         <div className="flex items-center gap-4">
           <button className="p-3 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 relative">
             <Bell className="w-5 h-5" />
@@ -57,9 +57,9 @@ export default function HousekeepingPortal() {
 
       {/* KPI Status Boxes matching Screenshot 1 */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="glass-card p-6 rounded-2xl border border-gray-200 dark:border-gray-800 space-y-1">
-          <span className="text-xs uppercase font-bold text-gray-600 dark:text-gray-400 tracking-wider">PENDING</span>
-          <span className="font-serif text-4xl font-bold block">12</span>
+        <div className="glass-card p-6 rounded-2xl border border-gray-200 dark:border-gray-800 space-y-1 text-slate-900 dark:text-slate-100">
+          <span className="text-xs uppercase font-bold text-slate-600 dark:text-slate-400 tracking-wider">PENDING</span>
+          <span className="font-serif text-4xl font-bold block text-slate-900 dark:text-slate-100">12</span>
         </div>
         <div className="glass-card p-6 rounded-2xl border border-gray-200 dark:border-gray-800 space-y-1">
           <span className="text-xs uppercase font-bold text-amber-500 tracking-wider">IN PROGRESS</span>
@@ -96,18 +96,18 @@ export default function HousekeepingPortal() {
           <div
             key={t.id}
             className={`glass-card rounded-2xl overflow-hidden border transition flex flex-col justify-between ${
-              t.priority === 'VIP' ? 'bg-[#08203E] text-white border-[#D4AF37]/50 shadow-2xl' : 'border-gray-200 dark:border-gray-800 bg-white dark:bg-[#132135]'
+              t.priority === 'VIP' ? 'bg-[#08203E] text-white border-[#D4AF37]/50 shadow-2xl' : 'border-gray-200 dark:border-gray-800 bg-white dark:bg-[#132135] text-slate-900 dark:text-slate-100'
             }`}
           >
             <div className="p-6 space-y-4">
               <div className="flex justify-between items-center">
                 <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
                   t.priority === 'VIP' ? 'bg-[#D4AF37] text-[#08203E]' :
-                  t.priority === 'URGENT' ? 'bg-red-500/20 text-red-600' : 'bg-gray-100 dark:bg-gray-800 text-gray-600'
+                  t.priority === 'URGENT' ? 'bg-red-500/20 text-red-600' : 'bg-gray-100 dark:bg-gray-800 text-slate-700 dark:text-slate-300'
                 }`}>
                   {t.priority === 'VIP' ? 'VIP ARRIVAL' : t.task_type}
                 </span>
-                <span className="font-serif font-bold text-sm">Room {t.room_number}</span>
+                <span className={`font-serif font-bold text-sm ${t.priority === 'VIP' ? 'text-amber-300' : 'text-slate-900 dark:text-slate-100'}`}>Room {t.room_number}</span>
               </div>
 
               {t.priority === 'VIP' ? (
@@ -120,8 +120,8 @@ export default function HousekeepingPortal() {
                   <div className="h-32 rounded-xl overflow-hidden">
                     <img src="https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&w=600&q=80" alt="Suite" className="w-full h-full object-cover" />
                   </div>
-                  <h4 className="font-serif text-lg font-bold">{t.task_type}</h4>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">{t.notes}</p>
+                  <h4 className="font-serif text-lg font-bold text-slate-900 dark:text-slate-100">{t.task_type}</h4>
+                  <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">{t.notes}</p>
                 </div>
               )}
             </div>

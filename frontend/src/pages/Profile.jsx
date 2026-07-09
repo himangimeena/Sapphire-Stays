@@ -48,7 +48,7 @@ export default function Profile() {
   };
 
   return (
-    <div className="py-16 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 animate-fade-in space-y-12">
+    <div className="py-16 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 animate-fade-in space-y-12 text-slate-900 dark:text-slate-100">
       {/* Header */}
       <div className="text-center max-w-2xl mx-auto space-y-3">
         <span className="text-xs uppercase tracking-[0.3em] font-semibold text-[#D4AF37] flex items-center justify-center gap-1.5">
@@ -61,7 +61,7 @@ export default function Profile() {
       </div>
 
       {/* Personal Details Card */}
-      <div className="glass-card p-8 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-xl flex flex-col md:flex-row justify-between items-start md:items-center gap-8 bg-gradient-to-r from-[#08203E] to-[#14355E] text-white">
+      <div className="p-8 rounded-3xl border border-[#D4AF37]/40 shadow-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-8 bg-gradient-to-r from-[#08203E] to-[#14355E] text-white">
         <div className="flex items-center gap-6">
           <div className="w-16 h-16 rounded-full bg-[#D4AF37]/20 border-2 border-[#D4AF37] flex items-center justify-center text-2xl font-bold text-[#D4AF37] shadow-lg shrink-0">
             {user.name ? user.name[0].toUpperCase() : 'S'}

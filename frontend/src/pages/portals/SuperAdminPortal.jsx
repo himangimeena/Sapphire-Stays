@@ -21,17 +21,17 @@ export default function SuperAdminPortal() {
     });
   }, []);
 
-  if (loading) return <div className="py-24 text-center font-serif text-xl">Loading Executive Portal...</div>;
+  if (loading) return <div className="py-24 text-center font-serif text-xl text-slate-900 dark:text-slate-100">Loading Executive Portal...</div>;
 
   return (
-    <div className="py-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 animate-fade-in space-y-12">
+    <div className="py-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 animate-fade-in space-y-12 text-slate-900 dark:text-slate-100">
       {/* Top Header matching Screenshot 5 */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div>
           <span className="text-xs uppercase tracking-[0.3em] font-semibold text-[#D4AF37] flex items-center gap-1.5">
             <Shield className="w-3.5 h-3.5" /> Estate Management
           </span>
-          <h1 className="font-serif text-4xl font-bold mt-1">Overview</h1>
+          <h1 className="font-serif text-4xl font-bold mt-1 text-slate-900 dark:text-slate-100">Overview</h1>
         </div>
         <button onClick={() => alert('New reservation desk modal')} className="btn-luxury !py-3 !px-5 text-xs flex items-center gap-2 shadow-lg">
           <Plus className="w-4 h-4 text-[#D4AF37]" /> New Reservation
@@ -79,10 +79,10 @@ export default function SuperAdminPortal() {
       {/* Middle Row matching Screenshot 5 */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Branch Distribution Portfolio Card */}
-        <div className="lg:col-span-2 glass-card p-6 rounded-2xl border border-gray-200 dark:border-gray-800 space-y-4">
+        <div className="lg:col-span-2 glass-card p-6 rounded-2xl border border-gray-200 dark:border-gray-800 space-y-4 text-slate-900 dark:text-slate-100">
           <div className="flex justify-between items-center">
             <div>
-              <h3 className="font-serif text-xl font-bold">Branch Distribution</h3>
+              <h3 className="font-serif text-xl font-bold text-slate-900 dark:text-slate-100">Branch Distribution</h3>
               <p className="text-xs text-gray-600 dark:text-gray-400 font-medium">Global footprint across iconic Indian destinations</p>
             </div>
             <span className="text-xs text-[#0F3D6E] dark:text-amber-300 font-semibold cursor-pointer">Expand Map ↗</span>
@@ -106,9 +106,9 @@ export default function SuperAdminPortal() {
         </div>
 
         {/* Revenue by Service Card matching Screenshot 5 */}
-        <div className="glass-card p-6 rounded-2xl border border-gray-200 dark:border-gray-800 space-y-6 flex flex-col justify-between">
+        <div className="glass-card p-6 rounded-2xl border border-gray-200 dark:border-gray-800 space-y-6 flex flex-col justify-between text-slate-900 dark:text-slate-100">
           <div>
-            <h3 className="font-serif text-xl font-bold">Revenue by Service</h3>
+            <h3 className="font-serif text-xl font-bold text-slate-900 dark:text-slate-100">Revenue by Service</h3>
             <p className="text-xs text-gray-600 dark:text-gray-400 font-medium">Quarterly distribution</p>
 
             <div className="space-y-4 mt-6">
@@ -126,19 +126,19 @@ export default function SuperAdminPortal() {
             </div>
           </div>
 
-          <button onClick={() => alert('Downloading comprehensive audit PDF report...')} className="w-full py-2.5 rounded-xl border border-gray-300 dark:border-gray-700 text-xs font-semibold hover:bg-gray-50 dark:hover:bg-gray-800 transition">
+          <button onClick={() => alert('Downloading comprehensive audit PDF report...')} className="w-full py-2.5 rounded-xl border border-gray-300 dark:border-gray-700 text-xs font-semibold hover:bg-gray-50 dark:hover:bg-gray-800 transition text-slate-800 dark:text-slate-200">
             View Detailed Report
           </button>
         </div>
       </div>
 
       {/* Recent Booking Activity Table matching Screenshot 5 */}
-      <div className="glass-card p-6 rounded-2xl border border-gray-200 dark:border-gray-800 space-y-6">
+      <div className="glass-card p-6 rounded-2xl border border-gray-200 dark:border-gray-800 space-y-6 text-slate-900 dark:text-slate-100">
         <div className="flex justify-between items-center">
-          <h3 className="font-serif text-xl font-bold">Recent Booking Activity (India Collection)</h3>
+          <h3 className="font-serif text-xl font-bold text-slate-900 dark:text-slate-100">Recent Booking Activity (India Collection)</h3>
           <div className="flex gap-2">
-            <button className="p-2 rounded-lg border border-gray-200 dark:border-gray-700 text-gray-500"><Filter className="w-4 h-4" /></button>
-            <button className="p-2 rounded-lg border border-gray-200 dark:border-gray-700 text-gray-500"><Download className="w-4 h-4" /></button>
+            <button className="p-2 rounded-lg border border-gray-200 dark:border-gray-700 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition"><Filter className="w-4 h-4" /></button>
+            <button className="p-2 rounded-lg border border-gray-200 dark:border-gray-700 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition"><Download className="w-4 h-4" /></button>
           </div>
         </div>
 
@@ -155,10 +155,10 @@ export default function SuperAdminPortal() {
             </thead>
             <tbody className="divide-y divide-gray-100 dark:divide-gray-800/50">
               {bookings.slice(0, 6).map(b => (
-                <tr key={b.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-800/30">
-                  <td className="py-3.5 px-4 font-semibold">{b.guest_name || 'Julian Thorne'}</td>
-                  <td className="py-3.5 px-4">{b.branch_name}</td>
-                  <td className="py-3.5 px-4 text-gray-600 dark:text-gray-400 font-medium">{b.check_in_date} → {b.check_out_date}</td>
+                <tr key={b.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-800/30 text-slate-900 dark:text-slate-100">
+                  <td className="py-3.5 px-4 font-semibold text-slate-900 dark:text-slate-100">{b.guest_name || 'Julian Thorne'}</td>
+                  <td className="py-3.5 px-4 text-slate-800 dark:text-slate-200">{b.branch_name}</td>
+                  <td className="py-3.5 px-4 text-slate-600 dark:text-slate-400 font-medium">{b.check_in_date} → {b.check_out_date}</td>
                   <td className="py-3.5 px-4">
                     <span className="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-600 font-bold uppercase text-[10px]">
                       {b.status}

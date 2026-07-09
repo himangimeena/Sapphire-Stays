@@ -35,17 +35,17 @@ export default function MaintenancePortal() {
   };
 
   return (
-    <div className="py-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 animate-fade-in space-y-10">
+    <div className="py-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 animate-fade-in space-y-10 text-slate-900 dark:text-slate-100">
       <div className="border-b border-gray-200 dark:border-gray-800 pb-6 flex justify-between items-center">
         <div>
           <span className="text-xs uppercase font-semibold text-[#D4AF37] tracking-widest">Engineering & Facilities</span>
-          <h1 className="font-serif text-4xl font-bold mt-1">Maintenance & Technical Repairs</h1>
+          <h1 className="font-serif text-4xl font-bold mt-1 text-slate-900 dark:text-slate-100">Maintenance & Technical Repairs</h1>
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {tickets.map(t => (
-          <div key={t.id} className="glass-card p-6 rounded-2xl border border-gray-200 dark:border-gray-800 flex flex-col justify-between space-y-4 shadow-lg">
+          <div key={t.id} className="glass-card p-6 rounded-2xl border border-gray-200 dark:border-gray-800 flex flex-col justify-between space-y-4 shadow-lg text-slate-900 dark:text-slate-100">
             <div className="space-y-3">
               <div className="flex justify-between items-center">
                 <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
@@ -53,12 +53,12 @@ export default function MaintenancePortal() {
                 }`}>
                   {t.priority}
                 </span>
-                <span className="font-serif font-bold text-sm">Room {t.room_number}</span>
+                <span className="font-serif font-bold text-sm text-slate-900 dark:text-slate-100">Room {t.room_number}</span>
               </div>
-              <h3 className="font-serif text-xl font-bold">{t.issue_title}</h3>
-              <p className="text-xs text-gray-600 dark:text-gray-400 font-medium">{t.description}</p>
-              <div className="text-[11px] text-gray-600 dark:text-gray-400 font-medium pt-2 border-t">
-                Reported by: <span className="font-semibold text-gray-800 dark:text-gray-300">{t.reported_by}</span>
+              <h3 className="font-serif text-xl font-bold text-slate-900 dark:text-slate-100">{t.issue_title}</h3>
+              <p className="text-xs text-slate-600 dark:text-slate-400 font-medium">{t.description}</p>
+              <div className="text-[11px] text-slate-600 dark:text-slate-400 font-medium pt-2 border-t">
+                Reported by: <span className="font-semibold text-slate-900 dark:text-slate-100">{t.reported_by}</span>
               </div>
             </div>
 

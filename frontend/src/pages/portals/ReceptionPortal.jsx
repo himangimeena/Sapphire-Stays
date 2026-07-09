@@ -40,11 +40,11 @@ export default function ReceptionPortal() {
     : bookings;
 
   return (
-    <div className="py-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 animate-fade-in space-y-10">
+    <div className="py-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 animate-fade-in space-y-10 text-slate-900 dark:text-slate-100">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-b border-gray-200 dark:border-gray-800 pb-6">
         <div>
           <span className="text-xs uppercase font-semibold text-[#D4AF37] tracking-widest">Front Desk Desk</span>
-          <h1 className="font-serif text-4xl font-bold mt-1">Reception Dashboard</h1>
+          <h1 className="font-serif text-4xl font-bold mt-1 text-slate-900 dark:text-slate-100">Reception Dashboard</h1>
         </div>
         <div className="relative w-full md:w-80">
           <Search className="w-4 h-4 absolute left-3 top-3.5 text-gray-400" />
@@ -72,11 +72,11 @@ export default function ReceptionPortal() {
           </thead>
           <tbody className="divide-y divide-gray-100 dark:divide-gray-800/50">
             {filtered.map(b => (
-              <tr key={b.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-800/30">
+              <tr key={b.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-800/30 text-slate-900 dark:text-slate-100">
                 <td className="py-4 px-6 font-mono font-bold text-[#0F3D6E] dark:text-amber-300">{b.booking_ref}</td>
-                <td className="py-4 px-6 font-semibold">{b.guest_name}</td>
-                <td className="py-4 px-6">{b.branch_name}</td>
-                <td className="py-4 px-6 text-gray-600 dark:text-gray-400 font-medium">{b.check_in_date} → {b.check_out_date}</td>
+                <td className="py-4 px-6 font-semibold text-slate-900 dark:text-slate-100">{b.guest_name}</td>
+                <td className="py-4 px-6 text-slate-800 dark:text-slate-200">{b.branch_name}</td>
+                <td className="py-4 px-6 text-slate-600 dark:text-slate-400 font-medium">{b.check_in_date} → {b.check_out_date}</td>
                 <td className="py-4 px-6">
                   <span className={`px-2.5 py-1 rounded text-[10px] font-bold uppercase ${
                     b.status === 'CHECKED_IN' ? 'bg-blue-500/20 text-blue-600' :

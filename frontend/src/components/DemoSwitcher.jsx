@@ -112,7 +112,7 @@ export default function DemoSwitcher({ onClose, compact = false }) {
               className={`p-5 rounded-2xl border transition duration-300 cursor-pointer flex flex-col justify-between group relative overflow-hidden ${
                 isCurrent
                   ? 'border-[#D4AF37] bg-[#D4AF37]/10 dark:bg-[#D4AF37]/15 shadow-lg ring-1 ring-[#D4AF37]/50'
-                  : 'border-gray-200 dark:border-gray-800 hover:border-[#D4AF37] bg-white/95 dark:bg-[#132135] hover:shadow-xl'
+                  : 'border-gray-200 dark:border-gray-800 hover:border-[#D4AF37] bg-white/95 dark:bg-[#132135] text-slate-900 dark:text-slate-100 hover:shadow-xl'
               }`}
             >
               <div className="space-y-3">
@@ -123,7 +123,7 @@ export default function DemoSwitcher({ onClose, compact = false }) {
                       <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-[#D4AF37]/20 text-[#D4AF37] border border-[#D4AF37]/30">
                         {acc.badge}
                       </span>
-                      <h4 className="font-serif text-lg font-bold text-gray-900 dark:text-white mt-1 group-hover:text-[#D4AF37] transition">
+                      <h4 className="font-serif text-lg font-bold text-slate-900 dark:text-slate-100 mt-1 group-hover:text-[#D4AF37] transition">
                         {acc.title}
                       </h4>
                     </div>
@@ -131,9 +131,9 @@ export default function DemoSwitcher({ onClose, compact = false }) {
                 </div>
 
                 <div className="p-2.5 rounded-lg bg-gray-50 dark:bg-gray-900/60 border border-gray-100 dark:border-gray-800 space-y-1 font-mono text-xs">
-                  <div className="flex justify-between text-gray-600 dark:text-gray-400">
+                  <div className="flex justify-between text-slate-600 dark:text-slate-400">
                     <span>User:</span>
-                    <span className="font-semibold text-gray-900 dark:text-white truncate max-w-[180px]">{acc.name}</span>
+                    <span className="font-semibold text-slate-900 dark:text-slate-100 truncate max-w-[180px]">{acc.name}</span>
                   </div>
                   <div className="flex justify-between text-gray-600 dark:text-gray-400">
                     <span>Email:</span>
