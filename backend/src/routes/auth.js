@@ -149,4 +149,101 @@ router.post('/demo-switch-role', async (req, res) => {
   }
 });
 
+// Helper to resolve role by email for Google sign-in
+function getRoleByEmail(email) {
+  const cleanEmail = (email || '').trim().toLowerCase();
+  if (cleanEmail === 'superadmin@sapphirestays.in' || cleanEmail === 'superadmin@sapphirestays.com') {
+    return 'SUPER_ADMIN';
+  }
+  if (cleanEmail === 'udaipur.admin@sapphirestays.in' || cleanEmail === 'udaipur.admin@sapphirestays.com') {
+    return 'BRANCH_ADMIN';
+  }
+  if (cleanEmail === 'reception@sapphirestays.in' || cleanEmail === 'reception@sapphirestays.com') {
+    return 'RECEPTIONIST';
+  }
+  if (cleanEmail === 'housekeeping@sapphirestays.in' || cleanEmail === 'housekeeping@sapphirestays.com') {
+    return 'HOUSEKEEPING';
+  }
+  if (cleanEmail === 'maintenance@sapphirestays.in' || cleanEmail === 'maintenance@sapphirestays.com') {
+    return 'MAINTENANCE';
+  }
+  return 'CUSTOMER';
+}
+
+// POST /api/auth/google-login
+router.post('/google-login', async (req, res) => {
+  try {
+    const { token } = req.body;
+    if (!token) {
+      return res.status(400).json({ error: 'Google access token is required.' });
+    }
+
+    const response = await fetch(`https://www.googleapis.com/oauth2/v3/userinfo?access_token=${token}`);
+    if (!response.ok) {
+      return res.status(400).json({ error: 'Failed to authenticate token with Google.' });
+    }
+
+    const userData = await response.json();
+    const { email, name, picture } = userData;
+
+    if (!email) {
+      return res.status(400).json({ error: 'Google account does not provide email access.' });
+    }
+
+    const cleanEmail = email.trim().toLowerCase();
+
+    // Check if user exists
+    let users = await query('SELECT * FROM Users WHERE email = ?', [cleanEmail]);
+    let user;
+
+    if (users.length === 0) {
+      // User doesn't exist, create account
+      // Generate a secure placeholder password hash for OAuth accounts
+      const randomPassword = require('crypto').randomBytes(32).toString('hex');
+      const hash = await bcrypt.hash(randomPassword, 10);
+      const role = getRoleByEmail(cleanEmail);
+
+      const resInsert = await query(
+        'INSERT INTO Users (email, password_hash, name, phone, role, avatar_url, loyalty_points) VALUES (?, ?, ?, ?, ?, ?, ?)',
+        [cleanEmail, hash, name || 'Royal Guest', '+91 98000 00000', role, picture || null, 500]
+      );
+
+      const userId = resInsert.insertId || 1;
+      const newUsers = await query('SELECT * FROM Users WHERE id = ?', [userId]);
+      user = newUsers[0];
+    } else {
+      user = users[0];
+      // Update avatar if we got a new one from Google and none exists locally
+      if (!user.avatar_url && picture) {
+        await query('UPDATE Users SET avatar_url = ? WHERE id = ?', [picture, user.id]);
+        user.avatar_url = picture;
+      }
+    }
+
+    // Generate JWT token
+    const localToken = jwt.sign(
+      { id: user.id, email: user.email, name: user.name, role: user.role, loyalty_points: user.loyalty_points },
+      JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
+    res.json({
+      message: 'Google login successful',
+      token: localToken,
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        phone: user.phone,
+        role: user.role,
+        avatar_url: user.avatar_url,
+        loyalty_points: user.loyalty_points
+      }
+    });
+  } catch (err) {
+    console.error('Google OAuth Login error:', err);
+    res.status(500).json({ error: 'Internal server error during Google login.' });
+  }
+});
+
 module.exports = router;

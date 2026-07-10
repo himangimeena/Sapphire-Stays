@@ -12,7 +12,7 @@ export default function Auth() {
   const [errorMsg, setErrorMsg] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const { login, register } = useContext(AuthContext);
+  const { login, register, loginWithGoogle } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -50,10 +50,61 @@ export default function Auth() {
   };
 
   const handleGoogleLogin = () => {
-    // Luxury Google OAuth simulator: Pre-fill guest credentials for local convenience
-    setEmail('guest@sapphirestays.in');
-    setPassword('password123');
-    setIsLogin(true);
+    setErrorMsg('');
+
+    if (!window.google) {
+      setErrorMsg('Google login library is still loading. Please try again in a few seconds.');
+      return;
+    }
+
+    const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+    if (!clientId || clientId === 'YOUR_GOOGLE_CLIENT_ID') {
+      setErrorMsg('Google Client ID is not configured. Please define VITE_GOOGLE_CLIENT_ID in your frontend .env file.');
+      return;
+    }
+
+    try {
+      const client = window.google.accounts.oauth2.initTokenClient({
+        client_id: clientId,
+        scope: 'openid email profile',
+        callback: async (tokenResponse) => {
+          if (tokenResponse && tokenResponse.access_token) {
+            setLoading(true);
+            try {
+              const res = await loginWithGoogle(tokenResponse.access_token);
+              const role = res.user.role;
+              if (role === 'SUPER_ADMIN') {
+                navigate('/portal/superadmin');
+              } else if (role === 'BRANCH_ADMIN') {
+                navigate('/portal/branchadmin');
+              } else if (role === 'RECEPTIONIST') {
+                navigate('/portal/reception');
+              } else if (role === 'HOUSEKEEPING') {
+                navigate('/portal/housekeeping');
+              } else if (role === 'MAINTENANCE') {
+                navigate('/portal/maintenance');
+              } else {
+                navigate('/portal/customer');
+              }
+            } catch (err) {
+              setErrorMsg(err.message || 'Google Authentication failed on the backend server.');
+            } finally {
+              setLoading(false);
+            }
+          } else {
+            setErrorMsg('Access request was not authorized by Google.');
+          }
+        },
+        error_callback: (err) => {
+          setErrorMsg(err?.message || 'An error occurred during Google sign-in.');
+        }
+      });
+
+      client.requestAccessToken();
+    } catch (err) {
+      console.error('Google Auth Init Error:', err);
+      setErrorMsg('Failed to initialize Google Auth process. Please contact admin.');
+    }
   };
 
   return (

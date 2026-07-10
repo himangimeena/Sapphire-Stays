@@ -235,6 +235,21 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const loginWithGoogle = async (googleAccessToken) => {
+    setLoading(true);
+    try {
+      const res = await axios.post(`${API_BASE}/auth/google-login`, { token: googleAccessToken });
+      const userToPersist = { ...res.data.user, role: getRoleByEmail(res.data.user.email) };
+      const newToken = res.data.token;
+      persistSession(newToken, userToPersist);
+      return { token: newToken, user: userToPersist };
+    } catch (err) {
+      throw new Error(err.response?.data?.error || 'Google login failed.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const logout = () => {
     sessionStorage.removeItem('sapphire_token');
     sessionStorage.removeItem('sapphire_user');
@@ -253,6 +268,7 @@ export const AuthProvider = ({ children }) => {
       theme,
       toggleTheme,
       login,
+      loginWithGoogle,
       loginWithSeededAccount,
       register,
       logout,

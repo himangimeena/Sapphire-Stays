@@ -65,7 +65,15 @@ router.post('/calculate', async (req, res) => {
 // POST /api/bookings - Create new luxury booking
 router.post('/', authenticate, async (req, res) => {
   try {
-    const { branchId, roomTypeId, checkIn, checkOut, adults = 2, children = 0, roomsCount = 1, couponCode, specialRequests, guestDetails, paymentMethod = 'UPI', upiId } = req.body;
+    const { branchId, roomTypeId, checkIn, checkOut, adults = 2, children = 0, roomsCount = 1, couponCode, specialRequests, guestDetails, paymentMethod = 'UPI', upiId, assignedRoomId } = req.body;
+
+    // Validate that the assigned room is neither locked nor occupied if checking in immediately
+    if (assignedRoomId) {
+      const roomCheck = await query('SELECT status, is_locked FROM Rooms WHERE id = ?', [assignedRoomId]);
+      if (roomCheck.length === 0 || roomCheck[0].is_locked === 1 || roomCheck[0].status !== 'AVAILABLE') {
+        return res.status(409).json({ error: 'Selected room is locked or unavailable. Refresh and pick another suite.' });
+      }
+    }
 
     // Calculate totals
     const rt = await query('SELECT * FROM RoomTypes WHERE id = ?', [roomTypeId]);
@@ -128,6 +136,11 @@ router.post('/', authenticate, async (req, res) => {
       [invNum, bookingId, '08AAACS9988H1Z5']
     );
 
+    if (req.body.assignedRoomId) {
+      await query("UPDATE Bookings SET status='CHECKED_IN', assigned_room_id=? WHERE id=?", [req.body.assignedRoomId, bookingId]);
+      await query("UPDATE Rooms SET status='OCCUPIED' WHERE id=?", [req.body.assignedRoomId]);
+    }
+
     res.status(201).json({
       message: 'Luxury reservation confirmed successfully!',
       bookingRef,
@@ -186,6 +199,15 @@ router.patch('/:id/status', authenticate, requireRoles(['SUPER_ADMIN', 'BRANCH_A
 
     if (status === 'CHECKED_IN') {
       let roomId = assigned_room_id;
+      
+      // Enforce server-side check-in validation against LOTO lockout status
+      if (roomId) {
+        const roomCheck = await query('SELECT status, is_locked FROM Rooms WHERE id = ?', [roomId]);
+        if (roomCheck.length === 0 || roomCheck[0].is_locked === 1 || roomCheck[0].status !== 'AVAILABLE') {
+          return res.status(409).json({ error: 'Selected room is locked or unavailable. Refresh and pick another suite.' });
+        }
+      }
+
       if (!roomId) {
         // Find booking room type and branch
         const bookings = await query('SELECT room_type_id, branch_id FROM Bookings WHERE id = ?', [req.params.id]);

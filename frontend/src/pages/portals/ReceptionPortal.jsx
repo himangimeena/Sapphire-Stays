@@ -154,43 +154,32 @@ export default function ReceptionPortal() {
       const sgst = baseAmount * 0.09;
       const totalAmount = baseAmount + cgst + sgst;
 
-      // Generate simulated booking ref
-      const bookingRef = `WLK-SPH-${Math.floor(10000 + Math.random() * 90000)}`;
-
       // Post walk-in booking
       await axios.post('http://localhost:5000/api/bookings', {
-        booking_ref: bookingRef,
-        guest_name: walkInGuestName,
-        branch_id: branchId,
-        room_type_id: walkInRoomTypeId,
-        assigned_room_id: walkInRoomId,
-        check_in_date: new Date().toISOString().split('T')[0],
-        check_out_date: new Date(Date.now() + Number(walkInNights) * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        branchId: Number(branchId),
+        roomTypeId: Number(walkInRoomTypeId),
+        checkIn: new Date().toISOString().split('T')[0],
+        checkOut: new Date(Date.now() + Number(walkInNights) * 24 * 60 * 60 * 1500).toISOString().split('T')[0], // 24 hours per day
         adults: 2,
         children: 0,
-        rooms_count: 1,
-        base_amount: baseAmount,
-        cgst_amount: cgst,
-        sgst_amount: sgst,
-        total_amount: totalAmount,
-        special_requests: 'Walk-In registration'
+        roomsCount: 1,
+        specialRequests: 'Walk-In registration',
+        guestDetails: { 
+          firstName: walkInGuestName.trim().split(' ')[0], 
+          lastName: walkInGuestName.trim().split(' ').slice(1).join(' ') || '', 
+          email: 'walkin@guest.com', 
+          phone: '+91 99999 88888' 
+        },
+        paymentMethod: 'Pay at Hotel',
+        assignedRoomId: Number(walkInRoomId)
       });
-
-      // Instantly check in the guest to occupied
-      const allB = await axios.get('http://localhost:5000/api/bookings');
-      const latestB = (allB.data.bookings || []).find(b => b.booking_ref === bookingRef);
-      if (latestB) {
-        await axios.patch(`http://localhost:5000/api/bookings/${latestB.id}/status`, {
-          status: 'CHECKED_IN',
-          assigned_room_id: walkInRoomId
-        });
-      }
 
       setWalkInGuestName('');
       setWalkInRoomId('');
       setWalkInOpen(false);
       fetchData();
     } catch (err) {
+      console.error('Walk-in check-in error details:', err);
       alert('Walk-in check-in failed.');
     }
   };
