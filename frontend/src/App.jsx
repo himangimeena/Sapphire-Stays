@@ -16,7 +16,7 @@ import Offers from './pages/Offers';
 import Gallery from './pages/Gallery';
 import About from './pages/About';
 import Contact from './pages/Contact';
-import Profile from './pages/Profile';
+import Profile from './pages/ProfilePage';
 
 // Role Portals
 import CustomerPortal from './pages/portals/CustomerPortal';

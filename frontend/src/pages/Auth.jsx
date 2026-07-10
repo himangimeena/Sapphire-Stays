@@ -255,6 +255,40 @@ export default function Auth() {
           Continue with Google
         </button>
 
+        <div className="text-center mt-3 pt-1 border-t border-dashed border-gray-200 dark:border-gray-800">
+          <button
+            type="button"
+            onClick={async () => {
+              setLoading(true);
+              setErrorMsg('');
+              try {
+                const res = await loginWithGoogle('MOCK_GOOGLE_OAUTH_TOKEN');
+                const role = res.user.role;
+                if (role === 'SUPER_ADMIN') {
+                  navigate('/portal/superadmin');
+                } else if (role === 'BRANCH_ADMIN') {
+                  navigate('/portal/branchadmin');
+                } else if (role === 'RECEPTIONIST') {
+                  navigate('/portal/reception');
+                } else if (role === 'HOUSEKEEPING') {
+                  navigate('/portal/housekeeping');
+                } else if (role === 'MAINTENANCE') {
+                  navigate('/portal/maintenance');
+                } else {
+                  navigate('/portal/customer');
+                }
+              } catch (err) {
+                setErrorMsg(err.message || 'Google Auth simulation failed.');
+              } finally {
+                setLoading(false);
+              }
+            }}
+            className="text-[10px] uppercase tracking-wider text-[#D4AF37] hover:underline font-bold"
+          >
+            🛡️ Demo Bypass: Simulate Google Login
+          </button>
+        </div>
+
       </div>
     </div>
   );
