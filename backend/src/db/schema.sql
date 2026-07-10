@@ -11,6 +11,7 @@ CREATE TABLE IF NOT EXISTS Users (
   avatar_url VARCHAR(500),
   loyalty_points INT DEFAULT 500,
   address TEXT,
+  status VARCHAR(50) DEFAULT 'ACTIVE',
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 

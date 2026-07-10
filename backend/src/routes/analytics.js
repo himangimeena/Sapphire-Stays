@@ -45,4 +45,85 @@ router.get('/overview', authenticate, requireRoles(['SUPER_ADMIN', 'BRANCH_ADMIN
   }
 });
 
+// GET /api/analytics/staff - Corporate user directory for RBAC Control
+router.get('/staff', authenticate, requireRoles(['SUPER_ADMIN']), async (req, res) => {
+  try {
+    const staffMembers = await query(
+      "SELECT id, name, email, role, phone, status, created_at FROM Users WHERE role != 'CUSTOMER' ORDER BY role, name"
+    );
+    res.json({ staff: staffMembers });
+  } catch (err) {
+    console.error('Error fetching staff directory:', err);
+    res.status(500).json({ error: 'Failed to fetch corporate staff directory.' });
+  }
+});
+
+// PATCH /api/analytics/staff/:id/status - Toggle staff account status
+router.patch('/staff/:id/status', authenticate, requireRoles(['SUPER_ADMIN']), async (req, res) => {
+  try {
+    const { status } = req.body; // 'ACTIVE' or 'SUSPENDED'
+    if (status !== 'ACTIVE' && status !== 'SUSPENDED') {
+      return res.status(400).json({ error: 'Invalid status type. Must be ACTIVE or SUSPENDED.' });
+    }
+    await query('UPDATE Users SET status = ? WHERE id = ?', [status, req.params.id]);
+    res.json({ message: `Staff member account status updated to ${status} successfully.` });
+  } catch (err) {
+    console.error('Error updating staff status:', err);
+    res.status(500).json({ error: 'Failed to update staff status.' });
+  }
+});
+
+// GET /api/analytics/coupons - Fetch all coupons and actual conversion usage counts
+router.get('/coupons', authenticate, requireRoles(['SUPER_ADMIN']), async (req, res) => {
+  try {
+    const coupons = await query(`
+      SELECT c.*, COUNT(b.id) as conversion_count 
+      FROM Coupons c 
+      LEFT JOIN Bookings b ON b.coupon_code = c.code 
+      GROUP BY c.id
+      ORDER BY c.created_at DESC
+    `);
+    res.json({ coupons });
+  } catch (err) {
+    console.error('Error fetching coupons:', err);
+    res.status(500).json({ error: 'Failed to fetch yield management coupons.' });
+  }
+});
+
+// POST /api/analytics/coupons - Create promotional coupon code
+router.post('/coupons', authenticate, requireRoles(['SUPER_ADMIN']), async (req, res) => {
+  try {
+    const { code, discount_type, discount_value, min_booking_amount, max_discount_amount, max_usages } = req.body;
+    if (!code || !discount_value) {
+      return res.status(400).json({ error: 'Promo code and discount value are required.' });
+    }
+
+    const uppercaseCode = code.trim().toUpperCase();
+
+    // Check if code exists
+    const existing = await query('SELECT id FROM Coupons WHERE code = ?', [uppercaseCode]);
+    if (existing.length > 0) {
+      return res.status(400).json({ error: 'A coupon with this code already exists.' });
+    }
+
+    await query(
+      `INSERT INTO Coupons (code, discount_type, discount_value, min_booking_amount, max_discount_amount, max_usages, is_active) 
+       VALUES (?, ?, ?, ?, ?, ?, 1)`,
+      [
+        uppercaseCode,
+        discount_type || 'PERCENTAGE',
+        Number(discount_value),
+        Number(min_booking_amount || 0),
+        Number(max_discount_amount || 10000),
+        Number(max_usages || 9999)
+      ]
+    );
+
+    res.status(201).json({ message: `Promotional coupon ${uppercaseCode} created successfully.` });
+  } catch (err) {
+    console.error('Error creating coupon:', err);
+    res.status(500).json({ error: 'Failed to create yield coupon.' });
+  }
+});
+
 module.exports = router;
