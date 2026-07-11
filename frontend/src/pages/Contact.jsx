@@ -1,7 +1,9 @@
 import React from 'react';
 import { Mail, Phone, MapPin, Send } from 'lucide-react';
+import { useModal } from '../context/ModalContext';
 
 export default function Contact() {
+  const { showAlert } = useModal();
   return (
     <div className="py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 animate-fade-in space-y-16">
       <div className="text-center max-w-3xl mx-auto space-y-4">
@@ -15,7 +17,7 @@ export default function Contact() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
         <div className="glass-card p-8 rounded-2xl border border-[#D4AF37]/30 space-y-6">
           <h3 className="font-serif text-2xl font-bold">Direct Inquiry Form</h3>
-          <form onSubmit={e => { e.preventDefault(); alert('Your message has been dispatched to our India Senior Concierge.'); }} className="space-y-4">
+          <form onSubmit={e => { e.preventDefault(); showAlert('Your message has been dispatched to our India Senior Concierge.', 'Concierge Services'); }} className="space-y-4">
             <div>
               <label className="text-xs uppercase font-semibold text-gray-500 block mb-1">Your Name</label>
               <input type="text" required placeholder="Julian Thorne" className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:outline-none focus:border-[#D4AF37]" />

@@ -1,8 +1,10 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Mail, Phone, MapPin, Sparkles } from 'lucide-react';
+import { useModal } from '../context/ModalContext';
 
 export default function Footer() {
+  const { showAlert } = useModal();
   return (
     <footer className="bg-[#08203E] text-white border-t border-[#D4AF37]/20 pt-16 pb-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12">
@@ -56,7 +58,7 @@ export default function Footer() {
         <div className="space-y-4">
           <h4 className="font-serif text-lg font-semibold text-[#D4AF37]">The Sapphire Society</h4>
           <p className="text-xs text-gray-300">Receive private invitations to palace unveilings and seasonal Indian retreats.</p>
-          <form onSubmit={(e) => { e.preventDefault(); alert('Welcome to The Sapphire Society!'); }} className="flex flex-col gap-2">
+          <form onSubmit={(e) => { e.preventDefault(); showAlert('Welcome to The Sapphire Society!', 'The Sapphire Society'); }} className="flex flex-col gap-2">
             <input
               type="email"
               placeholder="Enter your email address"

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useModal } from '../../context/ModalContext';
 import { 
   Sparkles, 
   CheckCircle, 
@@ -14,6 +15,7 @@ import {
 export default function HousekeepingPortal() {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { showAlert } = useModal();
 
   // Turnaround Checklist states
   const [activeChecklistTask, setActiveChecklistTask] = useState(null);
@@ -59,7 +61,7 @@ export default function HousekeepingPortal() {
       setActiveChecklistTask(task);
       setChecklistChecked([false, false, false, false, false]);
     } catch (err) {
-      alert('Failed to start cleaning task.');
+      showAlert('Failed to start cleaning task.', 'Housekeeping Service');
     }
   };
 
@@ -76,7 +78,7 @@ export default function HousekeepingPortal() {
       setChecklistChecked([false, false, false, false, false]);
       fetchTasks();
     } catch (err) {
-      alert('Failed to submit room turnaround.');
+      showAlert('Failed to submit room turnaround.', 'Housekeeping Service');
     }
   };
 
@@ -105,10 +107,10 @@ export default function HousekeepingPortal() {
       setEscalationDesc('');
       setEscalationPriority('URGENT');
       setActiveEscalationTask(null);
-      alert('Maintenance fault dispatched. Room has been locked for safety.');
+      showAlert('Maintenance fault dispatched. Room has been locked for safety.', 'Escalation Dispatched');
       fetchTasks();
     } catch (err) {
-      alert('Failed to dispatch maintenance ticket.');
+      showAlert('Failed to dispatch maintenance ticket.', 'Escalation Failed');
     } finally {
       setEscalating(false);
     }

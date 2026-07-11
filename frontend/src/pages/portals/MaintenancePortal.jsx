@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useModal } from '../../context/ModalContext';
 import { 
   Wrench, 
   AlertTriangle, 
@@ -16,6 +17,7 @@ import {
 export default function MaintenancePortal() {
   const [tickets, setTickets] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { showAlert } = useModal();
 
   // Modal / Interaction states
   const [activeChecklistTicket, setActiveChecklistTicket] = useState(null);
@@ -67,7 +69,7 @@ export default function MaintenancePortal() {
       });
       fetchData();
     } catch (err) {
-      alert('Failed to update ticket status.');
+      showAlert('Failed to update ticket status.', 'Engineering Service');
     }
   };
 
@@ -79,7 +81,7 @@ export default function MaintenancePortal() {
       });
       fetchData();
     } catch (err) {
-      alert('Failed to toggle Safety Lockout.');
+      showAlert('Failed to toggle Safety Lockout.', 'Safety Service');
     }
   };
 
@@ -103,7 +105,7 @@ export default function MaintenancePortal() {
       setChecklistChecked([false, false, false, false]);
       fetchData();
     } catch (err) {
-      alert('Failed to resolve maintenance request.');
+      showAlert('Failed to resolve maintenance request.', 'Engineering Service');
     }
   };
 
@@ -126,7 +128,7 @@ export default function MaintenancePortal() {
       setNewPriority('NORMAL');
       fetchData();
     } catch (err) {
-      alert('Failed to log incident.');
+      showAlert('Failed to log incident.', 'Incident Dispatch');
     } finally {
       setReportingIssue(false);
     }
@@ -142,7 +144,7 @@ export default function MaintenancePortal() {
     ]);
     setSupplyRoomNo('');
     setSupplyPartName('');
-    alert('Parts requisition request logged.');
+    showAlert('Parts requisition request logged.', 'Inventory Request');
   };
 
   const getAssetCategory = (title, desc) => {

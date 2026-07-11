@@ -16,6 +16,22 @@ export default {
         gold: {
           primary: '#D4AF37',
           light: '#F4E3B2'
+        },
+        red: {
+          650: '#cb2121'
+        },
+        emerald: {
+          650: '#0a986c'
+        },
+        amber: {
+          550: '#e78b08'
+        },
+        slate: {
+          450: '#7b8c9e',
+          550: '#526071',
+          850: '#172033',
+          855: '#131b2b',
+          950: '#020617'
         }
       },
       fontFamily: {

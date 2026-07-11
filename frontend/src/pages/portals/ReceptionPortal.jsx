@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { AuthContext } from '../../context/AuthContext';
+import { useModal } from '../../context/ModalContext';
 import { 
   Search, 
   UserCheck, 
@@ -19,11 +20,13 @@ import {
 export default function ReceptionPortal() {
   const { user } = useContext(AuthContext);
   const branchId = user?.branch_id || 1; // Default to Udaipur Palace (1)
+  const { showAlert } = useModal();
 
   const [bookings, setBookings] = useState([]);
   const [rooms, setRooms] = useState([]);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
+  const [isSubmittingWalkIn, setIsSubmittingWalkIn] = useState(false);
 
   // Folio incidentals state (simulates real-time hotel room charges)
   const [roomCharges, setRoomCharges] = useState({
@@ -79,7 +82,7 @@ export default function ReceptionPortal() {
   // Check-In submission executing Room Assignment and Room state change
   const handleConfirmCheckIn = async (bookingId, roomId) => {
     if (!roomId) {
-      alert('Please select a vacant clean room to allocate.');
+      showAlert('Please select a vacant clean room to allocate.', 'Room Selection Required');
       return;
     }
     try {
@@ -91,7 +94,7 @@ export default function ReceptionPortal() {
       setSelectedCheckInRoomId('');
       fetchData();
     } catch (err) {
-      alert(err.response?.data?.error || 'Check-in failed.');
+      showAlert(err.response?.data?.error || 'Check-in failed.', 'Check-In Error');
     }
   };
 
@@ -116,7 +119,7 @@ export default function ReceptionPortal() {
       setActiveCheckOutBooking(null);
       fetchData();
     } catch (err) {
-      alert('Check-out failed.');
+      showAlert('Check-out failed.', 'Check-Out Error');
     }
   };
 
@@ -137,14 +140,15 @@ export default function ReceptionPortal() {
     setChargeItemName('');
     setChargeAmount('');
     setChargeOpen(false);
-    alert('Folio charge posted successfully.');
+    showAlert('Folio charge posted successfully.', 'Folio Charges');
   };
 
   // Log immediate Walk-in Reservation
   const handleCreateWalkIn = async (e) => {
     e.preventDefault();
-    if (!walkInGuestName || !walkInRoomId) return;
+    if (!walkInGuestName || !walkInRoomId || isSubmittingWalkIn) return;
 
+    setIsSubmittingWalkIn(true);
     try {
       const roomObj = rooms.find(r => r.id === Number(walkInRoomId));
       const roomTypeSelected = roomTypesUnique.find(t => t.id === Number(walkInRoomTypeId)) || {};
@@ -180,7 +184,9 @@ export default function ReceptionPortal() {
       fetchData();
     } catch (err) {
       console.error('Walk-in check-in error details:', err);
-      alert('Walk-in check-in failed.');
+      showAlert('Walk-in check-in failed.', 'Walk-In Failure');
+    } finally {
+      setIsSubmittingWalkIn(false);
     }
   };
 
@@ -654,14 +660,14 @@ export default function ReceptionPortal() {
                 </button>
                 <button
                   type="submit"
-                  disabled={!walkInRoomId}
+                  disabled={!walkInRoomId || isSubmittingWalkIn}
                   className={`flex-1 py-3 rounded-xl text-xs font-bold transition ${
-                    walkInRoomId
+                    (walkInRoomId && !isSubmittingWalkIn)
                       ? 'btn-gold shadow-lg cursor-pointer'
                       : 'bg-slate-200 dark:bg-slate-800 text-slate-400 cursor-not-allowed border border-transparent'
                   }`}
                 >
-                  Register & Check-In
+                  {isSubmittingWalkIn ? 'Registering...' : 'Register & Check-In'}
                 </button>
               </div>
             </form>

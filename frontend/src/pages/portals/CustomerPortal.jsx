@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { AuthContext } from '../../context/AuthContext';
 import { Sparkles, Calendar, FileText, Download, XCircle, User, MapPin, CheckCircle } from 'lucide-react';
+import { useModal } from '../../context/ModalContext';
 
 export default function CustomerPortal() {
   const { user } = useContext(AuthContext);
@@ -11,6 +12,7 @@ export default function CustomerPortal() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('bookings');
   const [selectedInvoice, setSelectedInvoice] = useState(null);
+  const { showAlert, showConfirm } = useModal();
 
   useEffect(() => {
     fetchMyBookings();
@@ -36,12 +38,13 @@ export default function CustomerPortal() {
   };
 
   const handleCancel = async (id) => {
-    if (!window.confirm('Are you sure you wish to cancel this luxury stay?')) return;
+    const confirmed = await showConfirm('Are you sure you wish to cancel this luxury stay?', 'Cancel Luxury Reservation');
+    if (!confirmed) return;
     try {
       await axios.patch(`http://localhost:5000/api/bookings/${id}/status`, { status: 'CANCELLED' });
       fetchMyBookings();
     } catch (err) {
-      alert('Failed to cancel stay');
+      showAlert('Failed to cancel stay', 'Service Interruption');
     }
   };
 

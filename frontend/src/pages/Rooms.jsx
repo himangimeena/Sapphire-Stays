@@ -3,6 +3,7 @@ import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Star, Filter, CheckCircle, MapPin, Sparkles, Compass, ArrowLeft, RefreshCw } from 'lucide-react';
 import { FALLBACK_ROOMS } from '../data/fallbackData';
+import { getRoomImage } from '../utils/roomImage';
 
 export default function Rooms() {
   const [searchParams] = useSearchParams();
@@ -138,7 +139,7 @@ export default function Rooms() {
             <div key={rt.id} className="glass-card overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-800 flex flex-col justify-between shadow-lg">
               <div>
                 <div className="relative h-64 overflow-hidden">
-                  <img src="https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&w=800&q=80" alt={rt.name} className="w-full h-full object-cover hover:scale-105 transition duration-500" />
+                  <img src={getRoomImage(rt)} alt={rt.name} className="w-full h-full object-cover hover:scale-105 transition duration-500" />
                   <div className="absolute top-3 right-3 px-2.5 py-1 rounded bg-black/60 backdrop-blur-md text-amber-400 font-bold text-xs flex items-center gap-1">
                     <Star className="w-3.5 h-3.5 fill-amber-400" /> 4.95
                   </div>

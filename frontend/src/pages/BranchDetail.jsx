@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
 import { MapPin, Star, Sparkles, Wifi, Utensils, Car, Shield, CheckCircle } from 'lucide-react';
+import { getRoomImage } from '../utils/roomImage';
 
 export default function BranchDetail() {
   const { id } = useParams();
@@ -42,7 +43,7 @@ export default function BranchDetail() {
           <img src={branch.hero_image} alt={branch.name} className="w-full h-full object-cover hover:scale-105 transition duration-700" />
         </div>
         <div className="grid grid-rows-2 gap-4 h-[450px]">
-          <img src="https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&w=800&q=80" alt="Palace Suite" className="w-full h-full object-cover rounded-xl" />
+          <img src="https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=800&q=80" alt="Palace Heritage" className="w-full h-full object-cover rounded-xl" />
           <img src="https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=800&q=80" alt="Spa Pool" className="w-full h-full object-cover rounded-xl" />
         </div>
       </div>
@@ -96,7 +97,7 @@ export default function BranchDetail() {
             <div key={rt.id} className="glass-card overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-800 flex flex-col justify-between shadow-lg">
               <div>
                 <div className="relative h-56 overflow-hidden">
-                  <img src="https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&w=800&q=80" alt={rt.name} className="w-full h-full object-cover" />
+                  <img src={getRoomImage({ ...rt, branch_city: branch.city, branch_name: branch.name })} alt={rt.name} className="w-full h-full object-cover" />
                   <div className="absolute top-3 left-3 px-3 py-1 rounded bg-[#D4AF37] text-[#08203E] font-bold text-[10px] uppercase tracking-wider">
                     {rt.tier}
                   </div>

@@ -6,6 +6,9 @@ export default defineConfig({
   server: {
     port: 3001,
     strictPort: true,
-    open: true
+    open: true,
+    headers: {
+      'Cross-Origin-Opener-Policy': 'same-origin-allow-popups'
+    }
   }
 });

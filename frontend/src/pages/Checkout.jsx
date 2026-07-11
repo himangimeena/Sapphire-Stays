@@ -3,6 +3,8 @@ import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
 import { Shield, Lock, CreditCard, CheckCircle, ArrowLeft, ArrowRight, Smartphone, Calendar, Users } from 'lucide-react';
+import { useModal } from '../context/ModalContext';
+import { getRoomImage } from '../utils/roomImage';
 
 export default function Checkout() {
   const [searchParams] = useSearchParams();
@@ -10,12 +12,15 @@ export default function Checkout() {
   const branchId = searchParams.get('branchId') || 1;
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
+  const { showAlert } = useModal();
 
   const [checkIn, setCheckIn] = useState('2026-07-15');
   const [checkOut, setCheckOut] = useState('2026-07-18');
   const [roomsCount, setRoomsCount] = useState(1);
   const [couponCode, setCouponCode] = useState('ROYALINDIA20');
   const [calc, setCalc] = useState(null);
+  const [calcError, setCalcError] = useState(null);
+  const [roomType, setRoomType] = useState(null);
 
   // Form fields with bulletproof empty string fallbacks to prevent uncontrolled warning
   const [firstName, setFirstName] = useState(user ? user.name.split(' ')[0] || '' : 'Julian');
@@ -38,7 +43,22 @@ export default function Checkout() {
     }
   }, [user]);
 
+  // Fetch Room Type and Branch details dynamically
   useEffect(() => {
+    axios.get('http://localhost:5000/api/rooms/types')
+      .then(res => {
+        const found = res.data.roomTypes?.find(rt => Number(rt.id) === Number(roomTypeId));
+        if (found) {
+          setRoomType(found);
+        }
+      })
+      .catch(err => {
+        console.error("Failed to load room type details:", err);
+      });
+  }, [roomTypeId]);
+
+  useEffect(() => {
+    setCalcError(null);
     axios.post('http://localhost:5000/api/bookings/calculate', {
       roomTypeId,
       checkIn,
@@ -46,14 +66,24 @@ export default function Checkout() {
       roomsCount,
       couponCode
     })
-    .then(res => setCalc(res.data))
-    .catch(err => console.error(err));
+    .then(res => {
+      setCalc(res.data);
+    })
+    .catch(err => {
+      console.error(err);
+      setCalc(null);
+      setCalcError('Failed to calculate live booking price. Please check date inputs.');
+    });
   }, [roomTypeId, checkIn, checkOut, roomsCount, couponCode]);
 
   const handleBooking = async (e) => {
     if (e) e.preventDefault();
     if (!user) {
-      alert('Please sign in or use the Demo Role Switcher before booking.');
+      showAlert('Please sign in or use the Demo Role Switcher before booking.', 'Sign-in Required');
+      return;
+    }
+    if (calcError || !calc) {
+      showAlert('Cannot proceed with booking: Live price calculation failed. Please check inputs.', 'Calculation Error');
       return;
     }
     setLoading(true);
@@ -91,7 +121,7 @@ export default function Checkout() {
       setConfirmation(res.data);
     } catch (err) {
       console.error("Booking submission error detail:", err);
-      alert(err.response?.data?.error || 'Booking failed');
+      showAlert(err.response?.data?.error || 'Booking failed', 'Booking Failure');
     } finally {
       setLoading(false);
     }
@@ -257,22 +287,28 @@ export default function Checkout() {
             <span className="px-2.5 py-1 rounded bg-[#D4AF37]/20 text-[#D4AF37] font-bold text-[10px] uppercase">Royal Tier</span>
           </div>
 
+          {calcError && (
+            <div className="p-3.5 rounded-xl bg-red-500/10 border border-red-500/20 text-red-650 dark:text-red-400 text-xs font-semibold leading-relaxed">
+              ⚠️ {calcError}
+            </div>
+          )}
+
           <div className="flex items-center gap-4">
-            <img src="https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&w=200&q=80" alt="Room" className="w-16 h-16 rounded-xl object-cover shrink-0" />
+            <img src={getRoomImage(roomType)} alt={roomType?.name || 'Room'} className="w-16 h-16 rounded-xl object-cover shrink-0" />
             <div className="min-w-0">
-              <h4 className="font-serif font-bold text-base sm:text-lg truncate">Lakeview Royal Suite</h4>
-              <p className="text-xs text-gray-500 truncate">Sapphire Palace Udaipur</p>
+              <h4 className="font-serif font-bold text-base sm:text-lg truncate">{roomType?.name || 'Loading Suite...'}</h4>
+              <p className="text-xs text-gray-500 truncate">{roomType?.branch_name || 'Loading Branch...'}</p>
             </div>
           </div>
 
           <div className="space-y-3 pt-4 border-t border-gray-100 dark:border-gray-800 text-xs">
             <div className="flex justify-between">
-              <span className="text-gray-600 dark:text-gray-400 font-medium">Duration ({calc?.nights || 3} Nights)</span>
+              <span className="text-gray-600 dark:text-gray-400 font-medium">Duration ({calc?.nights || 0} Nights)</span>
               <span className="font-semibold">{checkIn} → {checkOut}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-gray-600 dark:text-gray-400 font-medium">Suite Rate (x{calc?.roomsCount || 1} Room)</span>
-              <span className="font-semibold">₹{Number(calc?.baseAmount || 135000).toLocaleString('en-IN')}</span>
+              <span className="font-semibold">₹{Number(calc?.baseAmount || 0).toLocaleString('en-IN')}</span>
             </div>
             {calc?.discountAmount > 0 && (
               <div className="flex justify-between text-emerald-600 dark:text-emerald-400 font-medium">
@@ -282,7 +318,7 @@ export default function Checkout() {
             )}
             <div className="flex justify-between">
               <span className="text-gray-600 dark:text-gray-400 font-medium">India GST (CGST 9% + SGST 9%)</span>
-              <span className="font-semibold">₹{Number((calc?.cgstAmount || 12150) + (calc?.sgstAmount || 12150)).toLocaleString('en-IN')}</span>
+              <span className="font-semibold">₹{Number((calc?.cgstAmount || 0) + (calc?.sgstAmount || 0)).toLocaleString('en-IN')}</span>
             </div>
           </div>
 
@@ -290,7 +326,7 @@ export default function Checkout() {
             <span className="font-serif text-base sm:text-lg font-bold">Total Amount</span>
             <div className="text-right">
               <span className="font-serif text-xl sm:text-2xl font-bold text-[#0F3D6E] dark:text-amber-300">
-                ₹{Number(calc?.totalAmount || 159300).toLocaleString('en-IN')}
+                ₹{Number(calc?.totalAmount || 0).toLocaleString('en-IN')}
               </span>
               <span className="block text-[10px] text-gray-600 dark:text-gray-400 font-semibold">All India taxes included</span>
             </div>
@@ -299,10 +335,10 @@ export default function Checkout() {
           <button
             type="button"
             onClick={handleBooking}
-            disabled={loading}
-            className="w-full py-4 text-xs sm:text-sm font-bold flex items-center justify-center gap-2 bg-[#08203E] hover:bg-[#14355E] text-white border border-[#D4AF37]/40 rounded-xl shadow-xl transition disabled:opacity-50"
+            disabled={loading || !calc || calcError}
+            className="w-full py-4 text-xs sm:text-sm font-bold flex items-center justify-center gap-2 bg-[#08203E] hover:bg-[#14355E] text-white border border-[#D4AF37]/40 rounded-xl shadow-xl transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <span>{loading ? 'Confirming Royal Stay...' : `Confirm & Pay ₹${Number(calc?.totalAmount || 159300).toLocaleString('en-IN')}`}</span>
+            <span>{loading ? 'Confirming Royal Stay...' : `Confirm & Pay ₹${Number(calc?.totalAmount || 0).toLocaleString('en-IN')}`}</span>
             <ArrowRight className="w-4 h-4 shrink-0" />
           </button>
         </div>
