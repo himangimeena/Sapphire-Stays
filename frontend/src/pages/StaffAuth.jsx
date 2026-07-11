@@ -1,5 +1,5 @@
-import React, { useState, useContext } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useContext, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { Shield, Briefcase, Key, Sparkles, Wrench, User, ArrowLeft, Mail, Lock, AlertTriangle } from 'lucide-react';
 
@@ -12,6 +12,37 @@ export default function StaffAuth() {
 
   const { login } = useContext(AuthContext);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
+  useEffect(() => {
+    const autofillRole = searchParams.get('autofill');
+    if (autofillRole) {
+      const card = roleCards.find(rc => rc.id === autofillRole);
+      if (card) {
+        setSelectedRole(card);
+        setEmail(card.demoEmail);
+        setPassword(card.demoPass);
+        
+        const autoSubmit = async () => {
+          setLoading(true);
+          try {
+            const res = await login(card.demoEmail, card.demoPass);
+            if (res.user.role !== card.id) {
+              setErrorMsg(`Role Mismatch: This account belongs to the role of '${res.user.role}', but you requested staff access as '${card.id}'.`);
+              setLoading(false);
+              return;
+            }
+            navigate(getPortalPath(res.user.role));
+          } catch (err) {
+            setErrorMsg(err.message || 'Authentication error occurred.');
+          } finally {
+            setLoading(false);
+          }
+        };
+        setTimeout(autoSubmit, 100);
+      }
+    }
+  }, [searchParams]);
 
   const roleCards = [
     {

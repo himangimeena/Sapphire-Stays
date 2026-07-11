@@ -239,7 +239,7 @@ export default function MaintenancePortal() {
                       <span className="text-[10px] text-slate-500 block">{cat} Category</span>
                     </div>
                     <span className={`px-2 py-0.5 rounded text-[8px] font-bold uppercase ${
-                      t.priority === 'EMERGENCY' ? 'bg-red-500/10 text-red-650' : 'bg-amber-500/10 text-amber-600'
+                      t.priority === 'EMERGENCY' ? 'bg-red-500/10 text-red-600 dark:text-red-400' : 'bg-amber-500/10 text-amber-600'
                     }`}>{t.priority}</span>
                   </div>
 
@@ -251,11 +251,11 @@ export default function MaintenancePortal() {
                     </div>
                   )}
 
-                  <div className="pt-3 border-t border-slate-200/40 dark:border-slate-850 flex justify-between items-center gap-2">
+                  <div className="pt-3 border-t border-slate-200/40 dark:border-slate-800 flex justify-between items-center gap-2">
                     <button
                       onClick={() => handleToggleLockout(t)}
                       className={`px-2.5 py-1.5 rounded-lg border text-[8px] font-bold uppercase transition ${
-                        isLOTO ? 'bg-red-650 border-red-600 text-white' : 'border-red-500/40 text-red-500 dark:text-red-400'
+                        isLOTO ? 'bg-red-600 border-red-600 text-white' : 'border-red-500/40 text-red-500 dark:text-red-400'
                       }`}
                     >
                       LOTO Lock
@@ -294,7 +294,7 @@ export default function MaintenancePortal() {
                       <span className="font-serif font-bold text-base text-slate-900 dark:text-slate-100">Suite {t.room_number}</span>
                       <span className="text-[10px] text-slate-500 block">{cat} Category</span>
                     </div>
-                    <span className="px-2 py-0.5 rounded text-[8px] font-bold bg-amber-500/10 text-amber-550 uppercase">Active fix</span>
+                    <span className="px-2 py-0.5 rounded text-[8px] font-bold bg-amber-500/10 text-amber-500 uppercase">Active fix</span>
                   </div>
 
                   <p className="text-xs text-slate-700 dark:text-slate-300 font-semibold">{t.issue_title}</p>
@@ -305,11 +305,11 @@ export default function MaintenancePortal() {
                     </div>
                   )}
 
-                  <div className="pt-3 border-t border-slate-200/40 dark:border-slate-850 flex justify-between items-center gap-2">
+                  <div className="pt-3 border-t border-slate-200/40 dark:border-slate-800 flex justify-between items-center gap-2">
                     <button
                       onClick={() => handleToggleLockout(t)}
                       className={`px-2.5 py-1.5 rounded-lg border text-[8px] font-bold uppercase transition ${
-                        isLOTO ? 'bg-red-650 border-red-600 text-white' : 'border-red-500/40 text-red-500 dark:text-red-400'
+                        isLOTO ? 'bg-red-600 border-red-600 text-white' : 'border-red-500/40 text-red-500 dark:text-red-400'
                       }`}
                     >
                       LOTO Lock
@@ -346,7 +346,7 @@ export default function MaintenancePortal() {
                 <div key={t.id} className="glass-card p-5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#132135] space-y-3 shadow-sm opacity-70">
                   <div className="flex justify-between items-start">
                     <span className="font-serif font-bold text-base text-slate-900 dark:text-slate-100">Suite {t.room_number}</span>
-                    <span className="px-2 py-0.5 rounded text-[8px] font-bold bg-emerald-500/10 text-emerald-650 uppercase">Closed</span>
+                    <span className="px-2 py-0.5 rounded text-[8px] font-bold bg-emerald-500/10 text-emerald-600 uppercase">Closed</span>
                   </div>
                   <p className="text-xs text-slate-700 dark:text-slate-400 font-semibold">{t.issue_title}</p>
                 </div>

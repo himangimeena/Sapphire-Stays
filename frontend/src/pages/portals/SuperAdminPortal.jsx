@@ -25,6 +25,7 @@ export default function SuperAdminPortal() {
   const [housekeepingTasks, setHousekeepingTasks] = useState([]);
   const [maintenanceTickets, setMaintenanceTickets] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   // Selector & Tabs
   const [selectedBranch, setSelectedBranch] = useState('ALL');
@@ -66,6 +67,7 @@ export default function SuperAdminPortal() {
 
   const fetchInitialData = () => {
     setLoading(true);
+    setError(null);
     Promise.all([
       axios.get('http://localhost:5000/api/analytics/overview'),
       axios.get('http://localhost:5000/api/bookings'),
@@ -81,6 +83,7 @@ export default function SuperAdminPortal() {
       setLoading(false);
     }).catch(err => {
       console.error('Overview fetch error:', err);
+      setError('Failed to load portfolio analytics. The server may be offline.');
       setLoading(false);
     });
   };
@@ -148,6 +151,21 @@ export default function SuperAdminPortal() {
   };
 
   if (loading) return <div className="py-24 text-center font-serif text-xl text-slate-900 dark:text-slate-100">Loading Executive Terminal...</div>;
+
+  if (error) {
+    return (
+      <div className="py-24 text-center space-y-6 max-w-md mx-auto px-4 text-slate-900 dark:text-slate-100">
+        <h2 className="font-serif text-2xl font-bold text-red-600 dark:text-red-400">Connection Error</h2>
+        <p className="text-sm text-slate-600 dark:text-slate-400 font-medium">{error}</p>
+        <button 
+          onClick={fetchInitialData}
+          className="btn-gold !py-3 !px-8 text-xs font-bold transition hover:scale-[1.02] shadow-lg w-full"
+        >
+          Retry Connection
+        </button>
+      </div>
+    );
+  }
 
   // 1. Dynamic Filtering by Property Dropdown Selection
   const filteredBookings = selectedBranch === 'ALL' 
@@ -522,7 +540,7 @@ export default function SuperAdminPortal() {
                   </thead>
                   <tbody className="divide-y divide-slate-100 dark:divide-slate-800/40">
                     {coupons.map(c => (
-                      <tr key={c.id} className="text-slate-850 dark:text-slate-200 hover:bg-slate-50/50 dark:hover:bg-slate-800/20">
+                      <tr key={c.id} className="text-slate-800 dark:text-slate-200 hover:bg-slate-50/50 dark:hover:bg-slate-800/20">
                         <td className="py-3 font-mono font-bold text-[#D4AF37]">{c.code}</td>
                         <td className="py-3 font-semibold">{c.discount_type === 'PERCENTAGE' ? `${c.discount_value}%` : `₹${c.discount_value}`}</td>
                         <td className="py-3 font-mono text-slate-500">₹{Number(c.min_booking_amount).toLocaleString('en-IN')}</td>

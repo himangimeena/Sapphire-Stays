@@ -26,6 +26,7 @@ export default function BranchAdminPortal() {
   const [housekeeping, setHousekeeping] = useState([]);
   const [maintenance, setMaintenance] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   // Tab management
   const [activeTab, setActiveTab] = useState('inventory');
@@ -65,6 +66,7 @@ export default function BranchAdminPortal() {
 
   const fetchBranchData = () => {
     setLoading(true);
+    setError(null);
     Promise.all([
       axios.get(`http://localhost:5000/api/rooms?branchId=${branchId}`),
       axios.get('http://localhost:5000/api/bookings'),
@@ -89,6 +91,7 @@ export default function BranchAdminPortal() {
       setLoading(false);
     }).catch(err => {
       console.error('Failed to load local branch analytics:', err);
+      setError('Failed to load branch analytics. The server may be offline.');
       setLoading(false);
     });
   };
@@ -113,6 +116,21 @@ export default function BranchAdminPortal() {
   };
 
   if (loading) return <div className="py-24 text-center font-serif text-xl text-slate-900 dark:text-slate-100">Loading Branch Control Console...</div>;
+
+  if (error) {
+    return (
+      <div className="py-24 text-center space-y-6 max-w-md mx-auto px-4">
+        <h2 className="font-serif text-2xl font-bold text-red-600 dark:text-red-400">Connection Error</h2>
+        <p className="text-sm text-slate-600 dark:text-slate-400 font-medium">{error}</p>
+        <button 
+          onClick={fetchBranchData}
+          className="btn-gold !py-3 !px-8 text-xs font-bold transition hover:scale-[1.02] shadow-lg w-full"
+        >
+          Retry Connection
+        </button>
+      </div>
+    );
+  }
 
   // Local property inventory calculations (.filter() & .reduce())
   const totalRooms = rooms.length;
@@ -401,7 +419,7 @@ export default function BranchAdminPortal() {
                       <span>Live Rate:</span>
                       <div className="text-right">
                         {surcharge > 0 && (
-                          <span className="text-[9px] line-through text-slate-450 block">₹{Number(r.nightly_rate).toLocaleString('en-IN')}</span>
+                          <span className="text-[9px] line-through text-slate-400 block">₹{Number(r.nightly_rate).toLocaleString('en-IN')}</span>
                         )}
                         <span className="text-[#0F3D6E] dark:text-amber-300 font-serif font-bold">₹{Math.round(adjustedNightlyRate).toLocaleString('en-IN')}</span>
                       </div>
@@ -523,7 +541,7 @@ export default function BranchAdminPortal() {
                         <td className="py-3.5 font-bold text-slate-900 dark:text-slate-100">{s.name}</td>
                         <td className="py-3.5 text-slate-500 font-semibold">{s.category}</td>
                         <td className="py-3.5 font-mono font-bold text-slate-900 dark:text-slate-100">{s.qty} {s.unit}</td>
-                        <td className="py-3.5 font-mono text-slate-550">{s.min} {s.unit}</td>
+                        <td className="py-3.5 font-mono text-slate-500">{s.min} {s.unit}</td>
                         <td className="py-3.5">
                           {isLow ? (
                             <span className="px-2 py-0.5 rounded text-[8px] font-bold bg-red-500/10 text-red-600 dark:text-red-400 uppercase tracking-wider flex items-center gap-1 w-max border border-red-500/20">

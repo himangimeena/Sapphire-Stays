@@ -70,7 +70,10 @@ export default function ProfilePage() {
 
   // Generate deterministic creation date based on user ID
   function getAccountCreationDate(userId) {
-    const id = userId || 101;
+    if (userId === undefined || userId === null) {
+      throw new Error("Invalid User context: User ID is missing for account creation date calculation.");
+    }
+    const id = Number(userId);
     const day = String((id % 28) + 1).padStart(2, '0');
     const month = String((id % 12) + 1).padStart(2, '0');
     const year = 2021 + (id % 4);
@@ -91,6 +94,9 @@ export default function ProfilePage() {
 
   // Generate mock JWT developer token
   function generateMockToken(currentUser) {
+    if (!currentUser || currentUser.id === undefined || currentUser.id === null) {
+      throw new Error("Invalid User context: User ID is missing for mock JWT developer token generation.");
+    }
     const header = btoa(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).replace(/=/g, '');
     const payload = btoa(JSON.stringify({
       sub: currentUser.id,

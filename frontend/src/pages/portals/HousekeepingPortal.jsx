@@ -16,6 +16,7 @@ export default function HousekeepingPortal() {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const { showAlert } = useModal();
+  const [error, setError] = useState(null);
 
   // Turnaround Checklist states
   const [activeChecklistTask, setActiveChecklistTask] = useState(null);
@@ -34,6 +35,7 @@ export default function HousekeepingPortal() {
 
   const fetchTasks = () => {
     setLoading(true);
+    setError(null);
     axios.get('http://localhost:5000/api/operations/housekeeping')
       .then(res => {
         setTasks(res.data.tasks || []);
@@ -41,6 +43,7 @@ export default function HousekeepingPortal() {
       })
       .catch(err => {
         console.error('Failed to load housekeeping tasks:', err);
+        setError('Failed to load housekeeping turnaround board. The server may be offline.');
         setLoading(false);
       });
   };
@@ -128,6 +131,21 @@ export default function HousekeepingPortal() {
 
   if (loading) return <div className="py-24 text-center font-serif text-xl text-slate-900 dark:text-slate-100">Loading Turnaround Board...</div>;
 
+  if (error) {
+    return (
+      <div className="py-24 text-center space-y-6 max-w-md mx-auto px-4 text-slate-900 dark:text-slate-100">
+        <h2 className="font-serif text-2xl font-bold text-red-600 dark:text-red-400">Connection Error</h2>
+        <p className="text-sm text-slate-600 dark:text-slate-400 font-medium">{error}</p>
+        <button 
+          onClick={fetchTasks}
+          className="btn-gold !py-3 !px-8 text-xs font-bold transition hover:scale-[1.02] shadow-lg w-full"
+        >
+          Retry Connection
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="py-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 animate-fade-in space-y-8 text-slate-900 dark:text-slate-100 bg-white dark:bg-[#0D1E36] border-slate-200 dark:border-slate-800">
       
@@ -167,7 +185,7 @@ export default function HousekeepingPortal() {
         
         {/* Category 1: Immediate Clean (Checkout/Arrivals) */}
         <div className="space-y-3">
-          <div className="flex items-center gap-2 border-b border-slate-200/60 dark:border-slate-850 pb-2">
+          <div className="flex items-center gap-2 border-b border-slate-200/60 dark:border-slate-800 pb-2">
             <span className="w-2.5 h-2.5 rounded-full bg-amber-500" />
             <h2 className="font-serif text-lg font-bold">Immediate Clean (Checkout Turnaround)</h2>
             <span className="px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 text-[10px] font-bold">
@@ -216,7 +234,7 @@ export default function HousekeepingPortal() {
 
         {/* Category 2: Stayover Service */}
         <div className="space-y-3">
-          <div className="flex items-center gap-2 border-b border-slate-200/60 dark:border-slate-850 pb-2">
+          <div className="flex items-center gap-2 border-b border-slate-200/60 dark:border-slate-800 pb-2">
             <span className="w-2.5 h-2.5 rounded-full bg-blue-500" />
             <h2 className="font-serif text-lg font-bold">Stayover Service (Tidy & Turn-down)</h2>
             <span className="px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-600 text-[10px] font-bold">
@@ -263,7 +281,7 @@ export default function HousekeepingPortal() {
 
         {/* Category 3: Deep Clean / Inspection */}
         <div className="space-y-3">
-          <div className="flex items-center gap-2 border-b border-slate-200/60 dark:border-slate-850 pb-2">
+          <div className="flex items-center gap-2 border-b border-slate-200/60 dark:border-slate-800 pb-2">
             <span className="w-2.5 h-2.5 rounded-full bg-purple-500" />
             <h2 className="font-serif text-lg font-bold">Deep Clean / Periodic Inspection</h2>
             <span className="px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-600 text-[10px] font-bold">
@@ -334,7 +352,7 @@ export default function HousekeepingPortal() {
             </div>
 
             <div className="space-y-4 text-xs font-semibold text-slate-800 dark:text-slate-200">
-              <p className="text-slate-550">
+              <p className="text-slate-500">
                 Acknowledge and verify the following turnaround standards before releasing this room to the front desk:
               </p>
 
@@ -347,7 +365,7 @@ export default function HousekeepingPortal() {
               ].map((item, idx) => (
                 <label 
                   key={idx} 
-                  className="flex items-start gap-3 p-3 rounded-xl border border-slate-100 dark:border-slate-850 hover:bg-slate-50 dark:hover:bg-slate-800/40 cursor-pointer transition"
+                  className="flex items-start gap-3 p-3 rounded-xl border border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/40 cursor-pointer transition"
                 >
                   <input
                     type="checkbox"
@@ -420,7 +438,7 @@ export default function HousekeepingPortal() {
                   type="text"
                   disabled
                   value={`Suite ${activeEscalationTask.room_number}`}
-                  className="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-855 bg-slate-50 dark:bg-[#0D1E36] text-slate-950 dark:text-slate-100 focus:outline-none opacity-80"
+                  className="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-[#0D1E36] text-slate-900 dark:text-slate-100 focus:outline-none opacity-80"
                 />
               </div>
 

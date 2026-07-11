@@ -258,7 +258,7 @@ export default function ReceptionPortal() {
             <span className="flex items-center gap-1.5 text-amber-600 dark:text-amber-400">
               <span className="w-2.5 h-2.5 rounded-full bg-amber-500" /> Dirty
             </span>
-            <span className="flex items-center gap-1.5 text-red-650 dark:text-red-400">
+            <span className="flex items-center gap-1.5 text-red-600 dark:text-red-400">
               <span className="w-2.5 h-2.5 rounded-full bg-red-600" /> Out of Order
             </span>
           </div>
@@ -519,8 +519,8 @@ export default function ReceptionPortal() {
               <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-[#0D1E36] border border-slate-200/50 dark:border-slate-800 space-y-1">
                 <span className="text-[9px] uppercase font-bold text-slate-500 block">Stay Details:</span>
                 <p className="text-sm font-bold text-slate-900 dark:text-slate-100">{activeCheckOutBooking.guest_name}</p>
-                <p className="text-slate-550">Room Number: <span className="font-bold text-slate-900 dark:text-slate-100">Suite {rooms.find(r => r.id === activeCheckOutBooking.assigned_room_id)?.room_number || 'Unassigned'}</span></p>
-                <p className="text-slate-550">Room Base Total: <span className="font-mono">₹{Number(activeCheckOutBooking.total_amount).toLocaleString('en-IN')}</span></p>
+                <p className="text-slate-500">Room Number: <span className="font-bold text-slate-900 dark:text-slate-100">Suite {rooms.find(r => r.id === activeCheckOutBooking.assigned_room_id)?.room_number || 'Unassigned'}</span></p>
+                <p className="text-slate-500">Room Base Total: <span className="font-mono">₹{Number(activeCheckOutBooking.total_amount).toLocaleString('en-IN')}</span></p>
               </div>
 
               {/* Incidental Charges listing */}

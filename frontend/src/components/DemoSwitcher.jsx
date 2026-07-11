@@ -25,15 +25,11 @@ export default function DemoSwitcher({ onClose, compact = false }) {
     setError(null);
 
     try {
-      // Execute production-minded login(email, password) via simulated JWT session
-      await loginWithSeededAccount(account.role);
-      
-      // Navigate cleanly to authorized portal
-      const targetRoute = getPortalRoute(account.role);
-      navigate(targetRoute);
+      // Redirect cleanly to login page with autofill query parameter
+      navigate(`/staff/login?autofill=${account.role}`);
       if (onClose) onClose();
     } catch (err) {
-      setError(err.message || 'Failed to authenticate seeded account.');
+      setError('Failed to route to demo login page.');
     } finally {
       setSwitchingRoleId(null);
     }
@@ -90,7 +86,7 @@ export default function DemoSwitcher({ onClose, compact = false }) {
           <Lock className="w-3.5 h-3.5" /> Production-Grade Demo Switcher
         </div>
         <p className="text-xs text-gray-300 leading-relaxed">
-          Select a **Seeded Test Account** below. Clicking will trigger `login(email, password)`, generate a valid Base64 JWT (`eyJhbGci...`), persist the token to `sessionStorage`, and route to the RBAC portal.
+          Select a **Seeded Test Account** below. Clicking will redirect to the secure login console, autofill the credentials, authenticate with the backend via standard JWT, and route to the corresponding RBAC portal.
         </p>
       </div>
 

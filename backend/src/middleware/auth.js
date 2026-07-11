@@ -1,5 +1,9 @@
 const jwt = require('jsonwebtoken');
-const JWT_SECRET = process.env.JWT_SECRET || 'sapphire_stays_secret_key_india_2026';
+
+if (!process.env.JWT_SECRET) {
+  throw new Error('FATAL: JWT_SECRET is not set in environment variables.');
+}
+const JWT_SECRET = process.env.JWT_SECRET;
 
 function authenticate(req, res, next) {
   const authHeader = req.headers.authorization;

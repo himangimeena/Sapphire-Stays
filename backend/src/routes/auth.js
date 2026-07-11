@@ -107,47 +107,6 @@ router.get('/me', authenticate, async (req, res) => {
   }
 });
 
-// POST /api/auth/demo-switch-role
-// Instant demo role switching so evaluators can inspect every dashboard
-router.post('/demo-switch-role', async (req, res) => {
-  try {
-    const { targetRole } = req.body;
-    let targetEmail = 'guest@sapphirestays.in';
-    if (targetRole === 'SUPER_ADMIN') targetEmail = 'superadmin@sapphirestays.in';
-    if (targetRole === 'BRANCH_ADMIN') targetEmail = 'udaipur.admin@sapphirestays.in';
-    if (targetRole === 'RECEPTIONIST') targetEmail = 'reception@sapphirestays.in';
-    if (targetRole === 'HOUSEKEEPING') targetEmail = 'housekeeping@sapphirestays.in';
-    if (targetRole === 'MAINTENANCE') targetEmail = 'maintenance@sapphirestays.in';
-
-    const users = await query('SELECT * FROM Users WHERE email = ?', [targetEmail]);
-    if (users.length === 0) {
-      return res.status(404).json({ error: 'Demo user for this role not found.' });
-    }
-
-    const user = users[0];
-    const token = jwt.sign(
-      { id: user.id, email: user.email, name: user.name, role: user.role, loyalty_points: user.loyalty_points },
-      JWT_SECRET,
-      { expiresIn: '7d' }
-    );
-
-    res.json({
-      message: `Switched demo account to role: ${user.role}`,
-      token,
-      user: {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        phone: user.phone,
-        role: user.role,
-        avatar_url: user.avatar_url,
-        loyalty_points: user.loyalty_points
-      }
-    });
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to switch role.' });
-  }
-});
 
 // Helper to resolve role by email for Google sign-in
 function getRoleByEmail(email) {
@@ -170,18 +129,14 @@ function getRoleByEmail(email) {
   return 'CUSTOMER';
 }
 
-// POST /api/auth/google-login
 router.post('/google-login', async (req, res) => {
   try {
     const { token } = req.body;
-    console.log('[DEBUG Google Login] Received request with token:', token ? `${token.slice(0, 10)}...` : 'undefined');
     if (!token) {
-      console.warn('[DEBUG Google Login] Rejecting: Token is missing.');
       return res.status(400).json({ error: 'Google access token is required.' });
     }
 
     if (token === 'MOCK_GOOGLE_OAUTH_TOKEN') {
-      console.log('[DEBUG Google Login] Processing simulated Mock Token bypass...');
       const mockUserData = {
         email: 'guest.google@sapphirestays.in',
         name: 'Google Guest Member',
@@ -231,18 +186,13 @@ router.post('/google-login', async (req, res) => {
     }
 
     const googleUrl = `https://www.googleapis.com/oauth2/v3/userinfo?access_token=${token}`;
-    console.log('[DEBUG Google Login] Fetching from Google OAuth API:', googleUrl.slice(0, 50) + '...');
     const response = await fetch(googleUrl);
-    console.log('[DEBUG Google Login] Google API Response Status:', response.status);
 
     if (!response.ok) {
-      const errText = await response.text();
-      console.error('[DEBUG Google Login] Google API authentication failed:', errText);
       return res.status(400).json({ error: 'Failed to authenticate token with Google.' });
     }
 
     const userData = await response.json();
-    console.log('[DEBUG Google Login] Retrieved User Data from Google:', JSON.stringify(userData, null, 2));
     const { email, name, picture } = userData;
 
     if (!email) {
