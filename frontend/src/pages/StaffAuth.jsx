@@ -95,11 +95,8 @@ export default function StaffAuth() {
     switch (role) {
       case 'SUPER_ADMIN': return '/portal/superadmin';
       case 'BRANCH_ADMIN': return '/portal/branchadmin';
-      case 'RECEPTIONIST':
-      case 'HOUSEKEEPING':
-      case 'MAINTENANCE':
-        return '/portal/reception';
-      default: return '/portal/customer';
+      case 'RECEPTIONIST': return '/portal/reception';
+      default: return '/';
     }
   };
 

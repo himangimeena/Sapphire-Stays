@@ -33,10 +33,10 @@ export default function Auth() {
         navigate('/portal/superadmin');
       } else if (role === 'BRANCH_ADMIN') {
         navigate('/portal/branchadmin');
-      } else if (role === 'RECEPTIONIST' || role === 'HOUSEKEEPING' || role === 'MAINTENANCE') {
+      } else if (role === 'RECEPTIONIST') {
         navigate('/portal/reception');
       } else {
-        navigate('/portal/customer');
+        navigate('/');
       }
     } catch (err) {
       setErrorMsg(err.message || 'Authentication error occurred.');
@@ -73,10 +73,10 @@ export default function Auth() {
                 navigate('/portal/superadmin');
               } else if (role === 'BRANCH_ADMIN') {
                 navigate('/portal/branchadmin');
-              } else if (role === 'RECEPTIONIST' || role === 'HOUSEKEEPING' || role === 'MAINTENANCE') {
+              } else if (role === 'RECEPTIONIST') {
                 navigate('/portal/reception');
               } else {
-                navigate('/portal/customer');
+                navigate('/');
               }
             } catch (err) {
               setErrorMsg(err.message || 'Google Authentication failed on the backend server.');

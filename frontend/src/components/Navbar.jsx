@@ -105,7 +105,7 @@ export default function Navbar() {
             </div>
           ) : (
             <Link to="/login" className={`btn-gold !py-2.5 !px-6 text-xs shadow-lg ${isActive('/login') ? 'ring-2 ring-white' : ''}`}>
-              Reserve Sanctuary
+              Sign In / Create Account
             </Link>
           )}
         </div>
@@ -146,7 +146,7 @@ export default function Navbar() {
               </>
             ) : (
               <Link to="/login" onClick={() => setMobileMenu(false)} className="btn-gold !py-2.5 !px-6 text-xs w-full text-center">
-                Sign In / Reserve
+                Sign In / Create Account
               </Link>
             )}
           </div>
