@@ -13,8 +13,7 @@ async function seedDatabase() {
     ['superadmin@sapphirestays.in', adminHash, 'Julian Sterling', '+91 98200 11223', 'SUPER_ADMIN', 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80', 15000, 'Malabar Hill, Mumbai'],
     ['udaipur.admin@sapphirestays.in', adminHash, 'Vikramaditya Rathore', '+91 94140 55667', 'BRANCH_ADMIN', 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=80', 5000, 'City Palace Road, Udaipur'],
     ['reception@sapphirestays.in', passwordHash, 'Ananya Sharma', '+91 98110 33445', 'RECEPTIONIST', 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80', 1200, 'Connaught Place, New Delhi'],
-    ['housekeeping@sapphirestays.in', passwordHash, 'Julian D.', '+91 98330 77889', 'HOUSEKEEPING', 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=200&q=80', 800, 'Bandra West, Mumbai'],
-    ['maintenance@sapphirestays.in', passwordHash, 'Rajesh Kumar', '+91 98440 99001', 'MAINTENANCE', 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=200&q=80', 600, 'Panaji, Goa'],
+
     ['guest@sapphirestays.in', passwordHash, 'Julian Thorne', '+91 99220 44556', 'CUSTOMER', 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&w=200&q=80', 8500, 'Jubilee Hills, Hyderabad']
   ];
 

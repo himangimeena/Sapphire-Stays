@@ -23,8 +23,6 @@ import CustomerPortal from './pages/portals/CustomerPortal';
 import SuperAdminPortal from './pages/portals/SuperAdminPortal';
 import BranchAdminPortal from './pages/portals/BranchAdminPortal';
 import ReceptionPortal from './pages/portals/ReceptionPortal';
-import HousekeepingPortal from './pages/portals/HousekeepingPortal';
-import MaintenancePortal from './pages/portals/MaintenancePortal';
 
 export default function App() {
   return (
@@ -74,28 +72,11 @@ export default function App() {
           <Route 
             path="/portal/reception" 
             element={
-              <ProtectedRoute allowedRoles={['RECEPTIONIST', 'HOUSEKEEPING', 'MAINTENANCE']}>
+              <ProtectedRoute allowedRoles={['RECEPTIONIST']}>
                 <ReceptionPortal />
               </ProtectedRoute>
             } 
           />
-          {/* Housekeeping and Maintenance portals are merged into Front Desk Command & Dispatch center */}
-          {/* <Route 
-            path="/portal/housekeeping" 
-            element={
-              <ProtectedRoute allowedRoles={['HOUSEKEEPING']}>
-                <HousekeepingPortal />
-              </ProtectedRoute>
-            } 
-          />
-          <Route 
-            path="/portal/maintenance" 
-            element={
-              <ProtectedRoute allowedRoles={['MAINTENANCE']}>
-                <MaintenancePortal />
-              </ProtectedRoute>
-            } 
-          /> */}
         </Routes>
       </main>
       <Footer />

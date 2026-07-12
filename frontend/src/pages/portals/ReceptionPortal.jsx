@@ -18,7 +18,7 @@ import {
   Wrench,
   Activity,
   Clock,
-  Radio
+
 } from 'lucide-react';
 
 export default function ReceptionPortal() {
@@ -35,19 +35,7 @@ export default function ReceptionPortal() {
   const [loading, setLoading] = useState(true);
   const [isSubmittingWalkIn, setIsSubmittingWalkIn] = useState(false);
 
-  // Radio dispatch log state (localStorage backed)
-  const [radioDispatches, setRadioDispatches] = useState(() => {
-    try {
-      const saved = localStorage.getItem('reception_radio_dispatches');
-      return saved ? JSON.parse(saved) : {};
-    } catch (e) {
-      return {};
-    }
-  });
 
-  useEffect(() => {
-    localStorage.setItem('reception_radio_dispatches', JSON.stringify(radioDispatches));
-  }, [radioDispatches]);
 
   // Folio incidentals state (simulates real-time hotel room charges)
   const [roomCharges, setRoomCharges] = useState({
@@ -188,7 +176,7 @@ export default function ReceptionPortal() {
         branchId: Number(branchId),
         roomTypeId: Number(walkInRoomTypeId),
         checkIn: new Date().toISOString().split('T')[0],
-        checkOut: new Date(Date.now() + Number(walkInNights) * 24 * 60 * 60 * 1500).toISOString().split('T')[0], // 24 hours per day
+        checkOut: new Date(Date.now() + Number(walkInNights) * 86400000).toISOString().split('T')[0],
         adults: 2,
         children: 0,
         roomsCount: 1,
@@ -275,14 +263,7 @@ export default function ReceptionPortal() {
     }
   };
 
-  const handleRadioDispatch = (key, roomNo) => {
-    setRadioDispatches(prev => ({
-      ...prev,
-      [key]: 'NOTIFIED'
-    }));
-    showAlert(`Floor crew notified via radio for Room ${roomNo}.`, 'Radio Dispatch Logged');
-  };
-
+  
   const getAssetCategory = (title, desc) => {
     const text = `${title} ${desc}`.toLowerCase();
     if (text.includes('ac') || text.includes('hvac') || text.includes('heat') || text.includes('cool') || text.includes('vent') || text.includes('fan')) {
@@ -418,13 +399,9 @@ export default function ReceptionPortal() {
         </div>
       </div>
 
-      {/* Operations Command Matrix Tabs & Staff Radio Dispatch */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        
-        {/* Left Columns: Operations Command Center Matrix Tabs */}
-        <div className="lg:col-span-2 space-y-6">
-          
-          {/* Tab Navigation Controls */}
+      {/* Operations Command Matrix Tabs */}
+
+      {/* Tab Navigation Controls */}
           <div className="flex space-x-1 bg-slate-100 dark:bg-[#132135] p-1.5 rounded-2xl border border-slate-200/50 dark:border-slate-800/80">
             <button
               onClick={() => setActiveTab('bookings')}
@@ -711,105 +688,7 @@ export default function ReceptionPortal() {
               </div>
             </div>
           )}
-        </div>
-
-        {/* Right Column: Staff Radio Dispatch Log Panel */}
-        <div className="space-y-6">
-          <div className="glass-card p-6 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#132135] text-slate-900 dark:text-slate-100 space-y-4 shadow-sm">
-            <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
-              <h3 className="font-serif text-lg font-bold flex items-center gap-2">
-                <Radio className="w-5 h-5 text-[#D4AF37] animate-pulse" /> Staff Radio Dispatch
-              </h3>
-              <span className="px-2 py-0.5 rounded bg-amber-500/10 text-amber-600 text-[10px] font-bold">
-                Live Channel
-              </span>
-            </div>
-
-            {/* Active alerts requiring radio dispatch */}
-            <div className="space-y-3">
-              <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Required Dispatches</span>
-              
-              {/* Rooms requiring cleaning dispatch */}
-              {rooms.filter(r => r.status === 'CLEANING' && radioDispatches[`hk-${r.room_number}`] !== 'NOTIFIED').map(room => (
-                <div key={`alert-hk-${room.id}`} className="p-3.5 rounded-xl bg-amber-500/5 dark:bg-[#D4AF37]/5 border border-amber-500/20 dark:border-[#D4AF37]/20 space-y-2.5 animate-pulse">
-                  <div className="text-xs text-slate-800 dark:text-slate-200 font-medium">
-                    <span className="font-bold text-amber-600 dark:text-amber-400 uppercase text-[9px] tracking-wide block mb-0.5">⚠️ Clean Dispatch Required</span>
-                    Action Required: Dispatch Floor Staff to Room <span className="font-serif font-bold text-slate-950 dark:text-white">{room.room_number}</span>
-                  </div>
-                  <button
-                    onClick={() => handleRadioDispatch(`hk-${room.room_number}`, room.room_number)}
-                    className="w-full py-2 rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-bold text-[9px] uppercase tracking-wider flex items-center justify-center gap-1.5 transition shadow-sm font-sans"
-                  >
-                    <Radio className="w-3.5 h-3.5" /> Dispatch Staff (Radio)
-                  </button>
-                </div>
-              ))}
-
-              {/* Maintenance tickets requiring dispatch */}
-              {maintenanceTickets.filter(t => t.status !== 'COMPLETED' && radioDispatches[`maint-${t.id}`] !== 'NOTIFIED').map(ticket => (
-                <div key={`alert-maint-${ticket.id}`} className="p-3.5 rounded-xl bg-red-500/5 border border-red-500/20 space-y-2.5 animate-pulse">
-                  <div className="text-xs text-slate-800 dark:text-slate-200 font-medium">
-                    <span className="font-bold text-red-600 dark:text-red-400 uppercase text-[9px] tracking-wide block mb-0.5">🚨 Repair Dispatch Required</span>
-                    Action Required: Dispatch Floor Staff to Room <span className="font-serif font-bold text-slate-950 dark:text-white">{ticket.room_number}</span> ({ticket.issue_title})
-                  </div>
-                  <button
-                    onClick={() => handleRadioDispatch(`maint-${ticket.id}`, ticket.room_number)}
-                    className="w-full py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white font-bold text-[9px] uppercase tracking-wider flex items-center justify-center gap-1.5 transition shadow-sm font-sans"
-                  >
-                    <Radio className="w-3.5 h-3.5" /> Dispatch Staff (Radio)
-                  </button>
-                </div>
-              ))}
-
-              {/* Empty state if all items are radio dispatched */}
-              {rooms.filter(r => r.status === 'CLEANING' && radioDispatches[`hk-${r.room_number}`] !== 'NOTIFIED').length === 0 &&
-               maintenanceTickets.filter(t => t.status !== 'COMPLETED' && radioDispatches[`maint-${t.id}`] !== 'NOTIFIED').length === 0 && (
-                <p className="text-[11px] text-slate-500 italic py-4 text-center">No outstanding radio dispatches needed. All shifts cleared.</p>
-              )}
-            </div>
-
-            {/* Recent notifications history log */}
-            <div className="border-t border-slate-200 dark:border-slate-800 pt-3.5 space-y-2.5">
-              <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Recent Dispatched Log</span>
-              <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
-                {/* Find dispatched housekeeping */}
-                {rooms.filter(r => r.status === 'CLEANING' && radioDispatches[`hk-${r.room_number}`] === 'NOTIFIED').map(room => (
-                  <div key={`logged-hk-${room.id}`} className="flex justify-between items-center text-xs py-1.5 border-b border-slate-100 dark:border-slate-850">
-                    <div>
-                      <span className="font-semibold block text-slate-900 dark:text-slate-100">Suite {room.room_number}</span>
-                      <span className="text-[9px] text-slate-500">Housekeeping turnaround</span>
-                    </div>
-                    <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 font-bold text-[8px] flex items-center gap-1">
-                      <Radio className="w-2.5 h-2.5" /> Radio Notified
-                    </span>
-                  </div>
-                ))}
-
-                {/* Find dispatched maintenance */}
-                {maintenanceTickets.filter(t => t.status !== 'COMPLETED' && radioDispatches[`maint-${t.id}`] === 'NOTIFIED').map(ticket => (
-                  <div key={`logged-maint-${ticket.id}`} className="flex justify-between items-center text-xs py-1.5 border-b border-slate-100 dark:border-slate-850">
-                    <div>
-                      <span className="font-semibold block text-slate-900 dark:text-slate-100">Suite {ticket.room_number}</span>
-                      <span className="text-[9px] text-slate-500 truncate max-w-[120px] block">{ticket.issue_title}</span>
-                    </div>
-                    <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 font-bold text-[8px] flex items-center gap-1">
-                      <Radio className="w-2.5 h-2.5" /> Radio Notified
-                    </span>
-                  </div>
-                ))}
-
-                {/* Empty check */}
-                {rooms.filter(r => r.status === 'CLEANING' && radioDispatches[`hk-${r.room_number}`] === 'NOTIFIED').length === 0 &&
-                 maintenanceTickets.filter(t => t.status !== 'COMPLETED' && radioDispatches[`maint-${t.id}`] === 'NOTIFIED').length === 0 && (
-                  <p className="text-[10px] text-slate-400 italic text-center py-2">No active notifications logged this shift.</p>
-                )}
-              </div>
-            </div>
-
-          </div>
-        </div>
-
-      </div>
+        
 
       {/* Smart Check-In allocation Modal (Fixes the Room 1 bug) */}
       {activeCheckInBooking && (

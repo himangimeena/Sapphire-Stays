@@ -13,9 +13,6 @@ import {
   Building2, 
   Clock, 
   Lock, 
-  RefreshCw, 
-  Copy, 
-  Check, 
   X, 
   Globe, 
   Cpu,
@@ -33,10 +30,7 @@ export default function ProfilePage() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editForm, setEditForm] = useState({ name: '', email: '', phone: '' });
   
-  // API Token State
-  const [apiToken, setApiToken] = useState('');
-  const [copied, setCopied] = useState(false);
-  const [generating, setGenerating] = useState(false);
+
 
   // Toast notifications state
   const [toast, setToast] = useState(null);
@@ -50,9 +44,6 @@ export default function ProfilePage() {
         email: user.email || '',
         phone: user.phone || ''
       });
-      
-      // Seed initial token
-      generateMockToken(user);
     }
   }, [user]);
 
@@ -92,39 +83,7 @@ export default function ProfilePage() {
     return phoneStr;
   }
 
-  // Generate mock JWT developer token
-  function generateMockToken(currentUser) {
-    if (!currentUser || currentUser.id === undefined || currentUser.id === null) {
-      throw new Error("Invalid User context: User ID is missing for mock JWT developer token generation.");
-    }
-    const header = btoa(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).replace(/=/g, '');
-    const payload = btoa(JSON.stringify({
-      sub: currentUser.id,
-      name: currentUser.name,
-      email: currentUser.email,
-      role: currentUser.role,
-      iss: 'sapphire-secure-auth-gateway',
-      exp: Math.floor(Date.now() / 1000) + 3600
-    })).replace(/=/g, '');
-    const signature = btoa(`sapphire-signature-key-verification-${currentUser.id}`).replace(/=/g, '');
-    setApiToken(`Bearer ${header}.${payload}.${signature}`);
-  }
 
-  const handleRegenerateToken = () => {
-    setGenerating(true);
-    setTimeout(() => {
-      generateMockToken(localUser);
-      setGenerating(false);
-      showToast('API Access Token successfully regenerated');
-    }, 800);
-  };
-
-  const handleCopyToken = () => {
-    navigator.clipboard.writeText(apiToken);
-    setCopied(true);
-    showToast('Token copied to clipboard');
-    setTimeout(() => setCopied(false), 2000);
-  };
 
   const showToast = (message) => {
     setToast(message);
@@ -479,33 +438,6 @@ export default function ProfilePage() {
                 <Edit3 className="w-4 h-4 text-slate-400" />
                 Update Contact Details
               </button>
-
-              {/* Regenerate API token */}
-              <button
-                onClick={handleRegenerateToken}
-                disabled={generating}
-                className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-[#D4AF37]/10 dark:hover:bg-[#D4AF37]/10 hover:border-[#D4AF37]/40 text-slate-700 dark:text-slate-200 text-xs font-bold transition flex items-center justify-center gap-2 disabled:opacity-50"
-              >
-                <RefreshCw className={`w-4 h-4 text-slate-400 ${generating ? 'animate-spin' : ''}`} />
-                Regenerate API Access Token
-              </button>
-            </div>
-
-            {/* API Token display */}
-            <div className="space-y-2 border-t border-slate-100 dark:border-slate-800/80 pt-4">
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] uppercase font-mono tracking-wider text-slate-400 block font-bold">Simulated API JWT Bearer Token</span>
-                <button
-                  onClick={handleCopyToken}
-                  className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-[#D4AF37] transition"
-                  title="Copy Token"
-                >
-                  {copied ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
-                </button>
-              </div>
-              <div className="p-3 rounded-xl bg-slate-900 text-slate-300 font-mono text-[10px] break-all border border-slate-800 select-all overflow-y-auto max-h-[80px]">
-                {apiToken}
-              </div>
             </div>
 
             {/* Secure Logout */}

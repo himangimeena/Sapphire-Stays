@@ -72,24 +72,7 @@ export default function StaffAuth() {
       demoEmail: 'reception@sapphirestays.in',
       demoPass: 'password123'
     },
-    {
-      id: 'HOUSEKEEPING',
-      title: 'Housekeeping',
-      badge: 'Palace Care',
-      desc: 'Inspect dirty vs ready suites, turn-down service schedule & room status tracking.',
-      icon: <Sparkles className="w-6 h-6 text-purple-400" />,
-      demoEmail: 'housekeeping@sapphirestays.in',
-      demoPass: 'password123'
-    },
-    {
-      id: 'MAINTENANCE',
-      title: 'Engineering & Maintenance',
-      badge: 'Facility Care',
-      desc: 'Urgent plumbing, AC repairs, room maintenance ticketing & work history.',
-      icon: <Wrench className="w-6 h-6 text-orange-400" />,
-      demoEmail: 'maintenance@sapphirestays.in',
-      demoPass: 'password123'
-    },
+
     {
       id: 'CUSTOMER',
       title: 'Guest / Customer',

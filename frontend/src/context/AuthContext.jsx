@@ -3,7 +3,7 @@ import axios from 'axios';
 
 export const AuthContext = createContext();
 
-const API_BASE = 'http://localhost:5000/api';
+const API_BASE = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000') + '/api';
 
 // Canonical Seeded Test Accounts Registry for Technical Reviewers & Demo Switcher
 export const SEEDED_ACCOUNTS = [
@@ -37,26 +37,7 @@ export const SEEDED_ACCOUNTS = [
     branch_name: 'Sapphire Grand Colaba Mumbai',
     avatar: '🛎️'
   },
-  {
-    id: 104,
-    role: 'HOUSEKEEPING',
-    name: 'Julian D.',
-    email: 'housekeeping@sapphirestays.in',
-    badge: 'Palace Care Lead',
-    title: 'Executive Housekeeping Director',
-    branch_name: 'Sapphire Imperial New Delhi',
-    avatar: '✨'
-  },
-  {
-    id: 105,
-    role: 'MAINTENANCE',
-    name: 'Rajesh Kumar',
-    email: 'maintenance@sapphirestays.in',
-    badge: 'Chief Engineer',
-    title: 'Head of Engineering & Facilities',
-    branch_name: 'Sapphire Serenity South Goa',
-    avatar: '🔧'
-  },
+
   {
     id: 106,
     role: 'CUSTOMER',
@@ -121,12 +102,7 @@ export const AuthProvider = ({ children }) => {
     if (cleanEmail === 'reception@sapphirestays.in' || cleanEmail === 'reception@sapphirestays.com') {
       return 'RECEPTIONIST';
     }
-    if (cleanEmail === 'housekeeping@sapphirestays.in' || cleanEmail === 'housekeeping@sapphirestays.com') {
-      return 'HOUSEKEEPING';
-    }
-    if (cleanEmail === 'maintenance@sapphirestays.in' || cleanEmail === 'maintenance@sapphirestays.com') {
-      return 'MAINTENANCE';
-    }
+
     return 'CUSTOMER';
   };
 

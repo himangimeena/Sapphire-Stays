@@ -35,7 +35,7 @@ router.get('/types', async (req, res) => {
 });
 
 // GET /api/rooms - Admin inventory list of specific physical rooms
-router.get('/', authenticate, requireRoles(['SUPER_ADMIN', 'BRANCH_ADMIN', 'RECEPTIONIST', 'HOUSEKEEPING', 'MAINTENANCE']), async (req, res) => {
+router.get('/', authenticate, requireRoles(['SUPER_ADMIN', 'BRANCH_ADMIN', 'RECEPTIONIST']), async (req, res) => {
   try {
     const { status, branchId, type } = req.query;
     let sqlText = `
@@ -78,7 +78,7 @@ router.post('/', authenticate, requireRoles(['SUPER_ADMIN', 'BRANCH_ADMIN']), as
 });
 
 // PATCH /api/rooms/:id/status - Update physical room status (e.g. from Housekeeping or Maintenance)
-router.patch('/:id/status', authenticate, requireRoles(['SUPER_ADMIN', 'BRANCH_ADMIN', 'RECEPTIONIST', 'HOUSEKEEPING', 'MAINTENANCE']), async (req, res) => {
+router.patch('/:id/status', authenticate, requireRoles(['SUPER_ADMIN', 'BRANCH_ADMIN', 'RECEPTIONIST']), async (req, res) => {
   try {
     const { status } = req.body; // AVAILABLE, OCCUPIED, CLEANING, MAINTENANCE
     await query('UPDATE Rooms SET status = ? WHERE id = ?', [status, req.params.id]);

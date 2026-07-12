@@ -120,13 +120,7 @@ function getRoleByEmail(email) {
   if (cleanEmail === 'reception@sapphirestays.in' || cleanEmail === 'reception@sapphirestays.com') {
     return 'RECEPTIONIST';
   }
-  if (cleanEmail === 'housekeeping@sapphirestays.in' || cleanEmail === 'housekeeping@sapphirestays.com') {
-    return 'HOUSEKEEPING';
-  }
-  if (cleanEmail === 'maintenance@sapphirestays.in' || cleanEmail === 'maintenance@sapphirestays.com') {
-    return 'MAINTENANCE';
-  }
-  return 'CUSTOMER';
+    return 'CUSTOMER';
 }
 
 router.post('/google-login', async (req, res) => {

@@ -178,11 +178,16 @@ router.get('/my', authenticate, async (req, res) => {
 router.get('/', authenticate, requireRoles(['SUPER_ADMIN', 'BRANCH_ADMIN', 'RECEPTIONIST']), async (req, res) => {
   try {
     const bookings = await query(
-      `SELECT b.*, br.name as branch_name, rt.name as room_type_name, u.name as guest_name, u.email as guest_email, u.phone as guest_phone, r.room_number as assigned_room_number
+      `SELECT b.*, br.name as branch_name, rt.name as room_type_name, 
+              COALESCE(NULLIF(bg.first_name || ' ' || bg.last_name, ' '), u.name) as guest_name, 
+              COALESCE(bg.email, u.email) as guest_email, 
+              COALESCE(bg.phone, u.phone) as guest_phone, 
+              r.room_number as assigned_room_number
        FROM Bookings b
        JOIN Branches br ON b.branch_id = br.id
        JOIN RoomTypes rt ON b.room_type_id = rt.id
        JOIN Users u ON b.user_id = u.id
+       LEFT JOIN BookingGuests bg ON b.id = bg.booking_id
        LEFT JOIN Rooms r ON b.assigned_room_id = r.id
        ORDER BY b.created_at DESC`
     );
