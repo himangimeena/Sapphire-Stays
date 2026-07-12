@@ -33,12 +33,8 @@ export default function Auth() {
         navigate('/portal/superadmin');
       } else if (role === 'BRANCH_ADMIN') {
         navigate('/portal/branchadmin');
-      } else if (role === 'RECEPTIONIST') {
+      } else if (role === 'RECEPTIONIST' || role === 'HOUSEKEEPING' || role === 'MAINTENANCE') {
         navigate('/portal/reception');
-      } else if (role === 'HOUSEKEEPING') {
-        navigate('/portal/housekeeping');
-      } else if (role === 'MAINTENANCE') {
-        navigate('/portal/maintenance');
       } else {
         navigate('/portal/customer');
       }
@@ -77,12 +73,8 @@ export default function Auth() {
                 navigate('/portal/superadmin');
               } else if (role === 'BRANCH_ADMIN') {
                 navigate('/portal/branchadmin');
-              } else if (role === 'RECEPTIONIST') {
+              } else if (role === 'RECEPTIONIST' || role === 'HOUSEKEEPING' || role === 'MAINTENANCE') {
                 navigate('/portal/reception');
-              } else if (role === 'HOUSEKEEPING') {
-                navigate('/portal/housekeeping');
-              } else if (role === 'MAINTENANCE') {
-                navigate('/portal/maintenance');
               } else {
                 navigate('/portal/customer');
               }
@@ -268,12 +260,8 @@ export default function Auth() {
                   navigate('/portal/superadmin');
                 } else if (role === 'BRANCH_ADMIN') {
                   navigate('/portal/branchadmin');
-                } else if (role === 'RECEPTIONIST') {
+                } else if (role === 'RECEPTIONIST' || role === 'HOUSEKEEPING' || role === 'MAINTENANCE') {
                   navigate('/portal/reception');
-                } else if (role === 'HOUSEKEEPING') {
-                  navigate('/portal/housekeeping');
-                } else if (role === 'MAINTENANCE') {
-                  navigate('/portal/maintenance');
                 } else {
                   navigate('/portal/customer');
                 }

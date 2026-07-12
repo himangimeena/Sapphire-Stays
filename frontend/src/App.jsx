@@ -74,12 +74,13 @@ export default function App() {
           <Route 
             path="/portal/reception" 
             element={
-              <ProtectedRoute allowedRoles={['RECEPTIONIST']}>
+              <ProtectedRoute allowedRoles={['RECEPTIONIST', 'HOUSEKEEPING', 'MAINTENANCE']}>
                 <ReceptionPortal />
               </ProtectedRoute>
             } 
           />
-          <Route 
+          {/* Housekeeping and Maintenance portals are merged into Front Desk Command & Dispatch center */}
+          {/* <Route 
             path="/portal/housekeeping" 
             element={
               <ProtectedRoute allowedRoles={['HOUSEKEEPING']}>
@@ -94,7 +95,7 @@ export default function App() {
                 <MaintenancePortal />
               </ProtectedRoute>
             } 
-          />
+          /> */}
         </Routes>
       </main>
       <Footer />

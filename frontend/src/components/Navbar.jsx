@@ -14,9 +14,10 @@ export default function Navbar() {
     switch (user.role) {
       case 'SUPER_ADMIN': return '/portal/superadmin';
       case 'BRANCH_ADMIN': return '/portal/branchadmin';
-      case 'RECEPTIONIST': return '/portal/reception';
-      case 'HOUSEKEEPING': return '/portal/housekeeping';
-      case 'MAINTENANCE': return '/portal/maintenance';
+      case 'RECEPTIONIST':
+      case 'HOUSEKEEPING':
+      case 'MAINTENANCE':
+        return '/portal/reception';
       default: return '/portal/customer';
     }
   };

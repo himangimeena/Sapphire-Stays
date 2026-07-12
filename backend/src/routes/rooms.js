@@ -89,7 +89,7 @@ router.patch('/:id/status', authenticate, requireRoles(['SUPER_ADMIN', 'BRANCH_A
 });
 
 // PATCH /api/rooms/:id/lockout - Toggle safety lockout (LOTO)
-router.patch('/:id/lockout', authenticate, requireRoles(['SUPER_ADMIN', 'BRANCH_ADMIN', 'MAINTENANCE']), async (req, res) => {
+router.patch('/:id/lockout', authenticate, requireRoles(['SUPER_ADMIN', 'BRANCH_ADMIN', 'MAINTENANCE', 'RECEPTIONIST']), async (req, res) => {
   try {
     const { is_locked } = req.body;
     await query('UPDATE Rooms SET is_locked = ? WHERE id = ?', [is_locked ? 1 : 0, req.params.id]);

@@ -4,7 +4,7 @@ const { query } = require('../db/index');
 const { authenticate, requireRoles } = require('../middleware/auth');
 
 // GET /api/operations/housekeeping - Get all housekeeping tasks
-router.get('/housekeeping', authenticate, requireRoles(['SUPER_ADMIN', 'BRANCH_ADMIN', 'HOUSEKEEPING']), async (req, res) => {
+router.get('/housekeeping', authenticate, requireRoles(['SUPER_ADMIN', 'BRANCH_ADMIN', 'HOUSEKEEPING', 'RECEPTIONIST']), async (req, res) => {
   try {
     const tasks = await query(
       `SELECT h.*, r.room_number, r.floor, rt.name as room_type_name, b.name as branch_name 
@@ -21,7 +21,7 @@ router.get('/housekeeping', authenticate, requireRoles(['SUPER_ADMIN', 'BRANCH_A
 });
 
 // PATCH /api/operations/housekeeping/:id - Toggle task status
-router.patch('/housekeeping/:id', authenticate, requireRoles(['SUPER_ADMIN', 'BRANCH_ADMIN', 'HOUSEKEEPING']), async (req, res) => {
+router.patch('/housekeeping/:id', authenticate, requireRoles(['SUPER_ADMIN', 'BRANCH_ADMIN', 'HOUSEKEEPING', 'RECEPTIONIST']), async (req, res) => {
   try {
     const { status, roomId } = req.body;
     await query('UPDATE HousekeepingTasks SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?', [status, req.params.id]);
@@ -35,7 +35,7 @@ router.patch('/housekeeping/:id', authenticate, requireRoles(['SUPER_ADMIN', 'BR
 });
 
 // GET /api/operations/maintenance - Get all maintenance tickets
-router.get('/maintenance', authenticate, requireRoles(['SUPER_ADMIN', 'BRANCH_ADMIN', 'MAINTENANCE']), async (req, res) => {
+router.get('/maintenance', authenticate, requireRoles(['SUPER_ADMIN', 'BRANCH_ADMIN', 'MAINTENANCE', 'RECEPTIONIST']), async (req, res) => {
   try {
     const tickets = await query(
       `SELECT m.*, r.room_number, r.floor, r.is_locked, rt.name as room_type_name, b.name as branch_name 
@@ -67,7 +67,7 @@ router.post('/maintenance', authenticate, requireRoles(['SUPER_ADMIN', 'BRANCH_A
 });
 
 // PATCH /api/operations/maintenance/:id - Resolve ticket
-router.patch('/maintenance/:id', authenticate, requireRoles(['SUPER_ADMIN', 'BRANCH_ADMIN', 'MAINTENANCE']), async (req, res) => {
+router.patch('/maintenance/:id', authenticate, requireRoles(['SUPER_ADMIN', 'BRANCH_ADMIN', 'MAINTENANCE', 'RECEPTIONIST']), async (req, res) => {
   try {
     const { status, roomId } = req.body;
     await query('UPDATE MaintenanceRequests SET status = ? WHERE id = ?', [status, req.params.id]);

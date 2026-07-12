@@ -14,7 +14,11 @@ import {
   DollarSign, 
   ClipboardList, 
   Bell, 
-  AlertTriangle 
+  AlertTriangle,
+  Wrench,
+  Activity,
+  Clock,
+  Radio
 } from 'lucide-react';
 
 export default function ReceptionPortal() {
@@ -24,9 +28,26 @@ export default function ReceptionPortal() {
 
   const [bookings, setBookings] = useState([]);
   const [rooms, setRooms] = useState([]);
+  const [housekeepingTasks, setHousekeepingTasks] = useState([]);
+  const [maintenanceTickets, setMaintenanceTickets] = useState([]);
+  const [activeTab, setActiveTab] = useState('bookings'); // bookings, housekeeping, maintenance
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [isSubmittingWalkIn, setIsSubmittingWalkIn] = useState(false);
+
+  // Radio dispatch log state (localStorage backed)
+  const [radioDispatches, setRadioDispatches] = useState(() => {
+    try {
+      const saved = localStorage.getItem('reception_radio_dispatches');
+      return saved ? JSON.parse(saved) : {};
+    } catch (e) {
+      return {};
+    }
+  });
+
+  useEffect(() => {
+    localStorage.setItem('reception_radio_dispatches', JSON.stringify(radioDispatches));
+  }, [radioDispatches]);
 
   // Folio incidentals state (simulates real-time hotel room charges)
   const [roomCharges, setRoomCharges] = useState({
@@ -64,13 +85,17 @@ export default function ReceptionPortal() {
     setLoading(true);
     Promise.all([
       axios.get('http://localhost:5000/api/bookings'),
-      axios.get(`http://localhost:5000/api/rooms?branchId=${branchId}`)
+      axios.get(`http://localhost:5000/api/rooms?branchId=${branchId}`),
+      axios.get('http://localhost:5000/api/operations/housekeeping'),
+      axios.get('http://localhost:5000/api/operations/maintenance')
     ])
-    .then(([bookingsRes, roomsRes]) => {
+    .then(([bookingsRes, roomsRes, hkRes, maintRes]) => {
       // Filter bookings for this branch
       const localBookings = (bookingsRes.data.bookings || []).filter(b => b.branch_id === Number(branchId));
       setBookings(localBookings);
       setRooms(roomsRes.data.rooms || []);
+      setHousekeepingTasks(hkRes.data.tasks || []);
+      setMaintenanceTickets(maintRes.data.tickets || []);
       setLoading(false);
     })
     .catch(err => {
@@ -188,6 +213,88 @@ export default function ReceptionPortal() {
     } finally {
       setIsSubmittingWalkIn(false);
     }
+  };
+
+  // Unified operational dispatch & resolution handlers
+  const handleMarkTurnaroundComplete = async (room) => {
+    // Find active housekeeping task for this room
+    const activeTask = housekeepingTasks.find(t => t.room_id === room.id && t.status !== 'COMPLETED');
+    try {
+      if (activeTask) {
+        await axios.patch(`http://localhost:5000/api/operations/housekeeping/${activeTask.id}`, {
+          status: 'COMPLETED',
+          roomId: room.id
+        });
+      } else {
+        // Fallback to update room status directly
+        await axios.patch(`http://localhost:5000/api/rooms/${room.id}/status`, {
+          status: 'AVAILABLE'
+        });
+      }
+      showAlert(`Suite ${room.room_number} turnaround complete. Room marked Vacant-Clean.`, 'Turnaround Complete');
+      fetchData();
+    } catch (err) {
+      showAlert('Failed to update room turnaround status.', 'Update Error');
+    }
+  };
+
+  const handleResolveMaintenanceTicket = async (ticket) => {
+    try {
+      await axios.patch(`http://localhost:5000/api/operations/maintenance/${ticket.id}`, {
+        status: 'COMPLETED',
+        roomId: ticket.room_id
+      });
+      
+      // Automatically clear safety lockout (LOTO) if active
+      if (ticket.is_locked === 1) {
+        await axios.patch(`http://localhost:5000/api/rooms/${ticket.room_id}/lockout`, {
+          is_locked: 0
+        });
+      }
+      showAlert(`Repair ticket for Suite ${ticket.room_number} resolved and room released.`, 'Issue Resolved');
+      fetchData();
+    } catch (err) {
+      showAlert('Failed to resolve maintenance request.', 'Update Error');
+    }
+  };
+
+  const handleClearSafetyLockout = async (roomId, roomNumber) => {
+    try {
+      // Clear safety lockout (is_locked = 0)
+      await axios.patch(`http://localhost:5000/api/rooms/${roomId}/lockout`, {
+        is_locked: 0
+      });
+      // Update room status to AVAILABLE
+      await axios.patch(`http://localhost:5000/api/rooms/${roomId}/status`, {
+        status: 'AVAILABLE'
+      });
+      showAlert(`Safety Lockout cleared for Suite ${roomNumber}. Room status reset to Vacant-Clean.`, 'Lockout Cleared');
+      fetchData();
+    } catch (err) {
+      showAlert('Failed to clear Safety Lockout.', 'Update Error');
+    }
+  };
+
+  const handleRadioDispatch = (key, roomNo) => {
+    setRadioDispatches(prev => ({
+      ...prev,
+      [key]: 'NOTIFIED'
+    }));
+    showAlert(`Floor crew notified via radio for Room ${roomNo}.`, 'Radio Dispatch Logged');
+  };
+
+  const getAssetCategory = (title, desc) => {
+    const text = `${title} ${desc}`.toLowerCase();
+    if (text.includes('ac') || text.includes('hvac') || text.includes('heat') || text.includes('cool') || text.includes('vent') || text.includes('fan')) {
+      return 'HVAC';
+    }
+    if (text.includes('leak') || text.includes('plumb') || text.includes('pipe') || text.includes('clog') || text.includes('water') || text.includes('toilet') || text.includes('sink') || text.includes('drain')) {
+      return 'Plumbing';
+    }
+    if (text.includes('wire') || text.includes('elect') || text.includes('short') || text.includes('light') || text.includes('plug') || text.includes('breaker') || text.includes('power')) {
+      return 'Electrical';
+    }
+    return 'Structural';
   };
 
   const filteredBookings = search
@@ -311,106 +418,394 @@ export default function ReceptionPortal() {
         </div>
       </div>
 
-      {/* Guest Bookings & Expected Arrivals Roster */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      {/* Operations Command Matrix Tabs & Staff Radio Dispatch */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
-        {/* Arrivals Table */}
-        <div className="glass-card p-6 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#132135] text-slate-900 dark:text-slate-100 space-y-4">
-          <div className="flex justify-between items-center">
-            <h3 className="font-serif text-xl font-bold">Today's Expected Arrivals</h3>
-            <span className="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-600 text-[10px] font-bold">
-              {expectedArrivals.length} Arrivals
-            </span>
+        {/* Left Columns: Operations Command Center Matrix Tabs */}
+        <div className="lg:col-span-2 space-y-6">
+          
+          {/* Tab Navigation Controls */}
+          <div className="flex space-x-1 bg-slate-100 dark:bg-[#132135] p-1.5 rounded-2xl border border-slate-200/50 dark:border-slate-800/80">
+            <button
+              onClick={() => setActiveTab('bookings')}
+              className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-xs uppercase transition-all duration-200 ${
+                activeTab === 'bookings'
+                  ? 'bg-white dark:bg-[#0D1E36] text-[#D4AF37] shadow-sm border border-slate-200/40 dark:border-slate-800/50'
+                  : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+              }`}
+            >
+              <ClipboardList className="w-4 h-4" /> Arrivals & Stays
+            </button>
+            <button
+              onClick={() => setActiveTab('housekeeping')}
+              className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-xs uppercase transition-all duration-200 ${
+                activeTab === 'housekeeping'
+                  ? 'bg-white dark:bg-[#0D1E36] text-[#D4AF37] shadow-sm border border-slate-200/40 dark:border-slate-800/50'
+                  : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+              }`}
+            >
+              <Sparkles className="w-4 h-4" /> 🧹 Housekeeping Queue
+            </button>
+            <button
+              onClick={() => setActiveTab('maintenance')}
+              className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-xs uppercase transition-all duration-200 ${
+                activeTab === 'maintenance'
+                  ? 'bg-white dark:bg-[#0D1E36] text-[#D4AF37] shadow-sm border border-slate-200/40 dark:border-slate-800/50'
+                  : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+              }`}
+            >
+              <Wrench className="w-4 h-4" /> 🔧 Maintenance Hub
+            </button>
           </div>
 
-          <div className="overflow-x-auto text-xs">
-            <table className="w-full text-left">
-              <thead>
-                <tr className="border-b border-slate-200 dark:border-slate-800 text-slate-500 uppercase font-bold text-[9px] pb-2">
-                  <th className="py-2">Guest</th>
-                  <th className="py-2">Suites Category</th>
-                  <th className="py-2 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-800/40">
-                {expectedArrivals.map(b => (
-                  <tr key={b.id} className="text-slate-800 dark:text-slate-200 hover:bg-slate-50/50 dark:hover:bg-slate-800/20">
-                    <td className="py-3">
-                      <span className="font-semibold block text-slate-900 dark:text-slate-100">{b.guest_name}</span>
-                      <span className="text-[9px] text-slate-500 font-mono">{b.booking_ref}</span>
-                    </td>
-                    <td className="py-3 text-slate-600 dark:text-slate-400 font-medium">{b.room_type_name}</td>
-                    <td className="py-3 text-right">
-                      <button
-                        onClick={() => {
-                          setActiveCheckInBooking(b);
-                          setSelectedCheckInRoomId('');
-                        }}
-                        className="px-3 py-1.5 rounded-lg bg-emerald-600 text-white font-bold text-[10px] uppercase hover:bg-emerald-700 transition"
-                      >
-                        Process Check-In
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-                {expectedArrivals.length === 0 && (
-                  <tr>
-                    <td colSpan="3" className="py-8 text-center text-slate-500 italic">No expected arrivals queued for today.</td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+          {/* Tab Contents: Arrivals & Stays */}
+          {activeTab === 'bookings' && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-fade-in">
+              {/* Arrivals Table */}
+              <div className="glass-card p-6 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#132135] text-slate-900 dark:text-slate-100 space-y-4">
+                <div className="flex justify-between items-center">
+                  <h3 className="font-serif text-lg font-bold">Expected Arrivals</h3>
+                  <span className="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-600 text-[10px] font-bold">
+                    {expectedArrivals.length} Arrivals
+                  </span>
+                </div>
+                <div className="overflow-x-auto text-xs">
+                  <table className="w-full text-left">
+                    <thead>
+                      <tr className="border-b border-slate-200 dark:border-slate-800 text-slate-500 uppercase font-bold text-[9px] pb-2">
+                        <th className="py-2">Guest</th>
+                        <th className="py-2">Category</th>
+                        <th className="py-2 text-right">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 dark:divide-slate-800/40">
+                      {expectedArrivals.map(b => (
+                        <tr key={b.id} className="text-slate-800 dark:text-slate-200 hover:bg-slate-50/50 dark:hover:bg-slate-800/20">
+                          <td className="py-3">
+                            <span className="font-semibold block text-slate-900 dark:text-slate-100">{b.guest_name}</span>
+                            <span className="text-[9px] text-slate-500 font-mono">{b.booking_ref}</span>
+                          </td>
+                          <td className="py-3 text-slate-600 dark:text-slate-400 font-medium">{b.room_type_name}</td>
+                          <td className="py-3 text-right">
+                            <button
+                              onClick={() => {
+                                setActiveCheckInBooking(b);
+                                setSelectedCheckInRoomId('');
+                              }}
+                              className="px-3 py-1.5 rounded-lg bg-emerald-600 text-white font-bold text-[10px] uppercase hover:bg-emerald-700 transition font-sans"
+                            >
+                              Check-In
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                      {expectedArrivals.length === 0 && (
+                        <tr>
+                          <td colSpan="3" className="py-8 text-center text-slate-500 italic">No expected arrivals queued.</td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* Active Stays Table */}
+              <div className="glass-card p-6 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#132135] text-slate-900 dark:text-slate-100 space-y-4">
+                <div className="flex justify-between items-center">
+                  <h3 className="font-serif text-lg font-bold">Active Stay Roster</h3>
+                  <span className="px-2 py-0.5 rounded bg-blue-500/10 text-blue-600 text-[10px] font-bold">
+                    {activeStays.length} Stays
+                  </span>
+                </div>
+                <div className="overflow-x-auto text-xs">
+                  <table className="w-full text-left">
+                    <thead>
+                      <tr className="border-b border-slate-200 dark:border-slate-800 text-slate-500 uppercase font-bold text-[9px] pb-2">
+                        <th className="py-2">Guest / Room</th>
+                        <th className="py-2">Stay Period</th>
+                        <th className="py-2 text-right">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 dark:divide-slate-800/40">
+                      {activeStays.map(b => {
+                        const allocatedRoom = rooms.find(r => r.id === b.assigned_room_id);
+                        const roomNo = allocatedRoom ? allocatedRoom.room_number : 'Unassigned';
+                        return (
+                          <tr key={b.id} className="text-slate-800 dark:text-slate-200 hover:bg-slate-50/50 dark:hover:bg-slate-800/20">
+                            <td className="py-3">
+                              <span className="font-semibold block text-slate-900 dark:text-slate-100">{b.guest_name}</span>
+                              <span className="text-[10px] text-[#D4AF37] font-bold">Room {roomNo}</span>
+                            </td>
+                            <td className="py-3 text-slate-500 font-medium font-mono">{b.check_in_date} → {b.check_out_date}</td>
+                            <td className="py-3 text-right">
+                              <button
+                                onClick={() => setActiveCheckOutBooking(b)}
+                                className="px-3 py-1.5 rounded-lg bg-amber-600 text-white font-bold text-[10px] uppercase hover:bg-amber-700 transition font-sans"
+                              >
+                                Check-Out
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                      {activeStays.length === 0 && (
+                        <tr>
+                          <td colSpan="3" className="py-8 text-center text-slate-500 italic">No guests checked-in.</td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Tab Contents: Housekeeping Turnaround Checklist */}
+          {activeTab === 'housekeeping' && (
+            <div className="glass-card p-6 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#132135] text-slate-900 dark:text-slate-100 space-y-4 animate-fade-in">
+              <div className="flex justify-between items-center">
+                <div>
+                  <h3 className="font-serif text-lg font-bold">Housekeeping Turnaround Checklist</h3>
+                  <p className="text-[11px] text-slate-500">Live operational log of physical suites currently flagged as Dirty.</p>
+                </div>
+                <span className="px-2 py-0.5 rounded bg-amber-500/10 text-amber-600 text-[10px] font-bold">
+                  {rooms.filter(r => r.status === 'CLEANING').length} Dirty Rooms
+                </span>
+              </div>
+              <div className="overflow-x-auto text-xs">
+                <table className="w-full text-left">
+                  <thead>
+                    <tr className="border-b border-slate-200 dark:border-slate-800 text-slate-500 uppercase font-bold text-[9px] pb-2">
+                      <th className="py-2">Room / Type</th>
+                      <th className="py-2">Floor</th>
+                      <th className="py-2">Task Details</th>
+                      <th className="py-2 text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 dark:divide-slate-800/40">
+                    {rooms.filter(r => r.status === 'CLEANING').map(room => {
+                      const task = housekeepingTasks.find(t => t.room_id === room.id && t.status !== 'COMPLETED');
+                      return (
+                        <tr key={room.id} className="text-slate-800 dark:text-slate-200 hover:bg-slate-50/50 dark:hover:bg-slate-800/20">
+                          <td className="py-3">
+                            <span className="font-serif font-bold text-sm block text-slate-900 dark:text-slate-100">Suite {room.room_number}</span>
+                            <span className="text-[10px] text-slate-500 block">{room.type_name}</span>
+                          </td>
+                          <td className="py-3 font-semibold text-slate-600 dark:text-slate-400">Floor {room.floor || '1'}</td>
+                          <td className="py-3 max-w-xs">
+                            {task ? (
+                              <div className="space-y-1">
+                                <span className={`inline-block px-1.5 py-0.5 rounded text-[8px] font-bold uppercase ${
+                                  task.priority === 'VIP' ? 'bg-[#D4AF37]/20 text-[#D4AF37]' : task.priority === 'URGENT' ? 'bg-red-500/10 text-red-600' : 'bg-slate-100 dark:bg-slate-800 text-slate-500'
+                                }`}>
+                                  {task.priority} Priority
+                                </span>
+                                <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-relaxed font-medium truncate" title={task.notes}>{task.notes}</p>
+                              </div>
+                            ) : (
+                              <span className="text-slate-400 italic">No instructions logged</span>
+                            )}
+                          </td>
+                          <td className="py-3 text-right">
+                            <button
+                              onClick={() => handleMarkTurnaroundComplete(room)}
+                              className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] uppercase transition flex items-center gap-1.5 ml-auto font-sans"
+                            >
+                              <CheckCircle className="w-3.5 h-3.5" /> Mark Turnaround Complete
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                    {rooms.filter(r => r.status === 'CLEANING').length === 0 && (
+                      <tr>
+                        <td colSpan="4" className="py-8 text-center text-slate-500 italic">All suites are clean! No pending housekeeping turnarounds.</td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* Tab Contents: Maintenance Hub */}
+          {activeTab === 'maintenance' && (
+            <div className="glass-card p-6 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#132135] text-slate-900 dark:text-slate-100 space-y-4 animate-fade-in">
+              <div className="flex justify-between items-center">
+                <div>
+                  <h3 className="font-serif text-lg font-bold">Facilities Engineering Hub</h3>
+                  <p className="text-[11px] text-slate-500">Dispatch and resolve active structural, electrical, and HVAC repairs.</p>
+                </div>
+                <span className="px-2 py-0.5 rounded bg-red-500/10 text-red-600 text-[10px] font-bold">
+                  {maintenanceTickets.filter(t => t.status !== 'COMPLETED').length} Active Issues
+                </span>
+              </div>
+              <div className="overflow-x-auto text-xs">
+                <table className="w-full text-left">
+                  <thead>
+                    <tr className="border-b border-slate-200 dark:border-slate-800 text-slate-500 uppercase font-bold text-[9px] pb-2">
+                      <th className="py-2">Suite / Location</th>
+                      <th className="py-2">System</th>
+                      <th className="py-2">Defect Summary</th>
+                      <th className="py-2">Urgency</th>
+                      <th className="py-2 text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 dark:divide-slate-800/40">
+                    {maintenanceTickets.filter(t => t.status !== 'COMPLETED').map(ticket => {
+                      const cat = getAssetCategory(ticket.issue_title, ticket.description);
+                      const isLOTO = ticket.is_locked === 1;
+                      const roomObj = rooms.find(r => r.id === ticket.room_id) || {};
+                      
+                      return (
+                        <tr key={ticket.id} className="text-slate-800 dark:text-slate-200 hover:bg-slate-50/50 dark:hover:bg-slate-800/20">
+                          <td className="py-3">
+                            <span className="font-serif font-bold text-sm block text-slate-900 dark:text-slate-100">Suite {ticket.room_number || roomObj.room_number}</span>
+                            <span className="text-[10px] text-slate-500 block">Floor {roomObj.floor || '1'}</span>
+                          </td>
+                          <td className="py-3">
+                            <span className="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold uppercase text-[9px] tracking-wider">
+                              {cat}
+                            </span>
+                          </td>
+                          <td className="py-3 max-w-xs">
+                            <span className="font-semibold text-slate-950 dark:text-slate-100 block">{ticket.issue_title}</span>
+                            <p className="text-[11px] text-slate-500 leading-normal truncate" title={ticket.description}>{ticket.description}</p>
+                          </td>
+                          <td className="py-3">
+                            <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase ${
+                              ticket.priority === 'EMERGENCY' ? 'bg-red-500/10 text-red-600' : ticket.priority === 'URGENT' ? 'bg-amber-500/10 text-amber-600' : 'bg-slate-100 dark:bg-slate-800 text-slate-500'
+                            }`}>
+                              {ticket.priority}
+                            </span>
+                          </td>
+                          <td className="py-3 text-right">
+                            <div className="flex justify-end gap-2">
+                              {isLOTO && (
+                                <button
+                                  onClick={() => handleClearSafetyLockout(ticket.room_id, ticket.room_number || roomObj.room_number)}
+                                  className="px-2.5 py-1.5 rounded-lg border border-red-500 text-red-500 hover:bg-red-500/5 text-[9px] font-bold uppercase flex items-center gap-1.5 shadow-sm transition font-sans"
+                                  title="Deactivate safety LOTO lockout"
+                                >
+                                  <ShieldAlert className="w-3.5 h-3.5" /> Clear Lockout
+                                </button>
+                              )}
+                              <button
+                                onClick={() => handleResolveMaintenanceTicket(ticket)}
+                                className="px-3 py-1.5 rounded-lg bg-[#0F3D6E] dark:bg-amber-500 hover:bg-[#14355E] dark:hover:bg-amber-600 text-white dark:text-[#08203E] text-[9px] font-bold uppercase flex items-center gap-1.5 shadow-sm transition font-sans"
+                              >
+                                <CheckCircle className="w-3.5 h-3.5" /> Mark Issue Fixed
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                    {maintenanceTickets.filter(t => t.status !== 'COMPLETED').length === 0 && (
+                      <tr>
+                        <td colSpan="5" className="py-8 text-center text-slate-500 italic">No active maintenance tickets pending resolution.</td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
         </div>
 
-        {/* Active Stays & Check-outs Table */}
-        <div className="glass-card p-6 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#132135] text-slate-900 dark:text-slate-100 space-y-4">
-          <div className="flex justify-between items-center">
-            <h3 className="font-serif text-xl font-bold">Active Stay Roster</h3>
-            <span className="px-2 py-0.5 rounded bg-blue-500/10 text-blue-600 text-[10px] font-bold">
-              {activeStays.length} Stays
-            </span>
-          </div>
+        {/* Right Column: Staff Radio Dispatch Log Panel */}
+        <div className="space-y-6">
+          <div className="glass-card p-6 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#132135] text-slate-900 dark:text-slate-100 space-y-4 shadow-sm">
+            <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
+              <h3 className="font-serif text-lg font-bold flex items-center gap-2">
+                <Radio className="w-5 h-5 text-[#D4AF37] animate-pulse" /> Staff Radio Dispatch
+              </h3>
+              <span className="px-2 py-0.5 rounded bg-amber-500/10 text-amber-600 text-[10px] font-bold">
+                Live Channel
+              </span>
+            </div>
 
-          <div className="overflow-x-auto text-xs">
-            <table className="w-full text-left">
-              <thead>
-                <tr className="border-b border-slate-200 dark:border-slate-800 text-slate-500 uppercase font-bold text-[9px] pb-2">
-                  <th className="py-2">Guest / Room</th>
-                  <th className="py-2">Stay Period</th>
-                  <th className="py-2 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-800/40">
-                {activeStays.map(b => {
-                  const allocatedRoom = rooms.find(r => r.id === b.assigned_room_id);
-                  const roomNo = allocatedRoom ? allocatedRoom.room_number : 'Unassigned';
+            {/* Active alerts requiring radio dispatch */}
+            <div className="space-y-3">
+              <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Required Dispatches</span>
+              
+              {/* Rooms requiring cleaning dispatch */}
+              {rooms.filter(r => r.status === 'CLEANING' && radioDispatches[`hk-${r.room_number}`] !== 'NOTIFIED').map(room => (
+                <div key={`alert-hk-${room.id}`} className="p-3.5 rounded-xl bg-amber-500/5 dark:bg-[#D4AF37]/5 border border-amber-500/20 dark:border-[#D4AF37]/20 space-y-2.5 animate-pulse">
+                  <div className="text-xs text-slate-800 dark:text-slate-200 font-medium">
+                    <span className="font-bold text-amber-600 dark:text-amber-400 uppercase text-[9px] tracking-wide block mb-0.5">⚠️ Clean Dispatch Required</span>
+                    Action Required: Dispatch Floor Staff to Room <span className="font-serif font-bold text-slate-950 dark:text-white">{room.room_number}</span>
+                  </div>
+                  <button
+                    onClick={() => handleRadioDispatch(`hk-${room.room_number}`, room.room_number)}
+                    className="w-full py-2 rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-bold text-[9px] uppercase tracking-wider flex items-center justify-center gap-1.5 transition shadow-sm font-sans"
+                  >
+                    <Radio className="w-3.5 h-3.5" /> Dispatch Staff (Radio)
+                  </button>
+                </div>
+              ))}
 
-                  return (
-                    <tr key={b.id} className="text-slate-800 dark:text-slate-200 hover:bg-slate-50/50 dark:hover:bg-slate-800/20">
-                      <td className="py-3">
-                        <span className="font-semibold block text-slate-900 dark:text-slate-100">{b.guest_name}</span>
-                        <span className="text-[10px] text-[#D4AF37] font-bold">Room {roomNo}</span>
-                      </td>
-                      <td className="py-3 text-slate-500 font-medium font-mono">{b.check_in_date} → {b.check_out_date}</td>
-                      <td className="py-3 text-right">
-                        <button
-                          onClick={() => setActiveCheckOutBooking(b)}
-                          className="px-3 py-1.5 rounded-lg bg-amber-600 text-white font-bold text-[10px] uppercase hover:bg-amber-700 transition"
-                        >
-                          Express Check-Out
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })}
-                {activeStays.length === 0 && (
-                  <tr>
-                    <td colSpan="3" className="py-8 text-center text-slate-500 italic">No guests checked-in currently.</td>
-                  </tr>
+              {/* Maintenance tickets requiring dispatch */}
+              {maintenanceTickets.filter(t => t.status !== 'COMPLETED' && radioDispatches[`maint-${t.id}`] !== 'NOTIFIED').map(ticket => (
+                <div key={`alert-maint-${ticket.id}`} className="p-3.5 rounded-xl bg-red-500/5 border border-red-500/20 space-y-2.5 animate-pulse">
+                  <div className="text-xs text-slate-800 dark:text-slate-200 font-medium">
+                    <span className="font-bold text-red-600 dark:text-red-400 uppercase text-[9px] tracking-wide block mb-0.5">🚨 Repair Dispatch Required</span>
+                    Action Required: Dispatch Floor Staff to Room <span className="font-serif font-bold text-slate-950 dark:text-white">{ticket.room_number}</span> ({ticket.issue_title})
+                  </div>
+                  <button
+                    onClick={() => handleRadioDispatch(`maint-${ticket.id}`, ticket.room_number)}
+                    className="w-full py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white font-bold text-[9px] uppercase tracking-wider flex items-center justify-center gap-1.5 transition shadow-sm font-sans"
+                  >
+                    <Radio className="w-3.5 h-3.5" /> Dispatch Staff (Radio)
+                  </button>
+                </div>
+              ))}
+
+              {/* Empty state if all items are radio dispatched */}
+              {rooms.filter(r => r.status === 'CLEANING' && radioDispatches[`hk-${r.room_number}`] !== 'NOTIFIED').length === 0 &&
+               maintenanceTickets.filter(t => t.status !== 'COMPLETED' && radioDispatches[`maint-${t.id}`] !== 'NOTIFIED').length === 0 && (
+                <p className="text-[11px] text-slate-500 italic py-4 text-center">No outstanding radio dispatches needed. All shifts cleared.</p>
+              )}
+            </div>
+
+            {/* Recent notifications history log */}
+            <div className="border-t border-slate-200 dark:border-slate-800 pt-3.5 space-y-2.5">
+              <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Recent Dispatched Log</span>
+              <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
+                {/* Find dispatched housekeeping */}
+                {rooms.filter(r => r.status === 'CLEANING' && radioDispatches[`hk-${r.room_number}`] === 'NOTIFIED').map(room => (
+                  <div key={`logged-hk-${room.id}`} className="flex justify-between items-center text-xs py-1.5 border-b border-slate-100 dark:border-slate-850">
+                    <div>
+                      <span className="font-semibold block text-slate-900 dark:text-slate-100">Suite {room.room_number}</span>
+                      <span className="text-[9px] text-slate-500">Housekeeping turnaround</span>
+                    </div>
+                    <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 font-bold text-[8px] flex items-center gap-1">
+                      <Radio className="w-2.5 h-2.5" /> Radio Notified
+                    </span>
+                  </div>
+                ))}
+
+                {/* Find dispatched maintenance */}
+                {maintenanceTickets.filter(t => t.status !== 'COMPLETED' && radioDispatches[`maint-${t.id}`] === 'NOTIFIED').map(ticket => (
+                  <div key={`logged-maint-${ticket.id}`} className="flex justify-between items-center text-xs py-1.5 border-b border-slate-100 dark:border-slate-850">
+                    <div>
+                      <span className="font-semibold block text-slate-900 dark:text-slate-100">Suite {ticket.room_number}</span>
+                      <span className="text-[9px] text-slate-500 truncate max-w-[120px] block">{ticket.issue_title}</span>
+                    </div>
+                    <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 font-bold text-[8px] flex items-center gap-1">
+                      <Radio className="w-2.5 h-2.5" /> Radio Notified
+                    </span>
+                  </div>
+                ))}
+
+                {/* Empty check */}
+                {rooms.filter(r => r.status === 'CLEANING' && radioDispatches[`hk-${r.room_number}`] === 'NOTIFIED').length === 0 &&
+                 maintenanceTickets.filter(t => t.status !== 'COMPLETED' && radioDispatches[`maint-${t.id}`] === 'NOTIFIED').length === 0 && (
+                  <p className="text-[10px] text-slate-400 italic text-center py-2">No active notifications logged this shift.</p>
                 )}
-              </tbody>
-            </table>
+              </div>
+            </div>
+
           </div>
         </div>
 
