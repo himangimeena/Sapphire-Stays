@@ -162,6 +162,10 @@ export const AuthProvider = ({ children }) => {
     delete axios.defaults.headers.common['Authorization'];
   };
 
+  const updateUser = (newToken, newUser) => {
+    persistSession(newToken, newUser);
+  };
+
   return (
     <AuthContext.Provider value={{
       user,
@@ -173,6 +177,7 @@ export const AuthProvider = ({ children }) => {
       loginWithGoogle,
       register,
       logout,
+      updateUser,
       SEEDED_ACCOUNTS,
       API_BASE
     }}>
@@ -180,3 +185,4 @@ export const AuthProvider = ({ children }) => {
     </AuthContext.Provider>
   );
 };
+

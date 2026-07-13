@@ -1,5 +1,6 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
 import { 
   Sparkles, 
@@ -22,7 +23,7 @@ import {
 } from 'lucide-react';
 
 export default function ProfilePage() {
-  const { user, logout } = useContext(AuthContext);
+  const { user, logout, updateUser, API_BASE } = useContext(AuthContext);
   const navigate = useNavigate();
 
   // Local state for interactive features
@@ -90,16 +91,21 @@ export default function ProfilePage() {
     setTimeout(() => setToast(null), 3000);
   };
 
-  const handleUpdateContact = (e) => {
+  const handleUpdateContact = async (e) => {
     e.preventDefault();
-    setLocalUser(prev => ({
-      ...prev,
-      name: editForm.name,
-      email: editForm.email,
-      phone: editForm.phone
-    }));
-    setIsEditModalOpen(false);
-    showToast('Contact details updated successfully');
+    try {
+      const res = await axios.put(`${API_BASE}/auth/profile`, {
+        name: editForm.name,
+        email: editForm.email,
+        phone: editForm.phone
+      });
+      updateUser(res.data.token, res.data.user);
+      setIsEditModalOpen(false);
+      showToast('Contact details updated successfully');
+    } catch (err) {
+      console.error('Update contact error:', err);
+      showToast(err.response?.data?.error || 'Failed to update contact details');
+    }
   };
 
   // Badge configs depending on role

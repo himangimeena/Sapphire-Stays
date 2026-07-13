@@ -105,12 +105,30 @@ router.post('/', authenticate, async (req, res) => {
     const sgstAmount = Number((discountedBase * 0.09).toFixed(2));
     const totalAmount = Number((discountedBase + cgstAmount + sgstAmount).toFixed(2));
 
+    // Resolve user ID for the booking, register user if they don't exist
     const bookingRef = `IND-SPH-${Math.floor(10000 + Math.random() * 90000)}`;
+    let bookingUserId = req.user.id;
+    if (guestDetails && guestDetails.email) {
+      const emailToCheck = guestDetails.email.trim().toLowerCase();
+      const existingUser = await query('SELECT id FROM Users WHERE email = ?', [emailToCheck]);
+      if (existingUser.length > 0) {
+        bookingUserId = existingUser[0].id;
+      } else {
+        const bcrypt = require('bcryptjs');
+        const placeholderHash = await bcrypt.hash('walkin123', 10);
+        const fullName = `${guestDetails.firstName} ${guestDetails.lastName || ''}`.trim();
+        const resUser = await query(
+          'INSERT INTO Users (email, password_hash, name, phone, role, status) VALUES (?, ?, ?, ?, ?, ?)',
+          [emailToCheck, placeholderHash, fullName || 'Walk-in Guest', guestDetails.phone || '', 'CUSTOMER', 'ACTIVE']
+        );
+        bookingUserId = resUser.insertId;
+      }
+    }
 
     const resBooking = await query(
       `INSERT INTO Bookings (booking_ref, user_id, branch_id, room_type_id, check_in_date, check_out_date, adults, children, rooms_count, base_amount, cgst_amount, sgst_amount, discount_amount, total_amount, coupon_code, status, special_requests)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'CONFIRMED', ?)`,
-      [bookingRef, req.user.id, branchId || roomType.branch_id, roomTypeId, checkIn, checkOut, adults, children, roomsCount, baseAmount, cgstAmount, sgstAmount, discountAmount, totalAmount, couponCode || null, specialRequests || '']
+      [bookingRef, bookingUserId, branchId || roomType.branch_id, roomTypeId, checkIn, checkOut, adults, children, roomsCount, baseAmount, cgstAmount, sgstAmount, discountAmount, totalAmount, couponCode || null, specialRequests || '']
     );
 
     const bookingId = resBooking.insertId;

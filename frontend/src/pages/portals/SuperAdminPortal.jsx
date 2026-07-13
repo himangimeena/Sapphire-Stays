@@ -22,8 +22,6 @@ export default function SuperAdminPortal() {
   const [data, setData] = useState(null);
   const [bookings, setBookings] = useState([]);
   const [rooms, setRooms] = useState([]);
-  const [housekeepingTasks, setHousekeepingTasks] = useState([]);
-  const [maintenanceTickets, setMaintenanceTickets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -45,6 +43,8 @@ export default function SuperAdminPortal() {
 
   // Corporate Directory state
   const [staff, setStaff] = useState([]);
+  const [guests, setGuests] = useState([]);
+  const [directoryTab, setDirectoryTab] = useState('staff'); // staff, guests
   const [togglingStaffId, setTogglingStaffId] = useState(null);
   const [staffError, setStaffError] = useState('');
 
@@ -60,6 +60,7 @@ export default function SuperAdminPortal() {
       fetchCouponsData();
     } else if (activeTab === 'directory') {
       fetchStaffData();
+      fetchGuestsData();
     } else {
       fetchInitialData();
     }
@@ -71,15 +72,11 @@ export default function SuperAdminPortal() {
     Promise.all([
       axios.get('http://localhost:5000/api/analytics/overview'),
       axios.get('http://localhost:5000/api/bookings'),
-      axios.get('http://localhost:5000/api/rooms'),
-      axios.get('http://localhost:5000/api/operations/housekeeping'),
-      axios.get('http://localhost:5000/api/operations/maintenance')
-    ]).then(([resAnalytics, resBookings, resRooms, resHousekeeping, resMaintenance]) => {
+      axios.get('http://localhost:5000/api/rooms')
+    ]).then(([resAnalytics, resBookings, resRooms]) => {
       setData(resAnalytics.data);
       setBookings(resBookings.data.bookings || []);
       setRooms(resRooms.data.rooms || []);
-      setHousekeepingTasks(resHousekeeping.data.tasks || []);
-      setMaintenanceTickets(resMaintenance.data.tickets || []);
       setLoading(false);
     }).catch(err => {
       console.error('Overview fetch error:', err);
@@ -102,6 +99,14 @@ export default function SuperAdminPortal() {
         setStaff(res.data.staff || []);
       })
       .catch(err => console.error('Staff fetch error:', err));
+  };
+
+  const fetchGuestsData = () => {
+    axios.get('http://localhost:5000/api/analytics/guests')
+      .then(res => {
+        setGuests(res.data.guests || []);
+      })
+      .catch(err => console.error('Guest fetch error:', err));
   };
 
   const handleCreateCoupon = async (e) => {
@@ -176,19 +181,7 @@ export default function SuperAdminPortal() {
     ? rooms 
     : rooms.filter(r => r.branch_id === Number(selectedBranch));
 
-  const filteredHousekeeping = selectedBranch === 'ALL' 
-    ? housekeepingTasks 
-    : housekeepingTasks.filter(t => {
-        const room = rooms.find(r => r.id === t.room_id);
-        return room && room.branch_id === Number(selectedBranch);
-      });
 
-  const filteredMaintenance = selectedBranch === 'ALL' 
-    ? maintenanceTickets 
-    : maintenanceTickets.filter(t => {
-        const room = rooms.find(r => r.id === t.room_id);
-        return room && room.branch_id === Number(selectedBranch);
-      });
 
   // 2. True Array Calculations (No Hardcoded Numbers)
   const occupiedCount = filteredRooms.filter(r => r.status === 'OCCUPIED').length;
@@ -203,7 +196,7 @@ export default function SuperAdminPortal() {
   const totalRoomsSold = completedCheckIns.reduce((sum, b) => sum + Number(b.rooms_count || 1), 0);
   const liveADR = totalRoomsSold > 0 ? Math.round(grossRevenue / totalRoomsSold) : 0;
 
-  const activeHousekeepers = filteredHousekeeping.filter(t => t.status === 'IN_PROGRESS').length + 3;
+
 
   // Dynamic Revenue Breakdown Calculation
   const revBreakdown = [
@@ -280,7 +273,7 @@ export default function SuperAdminPortal() {
         <div className="space-y-10 animate-fade-in">
           
           {/* KPI Analytics Grid (Clickable to open dynamic insight modals) */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-slate-900 dark:text-slate-100">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-slate-900 dark:text-slate-100">
             
             {/* KPI 1: Gross Revenue */}
             <button
@@ -322,20 +315,6 @@ export default function SuperAdminPortal() {
               <span className="text-xs text-slate-600 dark:text-slate-400 uppercase font-bold block">Live Occupancy Rate</span>
               <span className="font-serif text-3xl font-bold">{liveOccupancyRate}%</span>
               <span className="text-[10px] text-slate-400 block pt-1 border-t border-slate-200 dark:border-slate-800/40">Click to view room status boards ➔</span>
-            </button>
-
-            {/* KPI 4: Active Cleaning */}
-            <button
-              onClick={() => setActiveModal('CLEANING')}
-              className="glass-card p-6 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-2 bg-white dark:bg-[#132135] hover:border-[#D4AF37] transition-all text-left w-full hover:-translate-y-1 hover:shadow-xl duration-200"
-            >
-              <div className="flex justify-between items-center">
-                <span className="p-2.5 rounded-xl bg-purple-500/10 text-purple-500"><Users className="w-5 h-5" /></span>
-                <span className="px-2 py-0.5 rounded bg-purple-500/10 text-purple-500 text-xs font-bold">Roster</span>
-              </div>
-              <span className="text-xs text-slate-600 dark:text-slate-400 uppercase font-bold block">Active Cleaning Teams</span>
-              <span className="font-serif text-3xl font-bold">{activeHousekeepers} Teams</span>
-              <span className="text-[10px] text-slate-400 block pt-1 border-t border-slate-200 dark:border-slate-800/40">Click to view housekeeping schedule ➔</span>
             </button>
           </div>
 
@@ -408,13 +387,18 @@ export default function SuperAdminPortal() {
                       <td className="py-3.5 px-4 font-semibold">{b.guest_name || 'VIP Guest'}</td>
                       <td className="py-3.5 px-4 text-slate-600 dark:text-slate-400">{b.branch_name}</td>
                       <td className="py-3.5 px-4 text-slate-600 dark:text-slate-400 font-mono">{b.check_in_date} → {b.check_out_date}</td>
-                      <td className="py-3.5 px-4">
+                      <td className="py-3.5 px-4 space-x-1.5 flex items-center">
                         <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase ${
                           b.status === 'CHECKED_IN' ? 'bg-blue-500/10 text-blue-600' :
                           b.status === 'CHECKED_OUT' ? 'bg-slate-500/10 text-slate-500' : 'bg-emerald-500/10 text-emerald-600'
                         }`}>
                           {b.status}
                         </span>
+                        {b.special_requests === 'Walk-In registration' && (
+                          <span className="px-2 py-0.5 rounded text-[9px] font-bold uppercase bg-amber-500/20 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400">
+                            Walk-In
+                          </span>
+                        )}
                       </td>
                       <td className="py-3.5 px-4 text-right font-serif font-bold text-sm text-[#0F3D6E] dark:text-amber-300">
                         ₹{Number(b.total_amount).toLocaleString('en-IN')}
@@ -565,78 +549,145 @@ export default function SuperAdminPortal() {
         </div>
       )}
 
-      {/* Tab Panel 3: Corporate Directory (RBAC Control) */}
+      {/* Tab Panel 3: Corporate & Guest Directory (RBAC Control) */}
       {activeTab === 'directory' && (
         <div className="space-y-6 animate-fade-in text-slate-900 dark:text-slate-100">
           
           <div className="glass-card p-6 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#132135] text-slate-900 dark:text-slate-100 space-y-4">
-            <div>
-              <h3 className="font-serif text-xl font-bold flex items-center gap-1.5"><Users className="w-5 h-5 text-[#D4AF37]" /> Corporate User Directory (RBAC Control)</h3>
-              <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">Manage corporate accounts, review departmental permissions, and suspend or activate staff members.</p>
+            
+            {/* Header with Sub-tab controls */}
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-2">
+              <div>
+                <h3 className="font-serif text-xl font-bold flex items-center gap-1.5"><Users className="w-5 h-5 text-[#D4AF37]" /> Corporate User & Guest Directory</h3>
+                <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">Manage corporate staff accounts and audit registered guests / walk-in clients.</p>
+              </div>
+              <div className="flex bg-slate-100 dark:bg-[#0D1E36] p-1 rounded-xl border border-slate-200/50 dark:border-slate-800 shrink-0 self-end sm:self-auto">
+                <button
+                  onClick={() => setDirectoryTab('staff')}
+                  className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                    directoryTab === 'staff'
+                      ? 'bg-white dark:bg-[#132135] text-[#D4AF37] shadow-sm'
+                      : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
+                  }`}
+                >
+                  Staff Members
+                </button>
+                <button
+                  onClick={() => setDirectoryTab('guests')}
+                  className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                    directoryTab === 'guests'
+                      ? 'bg-white dark:bg-[#132135] text-[#D4AF37] shadow-sm'
+                      : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
+                  }`}
+                >
+                  Registered Guests
+                </button>
+              </div>
             </div>
 
             {staffError && <p className="text-xs text-red-500 bg-red-500/10 p-2.5 rounded-xl border border-red-500/20">{staffError}</p>}
 
-            <div className="overflow-x-auto text-xs">
-              <table className="w-full text-left">
-                <thead>
-                  <tr className="border-b border-slate-200 dark:border-slate-800 text-slate-500 uppercase tracking-wider font-bold text-[9px] pb-2">
-                    <th className="py-2">Employee Name</th>
-                    <th className="py-2">Email Address</th>
-                    <th className="py-2">Assigned Role</th>
-                    <th className="py-2">Phone Number</th>
-                    <th className="py-2">Access Status</th>
-                    <th className="py-2 text-right">Admin Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 dark:divide-slate-800/40">
-                  {staff.map(s => (
-                    <tr key={s.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/20 text-slate-800 dark:text-slate-200">
-                      <td className="py-3.5 font-bold text-slate-900 dark:text-slate-100">{s.name}</td>
-                      <td className="py-3.5 font-mono text-slate-500">{s.email}</td>
-                      <td className="py-3.5">
-                        <span className="px-2 py-0.5 rounded bg-[#08203E]/10 dark:bg-amber-500/10 text-[#0F3D6E] dark:text-amber-400 font-bold uppercase text-[9px]">
-                          {s.role}
-                        </span>
-                      </td>
-                      <td className="py-3.5 font-mono text-slate-500">{s.phone}</td>
-                      <td className="py-3.5">
-                        <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase ${
-                          s.status === 'SUSPENDED' 
-                            ? 'bg-red-500/15 text-red-600 dark:text-red-400' 
-                            : 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400'
-                        }`}>
-                          {s.status || 'ACTIVE'}
-                        </span>
-                      </td>
-                      <td className="py-3.5 text-right">
-                        <button
-                          type="button"
-                          disabled={togglingStaffId === s.id}
-                          onClick={() => handleToggleStaffStatus(s.id, s.status || 'ACTIVE')}
-                          className={`px-3 py-1.5 rounded-lg border text-[9px] font-bold uppercase tracking-wider transition ${
-                            s.status === 'SUSPENDED'
-                              ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20'
-                              : 'bg-red-500/10 border-red-500/30 text-red-600 dark:text-red-400 hover:bg-red-500/20'
-                          }`}
-                        >
-                          {togglingStaffId === s.id ? 'Updating...' : (s.status === 'SUSPENDED' ? 'Activate Account' : 'Suspend Account')}
-                        </button>
-                      </td>
+            {directoryTab === 'staff' ? (
+              <div className="overflow-x-auto text-xs">
+                <table className="w-full text-left">
+                  <thead>
+                    <tr className="border-b border-slate-200 dark:border-slate-800 text-slate-500 uppercase tracking-wider font-bold text-[9px] pb-2">
+                      <th className="py-2">Employee Name</th>
+                      <th className="py-2">Email Address</th>
+                      <th className="py-2">Assigned Role</th>
+                      <th className="py-2">Phone Number</th>
+                      <th className="py-2">Access Status</th>
+                      <th className="py-2 text-right">Admin Actions</th>
                     </tr>
-                  ))}
-                  {staff.length === 0 && (
-                    <tr>
-                      <td colSpan="6" className="py-8 text-center text-slate-500 italic">No corporate staff members fetched.</td>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 dark:divide-slate-800/40">
+                    {staff.map(s => (
+                      <tr key={s.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/20 text-slate-800 dark:text-slate-200">
+                        <td className="py-3.5 font-bold text-slate-900 dark:text-slate-100">{s.name}</td>
+                        <td className="py-3.5 font-mono text-slate-500">{s.email}</td>
+                        <td className="py-3.5">
+                          <span className="px-2 py-0.5 rounded bg-[#08203E]/10 dark:bg-amber-500/10 text-[#0F3D6E] dark:text-amber-400 font-bold uppercase text-[9px]">
+                            {s.role}
+                          </span>
+                        </td>
+                        <td className="py-3.5 font-mono text-slate-500">{s.phone}</td>
+                        <td className="py-3.5">
+                          <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase ${
+                            s.status === 'SUSPENDED' 
+                              ? 'bg-red-500/15 text-red-600 dark:text-red-400' 
+                              : 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400'
+                          }`}>
+                            {s.status || 'ACTIVE'}
+                          </span>
+                        </td>
+                        <td className="py-3.5 text-right">
+                          <button
+                            type="button"
+                            disabled={togglingStaffId === s.id}
+                            onClick={() => handleToggleStaffStatus(s.id, s.status || 'ACTIVE')}
+                            className={`px-3 py-1.5 rounded-lg border text-[9px] font-bold uppercase tracking-wider transition ${
+                              s.status === 'SUSPENDED'
+                                ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20'
+                                : 'bg-red-500/10 border-red-500/30 text-red-600 dark:text-red-400 hover:bg-red-500/20'
+                            }`}
+                          >
+                            {togglingStaffId === s.id ? 'Updating...' : (s.status === 'SUSPENDED' ? 'Activate Account' : 'Suspend Account')}
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                    {staff.length === 0 && (
+                      <tr>
+                        <td colSpan="6" className="py-8 text-center text-slate-500 italic">No corporate staff members fetched.</td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div className="overflow-x-auto text-xs">
+                <table className="w-full text-left">
+                  <thead>
+                    <tr className="border-b border-slate-200 dark:border-slate-800 text-slate-500 uppercase tracking-wider font-bold text-[9px] pb-2">
+                      <th className="py-2">Guest Name</th>
+                      <th className="py-2">Email Address</th>
+                      <th className="py-2">Phone Number</th>
+                      <th className="py-2">Loyalty Balance</th>
+                      <th className="py-2 text-right">Registration Origin</th>
                     </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 dark:divide-slate-800/40">
+                    {guests.map(g => (
+                      <tr key={g.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/20 text-slate-800 dark:text-slate-200">
+                        <td className="py-3.5 font-bold text-slate-900 dark:text-slate-100">{g.name}</td>
+                        <td className="py-3.5 font-mono text-slate-500">{g.email}</td>
+                        <td className="py-3.5 font-mono text-slate-500">{g.phone || 'N/A'}</td>
+                        <td className="py-3.5 font-mono text-[#D4AF37] font-bold">{g.loyalty_points} pts</td>
+                        <td className="py-3.5 text-right">
+                          <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase ${
+                            g.walkin_count > 0 
+                              ? 'bg-amber-500/15 text-amber-600 dark:text-amber-400' 
+                              : 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400'
+                          }`}>
+                            {g.walkin_count > 0 ? 'Walk-In Registration' : 'Online Booking'}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                    {guests.length === 0 && (
+                      <tr>
+                        <td colSpan="5" className="py-8 text-center text-slate-500 italic">No registered guests fetched.</td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            )}
 
-        </div>
-      )}
+          </div>
+ 
+         </div>
+       )}
 
       {/* Dynamic Overlays Insight Modals */}
       {activeModal && (
@@ -650,7 +701,6 @@ export default function SuperAdminPortal() {
                   {activeModal === 'REVENUE' && 'Gross Revenue Audit Logs'}
                   {activeModal === 'ADR' && 'Average Daily Rate (ADR) Index'}
                   {activeModal === 'OCCUPANCY' && 'Live Occupancy Breakdown'}
-                  {activeModal === 'CLEANING' && 'Housekeeping & Turnaround Schedule'}
                 </h3>
               </div>
               <button 
@@ -737,33 +787,7 @@ export default function SuperAdminPortal() {
                 </div>
               )}
 
-              {/* Cleaning & Turnaround details */}
-              {activeModal === 'CLEANING' && (
-                <div className="space-y-4 text-xs">
-                  <p className="text-slate-500">Live housekeeping roster schedule:</p>
-                  <div className="space-y-3">
-                    {filteredHousekeeping.map(t => (
-                      <div key={t.id} className="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-[#0B1D3A] flex justify-between items-center text-slate-900 dark:text-slate-100">
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <span className="font-serif font-bold text-sm text-slate-900 dark:text-slate-100">Suite {t.room_number}</span>
-                            <span className={`px-1.5 py-0.5 rounded text-[8px] font-bold uppercase ${
-                              t.priority === 'VIP' ? 'bg-[#D4AF37] text-[#08203E]' : 'bg-gray-100 dark:bg-gray-800 text-slate-500'
-                            }`}>{t.priority}</span>
-                          </div>
-                          <span className="text-[10px] text-slate-500 mt-0.5 block">{t.task_type} • Floor {t.floor || '1'}</span>
-                        </div>
-                        <span className={`text-[10px] uppercase font-bold ${
-                          t.status === 'COMPLETED' ? 'text-emerald-500' : 'text-amber-500'
-                        }`}>{t.status}</span>
-                      </div>
-                    ))}
-                    {filteredHousekeeping.length === 0 && (
-                      <p className="text-slate-500 italic text-center py-4">No active housekeeping turnarounds queued.</p>
-                    )}
-                  </div>
-                </div>
-              )}
+
 
             </div>
 

@@ -56,6 +56,8 @@ export default function ReceptionPortal() {
   
   const [walkInOpen, setWalkInOpen] = useState(false);
   const [walkInGuestName, setWalkInGuestName] = useState('');
+  const [walkInEmail, setWalkInEmail] = useState('');
+  const [walkInPhone, setWalkInPhone] = useState('');
   const [walkInRoomTypeId, setWalkInRoomTypeId] = useState('');
   const [walkInRoomId, setWalkInRoomId] = useState('');
   const [walkInNights, setWalkInNights] = useState('1');
@@ -171,6 +173,9 @@ export default function ReceptionPortal() {
       const sgst = baseAmount * 0.09;
       const totalAmount = baseAmount + cgst + sgst;
 
+      const generatedEmail = walkInEmail.trim() || `walkin.${walkInGuestName.toLowerCase().replace(/\s+/g, '')}.${Date.now()}@guest.com`;
+      const fallbackPhone = walkInPhone.trim() || '+91 99999 88888';
+
       // Post walk-in booking
       await axios.post('http://localhost:5000/api/bookings', {
         branchId: Number(branchId),
@@ -184,14 +189,16 @@ export default function ReceptionPortal() {
         guestDetails: { 
           firstName: walkInGuestName.trim().split(' ')[0], 
           lastName: walkInGuestName.trim().split(' ').slice(1).join(' ') || '', 
-          email: 'walkin@guest.com', 
-          phone: '+91 99999 88888' 
+          email: generatedEmail, 
+          phone: fallbackPhone
         },
         paymentMethod: 'Pay at Hotel',
         assignedRoomId: Number(walkInRoomId)
       });
 
       setWalkInGuestName('');
+      setWalkInEmail('');
+      setWalkInPhone('');
       setWalkInRoomId('');
       setWalkInOpen(false);
       fetchData();
@@ -878,6 +885,29 @@ export default function ReceptionPortal() {
                   onChange={e => setWalkInGuestName(e.target.value)}
                   className="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0D1E36] text-slate-900 dark:text-slate-100 focus:outline-none"
                 />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-[10px] uppercase font-bold text-slate-500 block mb-1">Guest Email (Optional)</label>
+                  <input 
+                    type="email" 
+                    placeholder="E.g. guest@domain.com"
+                    value={walkInEmail}
+                    onChange={e => setWalkInEmail(e.target.value)}
+                    className="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0D1E36] text-slate-900 dark:text-slate-100 focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] uppercase font-bold text-slate-500 block mb-1">Phone Number (Optional)</label>
+                  <input 
+                    type="text" 
+                    placeholder="E.g. +91 98765 43210"
+                    value={walkInPhone}
+                    onChange={e => setWalkInPhone(e.target.value)}
+                    className="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0D1E36] text-slate-900 dark:text-slate-100 focus:outline-none"
+                  />
+                </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">

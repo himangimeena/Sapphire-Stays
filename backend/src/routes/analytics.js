@@ -126,4 +126,29 @@ router.post('/coupons', authenticate, requireRoles(['SUPER_ADMIN']), async (req,
   }
 });
 
+// GET /api/analytics/guests - Guest registry for Super/Branch Admins
+router.get('/guests', authenticate, requireRoles(['SUPER_ADMIN', 'BRANCH_ADMIN']), async (req, res) => {
+  try {
+    const { branchId } = req.query;
+    let sql = `
+      SELECT u.id, u.name, u.email, u.phone, u.loyalty_points, u.created_at,
+             (SELECT COUNT(*) FROM Bookings b WHERE b.user_id = u.id AND b.special_requests = 'Walk-In registration') as walkin_count,
+             (SELECT COUNT(*) FROM Bookings b WHERE b.user_id = u.id) as total_bookings
+      FROM Users u
+      WHERE u.role = 'CUSTOMER'
+    `;
+    const params = [];
+    if (branchId) {
+      sql += ` AND EXISTS (SELECT 1 FROM Bookings b WHERE b.user_id = u.id AND b.branch_id = ?)`;
+      params.push(Number(branchId));
+    }
+    sql += ` ORDER BY u.created_at DESC`;
+    const guests = await query(sql, params);
+    res.json({ guests });
+  } catch (err) {
+    console.error('Error fetching guests:', err);
+    res.status(500).json({ error: 'Failed to fetch guest directory.' });
+  }
+});
+
 module.exports = router;

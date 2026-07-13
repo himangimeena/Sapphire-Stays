@@ -107,6 +107,50 @@ router.get('/me', authenticate, async (req, res) => {
   }
 });
 
+// PUT /api/auth/profile - Update user profile contact details
+router.put('/profile', authenticate, async (req, res) => {
+  try {
+    const { name, email, phone } = req.body;
+    if (!name || !email) {
+      return res.status(400).json({ error: 'Name and email are required.' });
+    }
+
+    const cleanEmail = email.trim().toLowerCase();
+
+    // Check if email is already taken by another user
+    const existing = await query('SELECT id FROM Users WHERE email = ? AND id != ?', [cleanEmail, req.user.id]);
+    if (existing.length > 0) {
+      return res.status(400).json({ error: 'An account with this email already exists.' });
+    }
+
+    await query(
+      'UPDATE Users SET name = ?, email = ?, phone = ? WHERE id = ?',
+      [name, cleanEmail, phone || '', req.user.id]
+    );
+
+    // Fetch updated details
+    const updatedUsers = await query('SELECT id, email, name, phone, role, avatar_url, loyalty_points FROM Users WHERE id = ?', [req.user.id]);
+    const user = updatedUsers[0];
+
+    // Generate new token with updated information
+    const token = jwt.sign(
+      { id: user.id, email: user.email, name: user.name, role: user.role, loyalty_points: user.loyalty_points },
+      JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
+    res.json({
+      message: 'Profile updated successfully',
+      token,
+      user
+    });
+  } catch (err) {
+    console.error('Update profile error:', err);
+    res.status(500).json({ error: 'Failed to update profile.' });
+  }
+});
+
+
 
 // Helper to resolve role by email for Google sign-in
 function getRoleByEmail(email) {

@@ -23,8 +23,8 @@ export default function BranchAdminPortal() {
 
   const [rooms, setRooms] = useState([]);
   const [bookings, setBookings] = useState([]);
-  const [housekeeping, setHousekeeping] = useState([]);
-  const [maintenance, setMaintenance] = useState([]);
+  const [guests, setGuests] = useState([]);
+  const [guestsLoading, setGuestsLoading] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -64,30 +64,38 @@ export default function BranchAdminPortal() {
     fetchBranchData();
   }, [branchId]);
 
+  useEffect(() => {
+    if (activeTab === 'guests') {
+      fetchGuests();
+    }
+  }, [activeTab]);
+
+  const fetchGuests = () => {
+    setGuestsLoading(true);
+    axios.get(`http://localhost:5000/api/analytics/guests?branchId=${branchId}`)
+      .then(res => {
+        setGuests(res.data.guests || []);
+        setGuestsLoading(false);
+      })
+      .catch(err => {
+        console.error('Failed to load guests:', err);
+        setGuestsLoading(false);
+      });
+  };
+
   const fetchBranchData = () => {
     setLoading(true);
     setError(null);
     Promise.all([
       axios.get(`http://localhost:5000/api/rooms?branchId=${branchId}`),
-      axios.get('http://localhost:5000/api/bookings'),
-      axios.get('http://localhost:5000/api/operations/housekeeping'),
-      axios.get('http://localhost:5000/api/operations/maintenance')
-    ]).then(([resRooms, resBookings, resHousekeeping, resMaintenance]) => {
+      axios.get('http://localhost:5000/api/bookings')
+    ]).then(([resRooms, resBookings]) => {
       setRooms(resRooms.data.rooms || []);
       
-      // Filter bookings, housekeeping and maintenance belonging to this branch
+      // Filter bookings belonging to this branch
       const localBookings = (resBookings.data.bookings || []).filter(b => b.branch_id === Number(branchId));
       setBookings(localBookings);
       
-      // Filter tasks associated with rooms of this branch
-      const roomIds = (resRooms.data.rooms || []).map(r => r.id);
-      
-      const localHK = (resHousekeeping.data.tasks || []).filter(t => roomIds.includes(t.room_id));
-      setHousekeeping(localHK);
-
-      const localMaint = (resMaintenance.data.tickets || []).filter(t => roomIds.includes(t.room_id));
-      setMaintenance(localMaint);
-
       setLoading(false);
     }).catch(err => {
       console.error('Failed to load local branch analytics:', err);
@@ -135,8 +143,6 @@ export default function BranchAdminPortal() {
   // Local property inventory calculations (.filter() & .reduce())
   const totalRooms = rooms.length;
   const occupiedRooms = rooms.filter(r => r.status === 'OCCUPIED').length;
-  const dirtyRooms = rooms.filter(r => r.status === 'CLEANING').length;
-  const maintenanceLocked = rooms.filter(r => r.is_locked === 1).length;
 
   const localOccupancyRate = totalRooms > 0 ? Math.round((occupiedRooms / totalRooms) * 100) : 0;
 
@@ -203,10 +209,10 @@ export default function BranchAdminPortal() {
         </div>
 
         <div className="glass-card p-6 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#132135] space-y-2">
-          <span className="text-[10px] text-slate-500 uppercase font-bold tracking-wider block">Dirty Turnaround Queue</span>
+          <span className="text-[10px] text-slate-500 uppercase font-bold tracking-wider block">Total Palace Suites</span>
           <div className="flex items-baseline justify-between">
-            <span className="font-serif text-4xl font-bold text-amber-500">{dirtyRooms} Suites</span>
-            <span className="text-xs text-slate-400 font-semibold">Housekeeping pending</span>
+            <span className="font-serif text-4xl font-bold text-[#D4AF37]">{totalRooms} Suites</span>
+            <span className="text-xs text-slate-400 font-semibold">Property Inventory</span>
           </div>
         </div>
 
@@ -219,10 +225,10 @@ export default function BranchAdminPortal() {
         </div>
 
         <div className="glass-card p-6 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#132135] space-y-2">
-          <span className="text-[10px] text-slate-500 uppercase font-bold tracking-wider block">Maintenance Lockouts</span>
+          <span className="text-[10px] text-slate-500 uppercase font-bold tracking-wider block">Today's Check-outs</span>
           <div className="flex items-baseline justify-between">
-            <span className="font-serif text-4xl font-bold text-red-500">{maintenanceLocked} Suites</span>
-            <span className="text-xs text-slate-400 font-semibold">Safety LOTO locks active</span>
+            <span className="font-serif text-4xl font-bold text-blue-500">{departuresToday} Guests</span>
+            <span className="text-xs text-slate-400 font-semibold">Scheduled departures</span>
           </div>
         </div>
       </div>
@@ -248,6 +254,16 @@ export default function BranchAdminPortal() {
           }`}
         >
           Procurement & Supplies
+        </button>
+        <button
+          onClick={() => setActiveTab('guests')}
+          className={`px-5 py-3 text-xs font-bold uppercase border-b-2 transition ${
+            activeTab === 'guests' 
+              ? 'border-[#D4AF37] text-[#D4AF37]' 
+              : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+          }`}
+        >
+          Guest Directory
         </button>
       </div>
 
@@ -430,11 +446,59 @@ export default function BranchAdminPortal() {
             </div>
           </div>
 
+          {/* Live Guest & Stay Registry */}
+          <div className="glass-card p-6 rounded-2xl border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 bg-white dark:bg-[#132135]">
+            <h3 className="font-serif text-xl font-bold mb-4">Live Guest & Stay Registry</h3>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead>
+                  <tr className="border-b border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 font-semibold uppercase">
+                    <th className="py-3 px-4">Guest Name</th>
+                    <th className="py-3 px-4">Room Type</th>
+                    <th className="py-3 px-4">Stay Dates</th>
+                    <th className="py-3 px-4">Status</th>
+                    <th className="py-3 px-4 text-right">INR Amount</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-800/50">
+                  {bookings.slice(0, 8).map(b => (
+                    <tr key={b.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 text-slate-900 dark:text-slate-100">
+                      <td className="py-3.5 px-4 font-semibold">{b.guest_name || 'VIP Guest'}</td>
+                      <td className="py-3.5 px-4 text-slate-600 dark:text-slate-400">{b.room_type_name}</td>
+                      <td className="py-3.5 px-4 text-slate-600 dark:text-slate-400 font-mono">{b.check_in_date} → {b.check_out_date}</td>
+                      <td className="py-3.5 px-4 space-x-1.5 flex items-center">
+                        <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase ${
+                          b.status === 'CHECKED_IN' ? 'bg-blue-500/10 text-blue-600' :
+                          b.status === 'CHECKED_OUT' ? 'bg-slate-500/10 text-slate-500' : 'bg-emerald-500/10 text-emerald-600'
+                        }`}>
+                          {b.status}
+                        </span>
+                        {b.special_requests === 'Walk-In registration' && (
+                          <span className="px-2 py-0.5 rounded text-[9px] font-bold uppercase bg-amber-500/20 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400">
+                            Walk-In
+                          </span>
+                        )}
+                      </td>
+                      <td className="py-3.5 px-4 text-right font-serif font-bold text-sm text-[#0F3D6E] dark:text-amber-300">
+                        ₹{Number(b.total_amount).toLocaleString('en-IN')}
+                      </td>
+                    </tr>
+                  ))}
+                  {bookings.length === 0 && (
+                    <tr>
+                      <td colSpan="5" className="py-8 text-center text-slate-500">No active bookings recorded.</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
           {/* Local Staff Dispatch Tracker */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             
             {/* Active Staff Registry */}
-            <div className="lg:col-span-2 glass-card p-6 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#132135] text-slate-900 dark:text-slate-100 space-y-4">
+            <div className="lg:col-span-3 glass-card p-6 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#132135] text-slate-900 dark:text-slate-100 space-y-4">
               <div>
                 <h3 className="font-serif text-xl font-bold flex items-center gap-1.5"><Users className="w-5 h-5 text-[#D4AF37]" /> Local On-Duty Staff</h3>
                 <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">Staff directory assigned strictly to this branch roster.</p>
@@ -469,40 +533,6 @@ export default function BranchAdminPortal() {
                     ))}
                   </tbody>
                 </table>
-              </div>
-            </div>
-
-            {/* Turnaround bottleneck tracking ticker */}
-            <div className="glass-card p-6 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#132135] text-slate-900 dark:text-slate-100 space-y-4">
-              <div>
-                <h3 className="font-serif text-xl font-bold flex items-center gap-1.5"><ShieldCheck className="w-5 h-5 text-[#D4AF37]" /> Operations Turnaround Ticker</h3>
-                <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">Live queue status and Turnaround tracking bottlenecks.</p>
-              </div>
-
-              <div className="space-y-4 font-semibold text-xs pt-1">
-                <div className="flex justify-between items-center text-slate-800 dark:text-slate-200">
-                  <span>Housekeeping Tasks Queued:</span>
-                  <span className="font-mono text-amber-500 text-sm font-bold">{housekeeping.filter(t => t.status !== 'COMPLETED').length} tasks</span>
-                </div>
-                <div className="flex justify-between items-center text-slate-800 dark:text-slate-200">
-                  <span>Maintenance Alerts Pending:</span>
-                  <span className="font-mono text-red-500 text-sm font-bold">{maintenance.filter(t => t.status !== 'COMPLETED').length} tickets</span>
-                </div>
-
-                <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-[#0D1E36] border border-slate-200/50 dark:border-slate-800 space-y-2 text-[10px]">
-                  <span className="uppercase font-bold text-slate-500 block">Queue Bottleneck Status:</span>
-                  {dirtyRooms > 2 ? (
-                    <div className="flex items-center gap-1.5 text-amber-600 dark:text-amber-400 font-bold">
-                      <AlertTriangle className="w-4 h-4 shrink-0 text-amber-500" />
-                      <span>{dirtyRooms} dirty suites waiting. Restock supplies below.</span>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-bold">
-                      <CheckCircle className="w-4 h-4 shrink-0 text-emerald-500" />
-                      <span>Housekeeping queues are optimal. Ready to take check-ins.</span>
-                    </div>
-                  )}
-                </div>
               </div>
             </div>
 
@@ -568,6 +598,62 @@ export default function BranchAdminPortal() {
                 </tbody>
               </table>
             </div>
+          </div>
+
+        </div>
+      )}
+
+      {/* Tab Panel 3: Guest Directory */}
+      {activeTab === 'guests' && (
+        <div className="space-y-6 animate-fade-in text-slate-900 dark:text-slate-100">
+          
+          <div className="glass-card p-6 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#132135] text-slate-900 dark:text-slate-100 space-y-4">
+            <div>
+              <h3 className="font-serif text-xl font-bold flex items-center gap-1.5"><Users className="w-5 h-5 text-[#D4AF37]" /> Registered Guests & Walk-Ins</h3>
+              <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">Directory of guest profiles who have booked stays at this branch palace sanctuary.</p>
+            </div>
+
+            {guestsLoading ? (
+              <div className="py-8 text-center text-slate-500 italic">Loading guests directory...</div>
+            ) : (
+              <div className="overflow-x-auto text-xs">
+                <table className="w-full text-left">
+                  <thead>
+                    <tr className="border-b border-slate-200 dark:border-slate-800 text-slate-500 uppercase tracking-wider font-bold text-[9px] pb-2">
+                      <th className="py-2">Guest Name</th>
+                      <th className="py-2">Email Address</th>
+                      <th className="py-2">Phone Number</th>
+                      <th className="py-2">Loyalty Balance</th>
+                      <th className="py-2 text-right">Registration Origin</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 dark:divide-slate-800/40">
+                    {guests.map(g => (
+                      <tr key={g.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/20 text-slate-800 dark:text-slate-200">
+                        <td className="py-3.5 font-bold text-slate-900 dark:text-slate-100">{g.name}</td>
+                        <td className="py-3.5 font-mono text-slate-500">{g.email}</td>
+                        <td className="py-3.5 font-mono text-slate-500">{g.phone || 'N/A'}</td>
+                        <td className="py-3.5 font-mono text-[#D4AF37] font-bold">{g.loyalty_points} pts</td>
+                        <td className="py-3.5 text-right">
+                          <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase ${
+                            g.walkin_count > 0
+                              ? 'bg-amber-500/15 text-amber-600 dark:text-amber-400'
+                              : 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400'
+                          }`}>
+                            {g.walkin_count > 0 ? 'Walk-In Registration' : 'Online Booking'}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                    {guests.length === 0 && (
+                      <tr>
+                        <td colSpan="5" className="py-8 text-center text-slate-500 italic">No registered guests found for this branch.</td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
 
         </div>
