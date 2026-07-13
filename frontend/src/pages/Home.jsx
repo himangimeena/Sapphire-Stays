@@ -17,7 +17,7 @@ export default function Home() {
   const destRef = useRef(null);
 
   useEffect(() => {
-    axios.get('http://localhost:5000/api/branches')
+    axios.get('/api/branches')
       .then(res => setBranches(res.data.branches || FALLBACK_BRANCHES))
       .catch(() => {
         // Silent fallback when live API server is offline during local review

@@ -72,7 +72,7 @@ export default function BranchAdminPortal() {
 
   const fetchGuests = () => {
     setGuestsLoading(true);
-    axios.get(`http://localhost:5000/api/analytics/guests?branchId=${branchId}`)
+    axios.get(`/api/analytics/guests?branchId=${branchId}`)
       .then(res => {
         setGuests(res.data.guests || []);
         setGuestsLoading(false);
@@ -87,8 +87,8 @@ export default function BranchAdminPortal() {
     setLoading(true);
     setError(null);
     Promise.all([
-      axios.get(`http://localhost:5000/api/rooms?branchId=${branchId}`),
-      axios.get('http://localhost:5000/api/bookings')
+      axios.get(`/api/rooms?branchId=${branchId}`),
+      axios.get('/api/bookings')
     ]).then(([resRooms, resBookings]) => {
       setRooms(resRooms.data.rooms || []);
       

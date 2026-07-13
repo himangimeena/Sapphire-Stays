@@ -1,5 +1,5 @@
 // Static Fallback Seed Data for Sapphire Stays India
-// Used gracefully when live backend server (http://localhost:5000) is offline during local review or demo mode.
+// Used gracefully when live backend server () is offline during local review or demo mode.
 
 export const FALLBACK_BRANCHES = [
   {

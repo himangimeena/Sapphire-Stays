@@ -74,10 +74,10 @@ export default function ReceptionPortal() {
   const fetchData = () => {
     setLoading(true);
     Promise.all([
-      axios.get('http://localhost:5000/api/bookings'),
-      axios.get(`http://localhost:5000/api/rooms?branchId=${branchId}`),
-      axios.get('http://localhost:5000/api/operations/housekeeping'),
-      axios.get('http://localhost:5000/api/operations/maintenance')
+      axios.get('/api/bookings'),
+      axios.get(`/api/rooms?branchId=${branchId}`),
+      axios.get('/api/operations/housekeeping'),
+      axios.get('/api/operations/maintenance')
     ])
     .then(([bookingsRes, roomsRes, hkRes, maintRes]) => {
       // Filter bookings for this branch
@@ -101,7 +101,7 @@ export default function ReceptionPortal() {
       return;
     }
     try {
-      await axios.patch(`http://localhost:5000/api/bookings/${bookingId}/status`, {
+      await axios.patch(`/api/bookings/${bookingId}/status`, {
         status: 'CHECKED_IN',
         assigned_room_id: roomId
       });
@@ -116,7 +116,7 @@ export default function ReceptionPortal() {
   // Express Check-Out releasing room and dispatching turnaround tasks
   const handleConfirmCheckOut = async (bookingId, roomId) => {
     try {
-      await axios.patch(`http://localhost:5000/api/bookings/${bookingId}/status`, {
+      await axios.patch(`/api/bookings/${bookingId}/status`, {
         status: 'CHECKED_OUT',
         assigned_room_id: roomId
       });
@@ -177,7 +177,7 @@ export default function ReceptionPortal() {
       const fallbackPhone = walkInPhone.trim() || '+91 99999 88888';
 
       // Post walk-in booking
-      await axios.post('http://localhost:5000/api/bookings', {
+      await axios.post('/api/bookings', {
         branchId: Number(branchId),
         roomTypeId: Number(walkInRoomTypeId),
         checkIn: new Date().toISOString().split('T')[0],
@@ -216,13 +216,13 @@ export default function ReceptionPortal() {
     const activeTask = housekeepingTasks.find(t => t.room_id === room.id && t.status !== 'COMPLETED');
     try {
       if (activeTask) {
-        await axios.patch(`http://localhost:5000/api/operations/housekeeping/${activeTask.id}`, {
+        await axios.patch(`/api/operations/housekeeping/${activeTask.id}`, {
           status: 'COMPLETED',
           roomId: room.id
         });
       } else {
         // Fallback to update room status directly
-        await axios.patch(`http://localhost:5000/api/rooms/${room.id}/status`, {
+        await axios.patch(`/api/rooms/${room.id}/status`, {
           status: 'AVAILABLE'
         });
       }
@@ -235,14 +235,14 @@ export default function ReceptionPortal() {
 
   const handleResolveMaintenanceTicket = async (ticket) => {
     try {
-      await axios.patch(`http://localhost:5000/api/operations/maintenance/${ticket.id}`, {
+      await axios.patch(`/api/operations/maintenance/${ticket.id}`, {
         status: 'COMPLETED',
         roomId: ticket.room_id
       });
       
       // Automatically clear safety lockout (LOTO) if active
       if (ticket.is_locked === 1) {
-        await axios.patch(`http://localhost:5000/api/rooms/${ticket.room_id}/lockout`, {
+        await axios.patch(`/api/rooms/${ticket.room_id}/lockout`, {
           is_locked: 0
         });
       }
@@ -256,11 +256,11 @@ export default function ReceptionPortal() {
   const handleClearSafetyLockout = async (roomId, roomNumber) => {
     try {
       // Clear safety lockout (is_locked = 0)
-      await axios.patch(`http://localhost:5000/api/rooms/${roomId}/lockout`, {
+      await axios.patch(`/api/rooms/${roomId}/lockout`, {
         is_locked: 0
       });
       // Update room status to AVAILABLE
-      await axios.patch(`http://localhost:5000/api/rooms/${roomId}/status`, {
+      await axios.patch(`/api/rooms/${roomId}/status`, {
         status: 'AVAILABLE'
       });
       showAlert(`Safety Lockout cleared for Suite ${roomNumber}. Room status reset to Vacant-Clean.`, 'Lockout Cleared');

@@ -15,7 +15,7 @@ export default function Rooms() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    axios.get('http://localhost:5000/api/rooms/types')
+    axios.get('/api/rooms/types')
       .then(res => {
         setRoomTypes(res.data.roomTypes || FALLBACK_ROOMS);
         setLoading(false);

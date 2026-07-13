@@ -14,7 +14,7 @@ export default function Branches() {
 
   // Single source of truth: fetch once, filter entirely client-side.
   useEffect(() => {
-    axios.get('http://localhost:5000/api/branches')
+    axios.get('/api/branches')
       .then(res => setAllBranches(res.data.branches || FALLBACK_BRANCHES))
       .catch(() => setAllBranches(FALLBACK_BRANCHES));
   }, []);

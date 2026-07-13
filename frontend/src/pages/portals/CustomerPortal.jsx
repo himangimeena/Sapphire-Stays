@@ -22,7 +22,7 @@ export default function CustomerPortal() {
     const token = sessionStorage.getItem('sapphire_token') || localStorage.getItem('sapphire_token');
 
     // 2. Inject token headers into Axios to prevent the 401 error
-    axios.get('http://localhost:5000/api/bookings/my', {
+    axios.get('/api/bookings/my', {
       headers: {
         Authorization: `Bearer ${token}`
       }
@@ -41,7 +41,7 @@ export default function CustomerPortal() {
     const confirmed = await showConfirm('Are you sure you wish to cancel this luxury stay?', 'Cancel Luxury Reservation');
     if (!confirmed) return;
     try {
-      await axios.patch(`http://localhost:5000/api/bookings/${id}/status`, { status: 'CANCELLED' });
+      await axios.patch(`/api/bookings/${id}/status`, { status: 'CANCELLED' });
       fetchMyBookings();
     } catch (err) {
       showAlert('Failed to cancel stay', 'Service Interruption');

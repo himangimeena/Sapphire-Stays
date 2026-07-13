@@ -3,7 +3,7 @@ import axios from 'axios';
 
 export const AuthContext = createContext();
 
-const API_BASE = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000') + '/api';
+const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
 
 // Canonical Seeded Test Accounts Registry for Technical Reviewers & Demo Switcher
 export const SEEDED_ACCOUNTS = [

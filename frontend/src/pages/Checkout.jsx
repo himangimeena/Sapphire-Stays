@@ -6,6 +6,8 @@ import { Shield, Lock, CreditCard, CheckCircle, ArrowLeft, ArrowRight, Smartphon
 import { useModal } from '../context/ModalContext';
 import { getRoomImage } from '../utils/roomImage';
 
+import { FALLBACK_ROOMS } from '../data/fallbackData';
+
 export default function Checkout() {
   const [searchParams] = useSearchParams();
   const roomTypeId = searchParams.get('roomTypeId') || 1;
@@ -14,28 +16,31 @@ export default function Checkout() {
   const navigate = useNavigate();
   const { showAlert } = useModal();
 
-  const [checkIn, setCheckIn] = useState('2026-07-15');
-  const [checkOut, setCheckOut] = useState('2026-07-18');
-  const [roomsCount, setRoomsCount] = useState(1);
-  const [couponCode, setCouponCode] = useState('ROYALINDIA20');
+  const [roomType, setRoomType] = useState(null);
+  const [checkIn, setCheckIn] = useState(searchParams.get('checkIn') || '2026-07-15');
+  const [checkOut, setCheckOut] = useState(searchParams.get('checkOut') || '2026-07-18');
+  const [roomsCount, setRoomsCount] = useState(searchParams.get('rooms') || 1);
+  const [couponCode, setCouponCode] = useState(searchParams.get('coupon') || '');
+  const [specialRequests, setSpecialRequests] = useState('');
+  
+  // Guest Details fields mapping
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+  
+  // Payment States matching Screenshot 3 requirements
+  const [paymentMethod, setPaymentMethod] = useState('UPI'); // Default
+  const [upiId, setUpiId] = useState('');
+  
+  // Bill calculation state
   const [calc, setCalc] = useState(null);
   const [calcError, setCalcError] = useState(null);
-  const [roomType, setRoomType] = useState(null);
-
-  // Form fields with bulletproof empty string fallbacks to prevent uncontrolled warning
-  const [firstName, setFirstName] = useState(user ? user.name.split(' ')[0] || '' : 'Julian');
-  const [lastName, setLastName] = useState(user ? user.name.split(' ')[1] || '' : 'Thorne');
-  const [email, setEmail] = useState(user ? user.email || '' : 'julian.thorne@example.com');
-  const [phone, setPhone] = useState(user ? user.phone || '' : '+91 99220 44556');
-  const [specialRequests, setSpecialRequests] = useState('Dietary requirements, lake view preference, airport Maybach pickup.');
-  const [paymentMethod, setPaymentMethod] = useState('UPI');
-  const [upiId, setUpiId] = useState('julian.thorne@okaxis');
   const [loading, setLoading] = useState(false);
   const [confirmation, setConfirmation] = useState(null);
 
-  // Synchronize state changes if the User updates via a Demo Context mid-session
   useEffect(() => {
-    if (user && user.name) {
+    if (user) {
       setFirstName(user.name.split(' ')[0] || '');
       setLastName(user.name.split(' ')[1] || '');
       setEmail(user.email || '');
@@ -45,21 +50,28 @@ export default function Checkout() {
 
   // Fetch Room Type and Branch details dynamically
   useEffect(() => {
-    axios.get('http://localhost:5000/api/rooms/types')
+    axios.get('/api/rooms/types')
       .then(res => {
         const found = res.data.roomTypes?.find(rt => Number(rt.id) === Number(roomTypeId));
         if (found) {
           setRoomType(found);
+        } else {
+          const fallback = FALLBACK_ROOMS.find(rt => Number(rt.id) === Number(roomTypeId));
+          if (fallback) setRoomType(fallback);
         }
       })
       .catch(err => {
         console.error("Failed to load room type details:", err);
+        const fallback = FALLBACK_ROOMS.find(rt => Number(rt.id) === Number(roomTypeId));
+        if (fallback) {
+          setRoomType(fallback);
+        }
       });
   }, [roomTypeId]);
 
   useEffect(() => {
     setCalcError(null);
-    axios.post('http://localhost:5000/api/bookings/calculate', {
+    axios.post('/api/bookings/calculate', {
       roomTypeId,
       checkIn,
       checkOut,
@@ -71,10 +83,33 @@ export default function Checkout() {
     })
     .catch(err => {
       console.error(err);
-      setCalc(null);
-      setCalcError('Failed to calculate live booking price. Please check date inputs.');
+      // Fallback calculations client-side if server is offline
+      const rate = roomType?.price || 25000;
+      const d1 = new Date(checkIn);
+      const d2 = new Date(checkOut);
+      const diffTime = Math.abs(d2 - d1);
+      const nights = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) || 1;
+      const baseAmount = rate * nights * Number(roomsCount || 1);
+      
+      let discountAmount = 0;
+      if (couponCode) {
+        discountAmount = baseAmount * 0.15; // 15% discount mock
+      }
+      const cgstAmount = (baseAmount - discountAmount) * 0.09;
+      const sgstAmount = (baseAmount - discountAmount) * 0.09;
+      const totalAmount = baseAmount - discountAmount + cgstAmount + sgstAmount;
+      
+      setCalc({
+        nights,
+        roomsCount: Number(roomsCount || 1),
+        baseAmount,
+        discountAmount,
+        cgstAmount,
+        sgstAmount,
+        totalAmount
+      });
     });
-  }, [roomTypeId, checkIn, checkOut, roomsCount, couponCode]);
+  }, [roomTypeId, checkIn, checkOut, roomsCount, couponCode, roomType]);
 
   const handleBooking = async (e) => {
     if (e) e.preventDefault();
@@ -102,7 +137,7 @@ export default function Checkout() {
       }
 
       // 3. Inject token headers safely into the axios call
-      const res = await axios.post('http://localhost:5000/api/bookings', {
+      const res = await axios.post('/api/bookings', {
         branchId,
         roomTypeId,
         checkIn,

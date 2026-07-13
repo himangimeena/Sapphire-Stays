@@ -32,7 +32,7 @@ router.get('/overview', authenticate, requireRoles(['SUPER_ADMIN', 'BRANCH_ADMIN
 
     res.json({
       totalRevenue,
-      formattedRevenue: totalRevenue >= 10000000 ? `₹${(totalRevenue/10000000).toFixed(2)} Cr` : `₹${(totalRevenue/100000).toFixed(1)} Lakh`,
+      formattedRevenue: totalRevenue >= 10000000 ? `₹${(totalRevenue / 10000000).toFixed(2)} Cr` : `₹${(totalRevenue / 100000).toFixed(1)} Lakh`,
       avgOccupancy,
       activeBranches,
       dailyBookings: totalBookings,

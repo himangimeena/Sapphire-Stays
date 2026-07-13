@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
 import { MapPin, Star, Sparkles, Wifi, Utensils, Car, Shield, CheckCircle } from 'lucide-react';
+import { FALLBACK_BRANCHES } from '../data/fallbackData';
 import { getRoomImage } from '../utils/roomImage';
 
 export default function BranchDetail() {
@@ -10,13 +11,17 @@ export default function BranchDetail() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    axios.get(`http://localhost:5000/api/branches/${id}`)
+    axios.get(`/api/branches/${id}`)
       .then(res => {
         setBranch(res.data.branch);
         setLoading(false);
       })
       .catch(err => {
         console.error(err);
+        const fallback = FALLBACK_BRANCHES.find(b => Number(b.id) === Number(id));
+        if (fallback) {
+          setBranch(fallback);
+        }
         setLoading(false);
       });
   }, [id]);

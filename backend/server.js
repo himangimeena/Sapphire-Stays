@@ -14,8 +14,14 @@ const analyticsRoutes = require('./src/routes/analytics');
 const app = express();
 const PORT = process.env.PORT || 5001;
 
+// app.use(cors({
+//   origin: ['http://localhost:3001', 'http://localhost:3000'],
+//   credentials: true
+// }));
+
+// Replace your old app.use(cors(...)) with this clean line:
 app.use(cors({
-  origin: ['http://localhost:3001', 'http://localhost:3000'],
+  origin: '*',
   credentials: true
 }));
 app.use(express.json());

@@ -70,9 +70,9 @@ export default function SuperAdminPortal() {
     setLoading(true);
     setError(null);
     Promise.all([
-      axios.get('http://localhost:5000/api/analytics/overview'),
-      axios.get('http://localhost:5000/api/bookings'),
-      axios.get('http://localhost:5000/api/rooms')
+      axios.get('/api/analytics/overview'),
+      axios.get('/api/bookings'),
+      axios.get('/api/rooms')
     ]).then(([resAnalytics, resBookings, resRooms]) => {
       setData(resAnalytics.data);
       setBookings(resBookings.data.bookings || []);
@@ -86,7 +86,7 @@ export default function SuperAdminPortal() {
   };
 
   const fetchCouponsData = () => {
-    axios.get('http://localhost:5000/api/analytics/coupons')
+    axios.get('/api/analytics/coupons')
       .then(res => {
         setCoupons(res.data.coupons || []);
       })
@@ -94,7 +94,7 @@ export default function SuperAdminPortal() {
   };
 
   const fetchStaffData = () => {
-    axios.get('http://localhost:5000/api/analytics/staff')
+    axios.get('/api/analytics/staff')
       .then(res => {
         setStaff(res.data.staff || []);
       })
@@ -102,7 +102,7 @@ export default function SuperAdminPortal() {
   };
 
   const fetchGuestsData = () => {
-    axios.get('http://localhost:5000/api/analytics/guests')
+    axios.get('/api/analytics/guests')
       .then(res => {
         setGuests(res.data.guests || []);
       })
@@ -116,7 +116,7 @@ export default function SuperAdminPortal() {
     setCreatingCoupon(true);
 
     try {
-      await axios.post('http://localhost:5000/api/analytics/coupons', {
+      await axios.post('/api/analytics/coupons', {
         code: promoCode,
         discount_type: discountType,
         discount_value: discountValue,
@@ -144,7 +144,7 @@ export default function SuperAdminPortal() {
     const nextStatus = currentStatus === 'ACTIVE' ? 'SUSPENDED' : 'ACTIVE';
 
     try {
-      await axios.patch(`http://localhost:5000/api/analytics/staff/${staffId}/status`, {
+      await axios.patch(`/api/analytics/staff/${staffId}/status`, {
         status: nextStatus
       });
       fetchStaffData();
