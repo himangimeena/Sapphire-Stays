@@ -96,7 +96,7 @@ export default function Navbar() {
                 <User className="w-4 h-4" />
               </Link>
               <button
-                onClick={() => { logout(); navigate('/'); }}
+                onClick={() => { logout(); navigate('/login'); }}
                 className="p-2 rounded-lg text-gray-300 hover:text-red-400 hover:bg-white/10 transition"
                 title="Logout"
               >
@@ -140,7 +140,7 @@ export default function Navbar() {
                     Profile
                   </Link>
                 </div>
-                <button onClick={() => { logout(); setMobileMenu(false); navigate('/'); }} className="text-red-400 text-xs font-semibold text-right">
+                <button onClick={() => { logout(); setMobileMenu(false); navigate('/login'); }} className="text-red-400 text-xs font-semibold text-right">
                   Sign Out
                 </button>
               </>
