@@ -37,7 +37,7 @@ export default function Navbar() {
     isActive(path)
       ? 'bg-[#D4AF37]/20 text-[#D4AF37] font-bold border-l-4 border-[#D4AF37]'
       : 'text-white/90 hover:text-[#D4AF37] hover:bg-white/5'
-  }`;
+  } min-h-[44px] flex items-center`;
 
   return (
     <header className="sticky top-0 z-40 w-full glass-navbar text-white shadow-lg">
@@ -123,7 +123,7 @@ export default function Navbar() {
 
       {/* Mobile Dropdown */}
       {mobileMenu && (
-        <div className="lg:hidden bg-[#08203E] border-t border-[#D4AF37]/20 px-6 py-6 flex flex-col gap-3">
+        <div className="absolute left-0 right-0 top-full lg:hidden bg-[#08203E] border-t border-[#D4AF37]/20 px-4 py-4 flex flex-col gap-1.5 max-h-[calc(100vh-5.5rem)] overflow-y-auto shadow-2xl z-50 animate-slide-down">
           <Link to="/" onClick={() => setMobileMenu(false)} className={mobileLinkClass('/')}>Sanctuaries</Link>
           <Link to="/branches" onClick={() => setMobileMenu(false)} className={mobileLinkClass('/branches')}>Palaces & Resorts</Link>
           <Link to="/offers" onClick={() => setMobileMenu(false)} className={mobileLinkClass('/offers')}>Offers & Privileges</Link>

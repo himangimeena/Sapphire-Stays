@@ -80,7 +80,7 @@ export default function GuestSelector({ value, onChange, className }) {
       </button>
 
       {open && (
-        <div className="absolute right-0 sm:left-auto sm:right-0 top-full mt-2 z-[100] w-[320px] sm:w-[440px] p-6 rounded-2xl bg-[#0B1D3A] border border-[#D4AF37]/50 shadow-2xl space-y-5 text-white animate-fade-in max-h-[85vh] overflow-y-auto">
+        <div className="fixed sm:absolute left-1/2 sm:left-auto -translate-x-1/2 sm:translate-x-0 right-auto sm:right-0 top-1/2 sm:top-full -translate-y-1/2 sm:translate-y-0 mt-0 sm:mt-2 z-[100] w-[92vw] max-w-[360px] sm:w-[440px] p-5 sm:p-6 rounded-2xl bg-[#0B1D3A] border border-[#D4AF37]/50 shadow-2xl space-y-5 text-white animate-fade-in max-h-[80vh] overflow-y-auto">
           
           {/* Room Row */}
           <div className="flex items-center justify-between">

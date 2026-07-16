@@ -124,7 +124,7 @@ export default function StaffAuth() {
   };
 
   return (
-    <div className="py-12 sm:py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 animate-fade-in min-h-[85vh] flex flex-col justify-center text-slate-900 dark:text-slate-100">
+    <div className="py-8 sm:py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 animate-fade-in min-h-[85vh] flex flex-col justify-center text-slate-900 dark:text-slate-100">
       {!selectedRole ? (
         /* SCREEN 1: 6 STAFF PORTAL ROLE SELECTION CARDS */
         <div className="space-y-10">
@@ -141,7 +141,7 @@ export default function StaffAuth() {
               <div
                 key={rc.id}
                 onClick={() => handleSelectRoleCard(rc)}
-                className="glass-card p-6 sm:p-7 rounded-3xl border border-gray-200 dark:border-gray-800 hover:border-[#D4AF37] dark:hover:border-[#D4AF37] transition-all duration-300 hover:-translate-y-1.5 hover:shadow-2xl hover:shadow-amber-500/10 cursor-pointer flex flex-col justify-between group bg-white/90 dark:bg-[#051329] text-slate-900 dark:text-slate-100"
+                className="glass-card p-5 sm:p-7 rounded-3xl border border-gray-200 dark:border-gray-800 hover:border-[#D4AF37] dark:hover:border-[#D4AF37] transition-all duration-300 hover:-translate-y-1.5 hover:shadow-2xl hover:shadow-amber-500/10 cursor-pointer flex flex-col justify-between group bg-white/90 dark:bg-[#051329] text-slate-900 dark:text-slate-100"
               >
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
@@ -181,7 +181,7 @@ export default function StaffAuth() {
             <ArrowLeft className="w-4 h-4" /> Back to Staff Doorway
           </button>
 
-          <div className="glass-card p-8 sm:p-10 rounded-3xl border-2 border-[#D4AF37]/40 shadow-2xl space-y-6 bg-white/95 dark:bg-[#08203E] text-slate-900 dark:text-slate-100">
+          <div className="glass-card p-5 sm:p-8 md:p-10 rounded-2xl sm:rounded-3xl border-2 border-[#D4AF37]/40 shadow-2xl space-y-5 sm:space-y-6 bg-white/95 dark:bg-[#08203E] text-slate-900 dark:text-slate-100">
             <div className="text-center space-y-3">
               <div className="w-14 h-14 rounded-2xl bg-amber-50 dark:bg-[#051329] border border-[#D4AF37] flex items-center justify-center mx-auto shadow-lg">
                 {selectedRole.icon}

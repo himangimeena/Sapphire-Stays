@@ -66,7 +66,7 @@ export default function Home() {
   return (
     <div className="min-h-screen animate-fade-in">
       {/* Luxury Hero Section matching reference design */}
-      <section className="relative min-h-[85vh] flex flex-col justify-center items-center text-center px-4">
+      <section className="relative min-h-[80vh] sm:min-h-[85vh] flex flex-col justify-center items-center text-center px-4">
         {/* Background Image with Overlay */}
         <div className="absolute inset-0 overflow-hidden z-0">
           <div 
@@ -80,7 +80,7 @@ export default function Home() {
           <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#D4AF37]/20 border border-[#D4AF37]/40 text-[#D4AF37] text-xs font-semibold tracking-widest uppercase shadow-md">
             <Sparkles className="w-3.5 h-3.5" /> Royal Indian Hospitality
           </span>
-          <h1 className="font-serif text-4xl md:text-6xl lg:text-7xl text-white font-bold tracking-tight leading-tight drop-shadow-lg">
+          <h1 className="font-serif text-3xl sm:text-4xl md:text-6xl lg:text-7xl text-white font-bold tracking-tight leading-tight drop-shadow-lg px-2">
             The Art of Timeless Retreats
           </h1>
           <p className="text-gray-200 text-base md:text-xl max-w-2xl mx-auto font-light leading-relaxed drop-shadow">
@@ -90,7 +90,7 @@ export default function Home() {
           {/* Floating Search Box (Check In - Check Out Details Filling Box) styled explicitly to look luxury rich midnight sapphire in both light & dark mode */}
           <form 
             onSubmit={handleSearch} 
-            className="mt-12 p-4 md:p-5 rounded-3xl max-w-4xl mx-auto shadow-2xl border-2 border-[#D4AF37]/50 bg-[#051224] text-white grid grid-cols-1 md:grid-cols-4 gap-4 text-left relative z-30"
+            className="mt-8 sm:mt-12 p-3.5 sm:p-4 md:p-5 rounded-2xl sm:rounded-3xl max-w-4xl mx-auto shadow-2xl border-2 border-[#D4AF37]/50 bg-[#051224] text-white grid grid-cols-1 md:grid-cols-4 gap-3 sm:gap-4 text-left relative z-30"
           >
             {/* Destination Autocomplete */}
             <div className="p-3.5 rounded-2xl bg-[#0B1D3A] border border-[#D4AF37]/30 hover:border-[#D4AF37] transition flex flex-col justify-center relative z-50" ref={destRef}>
@@ -135,21 +135,21 @@ export default function Home() {
               <label className="text-[11px] text-[#D4AF37] font-bold uppercase tracking-wider block mb-1.5 flex items-center gap-1.5">
                 <Calendar className="w-3.5 h-3.5 shrink-0" /> Check In — Out
               </label>
-              <div className="flex items-center justify-between gap-1 text-white text-xs font-semibold w-full">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-white text-xs font-semibold w-full">
                 <input 
                   type="date" 
                   value={checkIn} 
                   onChange={(e) => setCheckIn(e.target.value)} 
                   style={{ colorScheme: 'dark' }}
-                  className="bg-transparent focus:outline-none min-w-0 w-full max-w-[125px] text-white font-mono cursor-pointer text-xs" 
+                  className="bg-transparent focus:outline-none min-w-0 w-full sm:max-w-[125px] text-white font-mono cursor-pointer text-xs p-1 sm:p-0 rounded bg-white/5 sm:bg-transparent" 
                 />
-                <span className="text-[#D4AF37] shrink-0">→</span>
+                <span className="text-[#D4AF37] shrink-0 hidden sm:block">→</span>
                 <input 
                   type="date" 
                   value={checkOut} 
                   onChange={(e) => setCheckOut(e.target.value)} 
                   style={{ colorScheme: 'dark' }}
-                  className="bg-transparent focus:outline-none min-w-0 w-full max-w-[125px] text-white font-mono cursor-pointer text-xs text-right sm:text-left" 
+                  className="bg-transparent focus:outline-none min-w-0 w-full sm:max-w-[125px] text-white font-mono cursor-pointer text-xs text-left sm:text-right p-1 sm:p-0 rounded bg-white/5 sm:bg-transparent" 
                 />
               </div>
             </div>
@@ -163,7 +163,7 @@ export default function Home() {
             </div>
 
             {/* Submit Button */}
-            <button type="submit" className="btn-gold !rounded-2xl !py-4 flex items-center justify-center gap-2 text-sm font-bold shadow-xl hover:scale-[1.02] transition">
+            <button type="submit" className="btn-gold !rounded-2xl !py-4 w-full flex items-center justify-center gap-2 text-sm font-bold shadow-xl hover:scale-[1.02] transition">
               <span>Reserve Stay</span>
               <ArrowRight className="w-4 h-4" />
             </button>
@@ -172,7 +172,7 @@ export default function Home() {
       </section>
 
       {/* Global Sanctums Grid matching Reference Screenshot 3 */}
-      <section className="py-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="py-12 sm:py-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-12">
           <div>
             <span className="text-xs uppercase tracking-[0.3em] font-semibold text-[#D4AF37]">Our Collection</span>
@@ -183,16 +183,16 @@ export default function Home() {
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-8">
           {branches.slice(0, 3).map((b, idx) => (
             <Link key={b.id} to={`/branches/${b.id}`} className="group relative overflow-hidden rounded-2xl glass-card border border-gray-200/60 dark:border-gray-800 transition hover:-translate-y-2 shadow-lg">
-              <div className="relative h-80 overflow-hidden">
+              <div className="relative h-48 sm:h-80 overflow-hidden">
                 <img src={b.hero_image} alt={b.name} className="w-full h-full object-cover group-hover:scale-110 transition duration-700" />
                 <div className="absolute top-4 left-4 px-3 py-1 rounded bg-black/70 backdrop-blur-md text-[10px] uppercase font-bold tracking-wider text-amber-300">
                   {idx === 0 ? 'Royal Heritage' : idx === 1 ? 'Seafront Horizon' : 'Private Villa'}
                 </div>
               </div>
-              <div className="p-6 space-y-3">
+              <div className="p-4 sm:p-6 space-y-2 sm:space-y-3">
                 <div className="flex justify-between items-start">
                   <h3 className="font-serif text-2xl font-bold group-hover:text-[#D4AF37] transition">{b.name}</h3>
                   <span className="flex items-center gap-1 text-xs font-bold text-amber-500 bg-amber-50 dark:bg-amber-950/40 px-2.5 py-1 rounded">
@@ -200,7 +200,7 @@ export default function Home() {
                   </span>
                 </div>
                 <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-2 leading-relaxed">{b.description}</p>
-                <div className="pt-4 border-t border-gray-200 dark:border-gray-800 flex justify-between items-center">
+                <div className="pt-4 border-t border-gray-200 dark:border-gray-800 flex flex-wrap items-center justify-between gap-3">
                   <div>
                     <span className="text-[10px] uppercase text-gray-500 dark:text-gray-400 font-semibold block">Starting From</span>
                     <span className="font-serif font-bold text-lg text-[#0F3D6E] dark:text-amber-300">₹{Number(b.starting_price).toLocaleString('en-IN')}</span>
@@ -215,7 +215,7 @@ export default function Home() {
       </section>
 
       {/* Brand Heritage Banner */}
-      <section className="bg-[#08203E] text-white py-24 my-12 border-y border-[#D4AF37]/30 shadow-2xl">
+      <section className="bg-[#08203E] text-white py-12 sm:py-24 my-6 sm:my-12 border-y border-[#D4AF37]/30 shadow-2xl">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
           <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-[#D4AF37]/30">
             <img src="https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=1000&q=80" alt="Concierge" className="w-full h-96 object-cover" />

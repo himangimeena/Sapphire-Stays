@@ -178,13 +178,13 @@ export default function ProfilePage() {
             <span className="text-sm font-serif font-bold text-[#D4AF37] tracking-wide">Royal Heritage Club Elite</span>
           </div>
           <div className="grid grid-cols-2 gap-4 pt-2">
-            <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800/80 text-center transition hover:border-[#D4AF37]/30">
+            <div className="p-3 sm:p-4 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800/80 text-center transition hover:border-[#D4AF37]/30">
               <span className="text-[10px] uppercase text-slate-500 dark:text-slate-400 block tracking-wider font-bold">Loyalty Balance</span>
               <span className="text-2xl font-serif font-bold text-[#D4AF37] block mt-1">
                 {(localUser.loyalty_points || 8500).toLocaleString()} <span className="text-xs font-sans font-normal text-slate-500">pts</span>
               </span>
             </div>
-            <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800/80 text-center transition hover:border-[#D4AF37]/30">
+            <div className="p-3 sm:p-4 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800/80 text-center transition hover:border-[#D4AF37]/30">
               <span className="text-[10px] uppercase text-slate-500 dark:text-slate-400 block tracking-wider font-bold">Total Bookings</span>
               <span className="text-2xl font-serif font-bold text-slate-800 dark:text-slate-200 block mt-1">
                 {bookingsCount} <span className="text-xs font-sans font-normal text-slate-500">Stays</span>
@@ -240,13 +240,13 @@ export default function ProfilePage() {
             </span>
           </div>
           <div className="grid grid-cols-2 gap-4 pt-2">
-            <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800/80 text-center transition">
+            <div className="p-3 sm:p-4 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800/80 text-center transition">
               <span className="text-[10px] uppercase text-slate-500 dark:text-slate-400 block tracking-wider font-bold">{actionLabel}</span>
               <span className="text-2xl font-serif font-bold text-slate-800 dark:text-slate-200 block mt-1">
                 {shiftCount}
               </span>
             </div>
-            <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800/80 text-center transition">
+            <div className="p-3 sm:p-4 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800/80 text-center transition">
               <span className="text-[10px] uppercase text-slate-500 dark:text-slate-400 block tracking-wider font-bold">Operational Compliance</span>
               <span className="text-2xl font-serif font-bold text-emerald-600 dark:text-emerald-400 block mt-1">
                 {compliance}
@@ -259,7 +259,7 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="py-12 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 animate-fade-in">
+    <div className="py-8 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 sm:space-y-8 animate-fade-in">
       
       {/* Toast Notification */}
       {toast && (
@@ -289,7 +289,7 @@ export default function ProfilePage() {
         <div className="lg:col-span-7 space-y-8">
           
           {/* Identity & Core Credentials Block */}
-          <div className="bg-white dark:bg-[#0D1E36] border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 shadow-md rounded-2xl p-6 md:p-8 transition duration-300 hover:shadow-lg relative overflow-hidden">
+          <div className="bg-white dark:bg-[#0D1E36] border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 shadow-md rounded-2xl p-4 sm:p-6 md:p-8 transition duration-300 hover:shadow-lg relative overflow-hidden">
             {/* Ambient Background Glow */}
             <div className="absolute -top-12 -right-12 w-32 h-32 bg-[#D4AF37]/5 rounded-full blur-2xl pointer-events-none" />
             
@@ -361,7 +361,7 @@ export default function ProfilePage() {
           </div>
 
           {/* Role-Specific Summary Insight Card */}
-          <div className="bg-white dark:bg-[#0D1E36] border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 shadow-md rounded-2xl p-6 transition duration-300 hover:shadow-lg relative overflow-hidden">
+          <div className="bg-white dark:bg-[#0D1E36] border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 shadow-md rounded-2xl p-4 sm:p-6 transition duration-300 hover:shadow-lg relative overflow-hidden">
             <h3 className="font-serif text-lg font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
               <Award className="w-5 h-5 text-[#D4AF37]" />
               Role-Specific Summary Insight
@@ -439,7 +439,7 @@ export default function ProfilePage() {
               {/* Update Contact Details */}
               <button
                 onClick={() => setIsEditModalOpen(true)}
-                className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-[#D4AF37]/10 dark:hover:bg-[#D4AF37]/10 hover:border-[#D4AF37]/40 text-slate-700 dark:text-slate-200 text-xs font-bold transition flex items-center justify-center gap-2"
+                className="w-full px-4 py-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-[#D4AF37]/10 dark:hover:bg-[#D4AF37]/10 hover:border-[#D4AF37]/40 text-slate-700 dark:text-slate-200 text-xs font-bold transition flex items-center justify-center gap-2"
               >
                 <Edit3 className="w-4 h-4 text-slate-400" />
                 Update Contact Details
@@ -480,7 +480,7 @@ export default function ProfilePage() {
             </div>
 
             {/* Modal Body / Form */}
-            <form onSubmit={handleUpdateContact} className="p-6 space-y-4">
+            <form onSubmit={handleUpdateContact} className="p-5 sm:p-6 space-y-4">
               <div className="space-y-1">
                 <label className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Full Name</label>
                 <input 
@@ -519,13 +519,13 @@ export default function ProfilePage() {
                 <button
                   type="button"
                   onClick={() => setIsEditModalOpen(false)}
-                  className="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 text-xs font-bold hover:bg-slate-50 dark:hover:bg-slate-800 transition"
+                  className="flex-1 px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 text-xs font-bold hover:bg-slate-50 dark:hover:bg-slate-800 transition"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#08203E] to-[#14355E] text-[#D4AF37] border border-[#D4AF37]/30 text-xs font-bold shadow-md hover:brightness-110 transition"
+                  className="flex-1 px-4 py-3 rounded-xl bg-gradient-to-r from-[#08203E] to-[#14355E] text-[#D4AF37] border border-[#D4AF37]/30 text-xs font-bold shadow-md hover:brightness-110 transition"
                 >
                   Save Changes
                 </button>

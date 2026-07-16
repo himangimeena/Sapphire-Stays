@@ -28,7 +28,7 @@ export default function Offers() {
   ];
 
   return (
-    <div className="py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 animate-fade-in space-y-12">
+    <div className="py-10 sm:py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 animate-fade-in space-y-8 sm:space-y-12">
       <div className="text-center max-w-3xl mx-auto space-y-4">
         <span className="text-xs uppercase tracking-[0.3em] font-semibold text-[#D4AF37]">Privileges & Escapes</span>
         <h1 className="font-serif text-4xl md:text-6xl font-bold">Curated Seasonal Offers</h1>
@@ -39,7 +39,7 @@ export default function Offers() {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         {offers.map((o, idx) => (
-          <div key={idx} className="glass-card p-8 rounded-2xl border border-[#D4AF37]/30 flex flex-col justify-between shadow-xl space-y-6">
+          <div key={idx} className="glass-card p-5 sm:p-8 rounded-2xl border border-[#D4AF37]/30 flex flex-col justify-between shadow-xl space-y-6">
             <div className="space-y-4">
               <span className="inline-block px-3 py-1 rounded bg-[#D4AF37]/20 text-[#D4AF37] font-bold text-xs uppercase tracking-wider">
                 Promo Code: {o.code}

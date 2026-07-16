@@ -100,8 +100,8 @@ export default function Auth() {
   };
 
   return (
-    <div className="py-16 sm:py-24 max-w-md mx-auto px-4 animate-fade-in min-h-[85vh] flex flex-col justify-center text-slate-900 dark:text-slate-100">
-      <div className="glass-card p-8 sm:p-10 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-2xl space-y-6 bg-white/95 dark:bg-[#08203E] text-slate-900 dark:text-slate-100">
+    <div className="py-8 sm:py-24 max-w-md mx-auto px-4 animate-fade-in min-h-[85vh] flex flex-col justify-center text-slate-900 dark:text-slate-100">
+      <div className="glass-card p-5 sm:p-8 md:p-10 rounded-2xl sm:rounded-3xl border border-gray-200 dark:border-gray-800 shadow-2xl space-y-5 sm:space-y-6 bg-white/95 dark:bg-[#08203E] text-slate-900 dark:text-slate-100">
         
         {/* Luxury Brand Header */}
         <div className="text-center space-y-2">

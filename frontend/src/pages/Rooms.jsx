@@ -45,7 +45,7 @@ export default function Rooms() {
     : filteredByCity.filter(r => r.tier === selectedTier);
 
   return (
-    <div className="py-12 sm:py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 animate-fade-in space-y-12 overflow-x-hidden">
+    <div className="py-10 sm:py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 animate-fade-in space-y-8 sm:space-y-12 overflow-x-hidden">
       {/* Header matching Screenshot 2 */}
       <div className="border-b border-gray-200 dark:border-gray-800 pb-8 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
         <div className="space-y-3">
@@ -134,11 +134,11 @@ export default function Rooms() {
           </div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-8">
           {filtered.map(rt => (
             <div key={rt.id} className="glass-card overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-800 flex flex-col justify-between shadow-lg">
               <div>
-                <div className="relative h-64 overflow-hidden">
+                <div className="relative h-48 sm:h-64 overflow-hidden">
                   <img src={getRoomImage(rt)} alt={rt.name} className="w-full h-full object-cover hover:scale-105 transition duration-500" />
                   <div className="absolute top-3 right-3 px-2.5 py-1 rounded bg-black/60 backdrop-blur-md text-amber-400 font-bold text-xs flex items-center gap-1">
                     <Star className="w-3.5 h-3.5 fill-amber-400" /> 4.95
@@ -147,10 +147,10 @@ export default function Rooms() {
                     {rt.branch_name || 'India Collection'}
                   </div>
                 </div>
-                <div className="p-6 space-y-3">
-                  <h3 className="font-serif text-2xl font-bold">{rt.name}</h3>
+                <div className="p-4 sm:p-6 space-y-2 sm:space-y-3">
+                  <h3 className="font-serif text-xl sm:text-2xl font-bold">{rt.name}</h3>
                   <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2">{rt.description}</p>
-                  <div className="grid grid-cols-2 gap-2 text-xs text-gray-600 dark:text-gray-400 pt-2">
+                  <div className="grid grid-cols-2 gap-2 text-[11px] sm:text-xs text-gray-600 dark:text-gray-400 pt-2">
                     <span className="flex items-center gap-1">✨ {rt.size_sqm} sqm suite</span>
                     <span className="flex items-center gap-1">👥 Up to {rt.capacity_adults} Guests</span>
                     <span className="flex items-center gap-1">🛏️ {rt.bed_type}</span>
@@ -159,13 +159,13 @@ export default function Rooms() {
                 </div>
               </div>
 
-              <div className="p-6 pt-0 flex items-center justify-between border-t border-gray-100 dark:border-gray-800/50 mt-4">
+              <div className="p-4 sm:p-6 pt-0 flex flex-wrap items-center justify-between gap-3 border-t border-gray-100 dark:border-gray-800/50 mt-4">
                 <div>
                   <span className="text-[10px] text-gray-600 dark:text-gray-400 font-semibold uppercase block">Nightly Rate</span>
-                  <span className="font-serif font-bold text-xl text-[#0F3D6E] dark:text-amber-300">₹{Number(rt.base_price).toLocaleString('en-IN')}</span>
-                  <span className="text-xs text-gray-600 dark:text-gray-400 font-semibold"> + GST</span>
+                  <span className="font-serif font-bold text-base sm:text-lg text-[#0F3D6E] dark:text-amber-300">₹{Number(rt.base_price).toLocaleString('en-IN')}</span>
+                  <span className="text-[10px] sm:text-xs text-gray-600 dark:text-gray-400 font-semibold"> + GST</span>
                 </div>
-                <Link to={`/checkout?roomTypeId=${rt.id}&branchId=${rt.branch_id}${couponParam ? `&coupon=${couponParam}` : ''}`} className="btn-luxury !py-2.5 !px-5 text-xs">
+                <Link to={`/checkout?roomTypeId=${rt.id}&branchId=${rt.branch_id}${couponParam ? `&coupon=${couponParam}` : ''}`} className="btn-luxury !py-3 sm:!py-2.5 !px-5 text-xs shrink-0">
                   Reserve Suite
                 </Link>
               </div>

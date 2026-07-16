@@ -3,7 +3,7 @@ import { Shield, Sparkles, Award, Heart } from 'lucide-react';
 
 export default function About() {
   return (
-    <div className="py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 animate-fade-in space-y-20">
+    <div className="py-10 sm:py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 animate-fade-in space-y-12 sm:space-y-20">
       <div className="text-center max-w-3xl mx-auto space-y-4">
         <span className="text-xs uppercase tracking-[0.3em] font-semibold text-[#D4AF37]">Brand Heritage</span>
         <h1 className="font-serif text-4xl md:text-6xl font-bold">A Century of Royal Elegance</h1>

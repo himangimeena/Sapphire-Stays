@@ -6,8 +6,8 @@ import { useModal } from '../context/ModalContext';
 export default function Footer() {
   const { showAlert } = useModal();
   return (
-    <footer className="bg-[#08203E] text-white border-t border-[#D4AF37]/20 pt-16 pb-12">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12">
+    <footer className="bg-[#08203E] text-white border-t border-[#D4AF37]/20 pt-10 sm:pt-16 pb-8 sm:pb-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 sm:gap-12">
         {/* Brand Summary */}
         <div className="lg:col-span-2 space-y-4">
           <div className="flex items-center gap-3">
@@ -32,25 +32,25 @@ export default function Footer() {
         {/* Iconic Indian Branches */}
         <div className="space-y-4">
           <h4 className="font-serif text-lg font-semibold text-[#D4AF37]">Global Sanctums</h4>
-          <ul className="space-y-2 text-sm text-gray-300">
-            <li><Link to="/branches/1" className="hover:text-white transition">Udaipur Royal Palace</Link></li>
-            <li><Link to="/branches/2" className="hover:text-white transition">Mumbai Marine Skyline</Link></li>
-            <li><Link to="/branches/3" className="hover:text-white transition">South Goa Beach Villa</Link></li>
-            <li><Link to="/branches/4" className="hover:text-white transition">New Delhi Diplomatic</Link></li>
-            <li><Link to="/branches/5" className="hover:text-white transition">Jaipur Heritage Fort</Link></li>
-            <li><Link to="/branches/6" className="hover:text-white transition">Munnar Cloud Pavilion</Link></li>
+          <ul className="space-y-1 md:space-y-2 text-sm text-gray-300">
+            <li><Link to="/branches/1" className="block py-1 hover:text-white transition">Udaipur Royal Palace</Link></li>
+            <li><Link to="/branches/2" className="block py-1 hover:text-white transition">Mumbai Marine Skyline</Link></li>
+            <li><Link to="/branches/3" className="block py-1 hover:text-white transition">South Goa Beach Villa</Link></li>
+            <li><Link to="/branches/4" className="block py-1 hover:text-white transition">New Delhi Diplomatic</Link></li>
+            <li><Link to="/branches/5" className="block py-1 hover:text-white transition">Jaipur Heritage Fort</Link></li>
+            <li><Link to="/branches/6" className="block py-1 hover:text-white transition">Munnar Cloud Pavilion</Link></li>
           </ul>
         </div>
 
         {/* Quick Links */}
         <div className="space-y-4">
           <h4 className="font-serif text-lg font-semibold text-[#D4AF37]">Explore</h4>
-          <ul className="space-y-2 text-sm text-gray-300">
-            <li><Link to="/rooms" className="hover:text-white transition">Curated Suites</Link></li>
-            <li><Link to="/offers" className="hover:text-white transition">Seasonal Offers</Link></li>
-            <li><Link to="/gallery" className="hover:text-white transition">Visual Sanctuary</Link></li>
-            <li><Link to="/about" className="hover:text-white transition">Our Heritage</Link></li>
-            <li><Link to="/contact" className="hover:text-white transition">Contact Concierge</Link></li>
+          <ul className="space-y-1 md:space-y-2 text-sm text-gray-300">
+            <li><Link to="/rooms" className="block py-1 hover:text-white transition">Curated Suites</Link></li>
+            <li><Link to="/offers" className="block py-1 hover:text-white transition">Seasonal Offers</Link></li>
+            <li><Link to="/gallery" className="block py-1 hover:text-white transition">Visual Sanctuary</Link></li>
+            <li><Link to="/about" className="block py-1 hover:text-white transition">Our Heritage</Link></li>
+            <li><Link to="/contact" className="block py-1 hover:text-white transition">Contact Concierge</Link></li>
           </ul>
         </div>
 
@@ -76,7 +76,7 @@ export default function Footer() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12 pt-8 border-t border-white/10 flex flex-col md:flex-row items-center justify-between text-xs text-gray-400 gap-4">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 sm:mt-12 pt-6 sm:pt-8 border-t border-white/10 flex flex-col md:flex-row items-center justify-between text-xs text-gray-400 gap-3">
         <p>© 2026 Sapphire Stays India Global Hospitality Group. All rights reserved.</p>
         <div className="flex gap-6">
           <span className="hover:text-white cursor-pointer">Privacy Policy</span>

@@ -5,7 +5,7 @@ import { useModal } from '../context/ModalContext';
 export default function Contact() {
   const { showAlert } = useModal();
   return (
-    <div className="py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 animate-fade-in space-y-16">
+    <div className="py-10 sm:py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 animate-fade-in space-y-10 sm:space-y-16">
       <div className="text-center max-w-3xl mx-auto space-y-4">
         <span className="text-xs uppercase tracking-[0.3em] font-semibold text-[#D4AF37]">Private Concierge</span>
         <h1 className="font-serif text-4xl md:text-6xl font-bold">Contact Our India Desk</h1>
@@ -15,7 +15,7 @@ export default function Contact() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-        <div className="glass-card p-8 rounded-2xl border border-[#D4AF37]/30 space-y-6">
+        <div className="glass-card p-5 sm:p-8 rounded-2xl border border-[#D4AF37]/30 space-y-6">
           <h3 className="font-serif text-2xl font-bold">Direct Inquiry Form</h3>
           <form onSubmit={e => { e.preventDefault(); showAlert('Your message has been dispatched to our India Senior Concierge.', 'Concierge Services'); }} className="space-y-4">
             <div>

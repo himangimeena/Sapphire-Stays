@@ -70,6 +70,12 @@ export default function Checkout() {
   }, [roomTypeId]);
 
   useEffect(() => {
+    if (confirmation) {
+      window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+    }
+  }, [confirmation]);
+
+  useEffect(() => {
     setCalcError(null);
     axios.post('/api/bookings/calculate', {
       roomTypeId,
@@ -199,7 +205,7 @@ export default function Checkout() {
   }
 
   return (
-    <div className="py-8 sm:py-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 animate-fade-in overflow-x-hidden text-slate-900 dark:text-slate-100">
+    <div className="py-6 sm:py-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 animate-fade-in overflow-x-hidden text-slate-900 dark:text-slate-100">
       <Link to="/rooms" className="inline-flex items-center gap-2 text-xs font-semibold text-gray-500 hover:text-gray-800 dark:hover:text-gray-200 mb-6 sm:mb-8 transition">
         <ArrowLeft className="w-4 h-4" /> Return to Selection
       </Link>
@@ -208,7 +214,7 @@ export default function Checkout() {
         {/* Left Column: Guest & Payment details */}
         <form onSubmit={handleBooking} className="lg:col-span-2 space-y-8 sm:space-y-10 min-w-0 w-full">
           {/* Stay Dates Box */}
-          <div className="p-5 sm:p-6 rounded-2xl bg-white dark:bg-[#0D1E36] border border-slate-200 dark:border-slate-800 space-y-4 shadow-sm">
+          <div className="p-4 sm:p-6 rounded-2xl bg-white dark:bg-[#0D1E36] border border-slate-200 dark:border-slate-800 space-y-4 shadow-sm">
             <div className="flex items-center gap-2 text-sm font-bold font-serif border-b border-gray-200 dark:border-gray-800 pb-3">
               <Calendar className="w-4 h-4 text-[#D4AF37]" />
               <span>Modify Royal Stay Dates</span>
@@ -220,7 +226,7 @@ export default function Checkout() {
                   type="date"
                   value={checkIn || ''}
                   onChange={e => setCheckIn(e.target.value)}
-                  className="w-full max-w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-xs sm:text-sm focus:outline-none focus:border-[#D4AF37] box-border text-slate-900 dark:text-slate-100"
+                  className="w-full max-w-full px-3.5 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-xs sm:text-sm focus:outline-none focus:border-[#D4AF37] box-border text-slate-900 dark:text-slate-100"
                 />
               </div>
               <div className="min-w-0 w-full">
@@ -229,13 +235,13 @@ export default function Checkout() {
                   type="date"
                   value={checkOut || ''}
                   onChange={e => setCheckOut(e.target.value)}
-                  className="w-full max-w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-xs sm:text-sm focus:outline-none focus:border-[#D4AF37] box-border text-slate-900 dark:text-slate-100"
+                  className="w-full max-w-full px-3.5 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-xs sm:text-sm focus:outline-none focus:border-[#D4AF37] box-border text-slate-900 dark:text-slate-100"
                 />
               </div>
             </div>
           </div>
 
-          <div className="p-5 sm:p-6 rounded-2xl bg-white dark:bg-[#0D1E36] border border-slate-200 dark:border-slate-800 space-y-6 shadow-sm">
+          <div className="p-4 sm:p-6 rounded-2xl bg-white dark:bg-[#0D1E36] border border-slate-200 dark:border-slate-800 space-y-6 shadow-sm">
             <h2 className="font-serif text-2xl sm:text-3xl font-bold border-b border-gray-200 dark:border-gray-800 pb-4">Guest Details</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="min-w-0 w-full">
@@ -265,7 +271,7 @@ export default function Checkout() {
             </div>
           </div>
 
-          <div className="p-5 sm:p-6 rounded-2xl bg-white dark:bg-[#0D1E36] border border-slate-200 dark:border-slate-800 space-y-6 shadow-sm">
+          <div className="p-4 sm:p-6 rounded-2xl bg-white dark:bg-[#0D1E36] border border-slate-200 dark:border-slate-800 space-y-6 shadow-sm">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-gray-200 dark:border-gray-800 pb-4 gap-2">
               <h2 className="font-serif text-2xl sm:text-3xl font-bold">Payment Information (India)</h2>
               <div className="flex gap-2 text-gray-500">
@@ -274,13 +280,13 @@ export default function Checkout() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 xs:grid-cols-3 sm:grid-cols-3 gap-2.5">
               {['UPI', 'Credit / Debit Card', 'Net Banking'].map(pm => (
                 <button
                   type="button"
                   key={pm}
                   onClick={() => setPaymentMethod(pm)}
-                  className={`py-3 px-4 rounded-xl text-xs font-bold uppercase transition border text-center truncate ${
+                  className={`py-3.5 px-4 rounded-xl text-xs font-bold uppercase transition border text-center truncate min-h-[46px] ${
                     paymentMethod === pm ? 'border-[#D4AF37] bg-[#D4AF37]/10 text-[#0F3D6E] dark:text-amber-300' : 'border-gray-200 dark:border-gray-700 text-gray-500'
                   }`}
                 >
@@ -316,7 +322,7 @@ export default function Checkout() {
         </form>
 
         {/* Right Column: Stay Summary Card */}
-        <div className="p-5 sm:p-6 rounded-2xl bg-white dark:bg-[#0D1E36] border border-[#D4AF37]/30 shadow-2xl lg:sticky lg:top-28 space-y-6 min-w-0 w-full">
+        <div className="p-4 sm:p-6 rounded-2xl bg-white dark:bg-[#0D1E36] border border-[#D4AF37]/30 shadow-2xl lg:sticky lg:top-28 space-y-5 sm:space-y-6 min-w-0 w-full">
           <div className="flex items-center justify-between border-b border-gray-200 dark:border-gray-800 pb-4">
             <h3 className="font-serif text-xl sm:text-2xl font-bold">Stay Summary</h3>
             <span className="px-2.5 py-1 rounded bg-[#D4AF37]/20 text-[#D4AF37] font-bold text-[10px] uppercase">Royal Tier</span>
@@ -371,7 +377,7 @@ export default function Checkout() {
             type="button"
             onClick={handleBooking}
             disabled={loading || !calc || calcError}
-            className="w-full py-4 text-xs sm:text-sm font-bold flex items-center justify-center gap-2 bg-[#08203E] hover:bg-[#14355E] text-white border border-[#D4AF37]/40 rounded-xl shadow-xl transition disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full py-4 text-xs sm:text-sm font-bold flex items-center justify-center gap-2 bg-[#08203E] hover:bg-[#14355E] text-white border border-[#D4AF37]/40 rounded-xl shadow-xl transition disabled:opacity-50 disabled:cursor-not-allowed uppercase"
           >
             <span>{loading ? 'Confirming Royal Stay...' : `Confirm & Pay ₹${Number(calc?.totalAmount || 0).toLocaleString('en-IN')}`}</span>
             <ArrowRight className="w-4 h-4 shrink-0" />
