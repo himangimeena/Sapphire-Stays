@@ -19,6 +19,23 @@ router.post('/calculate', async (req, res) => {
 
     const d1 = new Date(checkIn);
     const d2 = new Date(checkOut);
+
+    if (isNaN(d1.getTime()) || isNaN(d2.getTime())) {
+      return res.status(400).json({ error: 'Invalid check-in or check-out dates.' });
+    }
+
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    const checkInDateNormalized = new Date(checkIn);
+    checkInDateNormalized.setHours(0,0,0,0);
+
+    if (checkInDateNormalized < today) {
+      return res.status(400).json({ error: 'Check-in date cannot be in the past.' });
+    }
+    if (d2 <= d1) {
+      return res.status(400).json({ error: 'Check-out date must be strictly after check-in date.' });
+    }
+
     const nights = Math.max(1, Math.ceil((d2 - d1) / (1000 * 60 * 60 * 24)));
 
     let baseAmount = Number(roomType.base_price) * nights * Number(roomsCount);
@@ -65,7 +82,26 @@ router.post('/calculate', async (req, res) => {
 // POST /api/bookings - Create new luxury booking
 router.post('/', authenticate, async (req, res) => {
   try {
-    const { branchId, roomTypeId, checkIn, checkOut, adults = 2, children = 0, roomsCount = 1, couponCode, specialRequests, guestDetails, paymentMethod = 'UPI', upiId, assignedRoomId } = req.body;
+    const { branchId, roomTypeId, checkIn, checkOut, adults = 2, children = 0, roomsCount = 1, couponCode, specialRequests, guestDetails, paymentMethod = 'UPI', upiId, assignedRoomId, paymentOption = 'FULL' } = req.body;
+
+    const d1 = new Date(checkIn);
+    const d2 = new Date(checkOut);
+
+    if (isNaN(d1.getTime()) || isNaN(d2.getTime())) {
+      return res.status(400).json({ error: 'Invalid check-in or check-out dates.' });
+    }
+
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    const checkInDateNormalized = new Date(checkIn);
+    checkInDateNormalized.setHours(0,0,0,0);
+
+    if (checkInDateNormalized < today) {
+      return res.status(400).json({ error: 'Check-in date cannot be in the past.' });
+    }
+    if (d2 <= d1) {
+      return res.status(400).json({ error: 'Check-out date must be strictly after check-in date.' });
+    }
 
     // Validate that the assigned room is neither locked nor occupied if checking in immediately
     if (assignedRoomId) {
@@ -80,8 +116,6 @@ router.post('/', authenticate, async (req, res) => {
     if (rt.length === 0) return res.status(404).json({ error: 'Room type not found' });
     const roomType = rt[0];
 
-    const d1 = new Date(checkIn);
-    const d2 = new Date(checkOut);
     const nights = Math.max(1, Math.ceil((d2 - d1) / (1000 * 60 * 60 * 24)));
     let baseAmount = Number(roomType.base_price) * nights * Number(roomsCount);
     let discountAmount = 0;
@@ -140,11 +174,12 @@ router.post('/', authenticate, async (req, res) => {
       );
     }
 
-    // Payment record
+    // Payment record (supporting partial payment schedule)
+    const paidAmount = paymentOption === 'PARTIAL' ? Number((totalAmount * 0.20).toFixed(2)) : totalAmount;
     const txnRef = `TXN-${Date.now()}-INR`;
     await query(
       'INSERT INTO Payments (booking_id, amount, payment_method, upi_id, transaction_ref, status) VALUES (?, ?, ?, ?, ?, ?)',
-      [bookingId, totalAmount, paymentMethod, upiId || null, txnRef, 'SUCCESS']
+      [bookingId, paidAmount, paymentMethod, upiId || null, txnRef, 'SUCCESS']
     );
 
     // GST Invoice record
@@ -164,6 +199,7 @@ router.post('/', authenticate, async (req, res) => {
       bookingRef,
       bookingId,
       totalAmount,
+      paidAmount,
       currency: 'INR'
     });
   } catch (err) {

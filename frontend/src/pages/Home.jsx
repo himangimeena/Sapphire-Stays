@@ -5,13 +5,31 @@ import { Sparkles, MapPin, Calendar, Users, Star, ArrowRight, CheckCircle, Shiel
 import GuestSelector from '../components/GuestSelector';
 import { FALLBACK_BRANCHES } from '../data/fallbackData';
 
+const getTodayString = () => {
+  const today = new Date();
+  const yyyy = today.getFullYear();
+  const mm = String(today.getMonth() + 1).padStart(2, '0');
+  const dd = String(today.getDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
+};
+
+const getNextDayString = (dateStr) => {
+  if (!dateStr) return '';
+  const d = new Date(dateStr);
+  d.setDate(d.getDate() + 1);
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
+};
+
 export default function Home() {
   const [branches, setBranches] = useState([]);
   const [searchDestination, setSearchDestination] = useState('');
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const [checkIn, setCheckIn] = useState('2026-07-15');
-  const [checkOut, setCheckOut] = useState('2026-07-18');
+  const [checkIn, setCheckIn] = useState(getTodayString());
+  const [checkOut, setCheckOut] = useState(getNextDayString(getTodayString()));
   const [guests, setGuests] = useState('2 Adults, 0 Children');
   const navigate = useNavigate();
   const destRef = useRef(null);
@@ -58,6 +76,24 @@ export default function Home() {
     setShowSuggestions(false);
   };
 
+  const handleCheckInChange = (val) => {
+    if (!val) return;
+    setCheckIn(val);
+    const tomorrowStr = getNextDayString(val);
+    if (!checkOut || new Date(checkOut) <= new Date(val)) {
+      setCheckOut(tomorrowStr);
+    }
+  };
+
+  const handleCheckOutChange = (val) => {
+    if (!val) return;
+    if (new Date(val) > new Date(checkIn)) {
+      setCheckOut(val);
+    } else {
+      setCheckOut(getNextDayString(checkIn));
+    }
+  };
+
   const handleSearch = (e) => {
     e.preventDefault();
     navigate(`/rooms?city=${encodeURIComponent(searchDestination)}&checkIn=${checkIn}&checkOut=${checkOut}`);
@@ -75,7 +111,7 @@ export default function Home() {
           />
         </div>
         <div className="absolute inset-0 bg-gradient-to-b from-[#08203E]/80 via-[#08203E]/60 to-[#08203E]/95 z-10" />
-
+ 
         <div className="relative z-20 max-w-5xl mx-auto space-y-6 pt-12">
           <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#D4AF37]/20 border border-[#D4AF37]/40 text-[#D4AF37] text-xs font-semibold tracking-widest uppercase shadow-md">
             <Sparkles className="w-3.5 h-3.5" /> Royal Indian Hospitality
@@ -86,7 +122,7 @@ export default function Home() {
           <p className="text-gray-200 text-base md:text-xl max-w-2xl mx-auto font-light leading-relaxed drop-shadow">
             Discover curated palaces and coastal sanctuaries across India where centuries of Rajput grandeur meet unparalleled contemporary luxury.
           </p>
-
+ 
           {/* Floating Search Box (Check In - Check Out Details Filling Box) styled explicitly to look luxury rich midnight sapphire in both light & dark mode */}
           <form 
             onSubmit={handleSearch} 
@@ -129,7 +165,7 @@ export default function Home() {
                 </div>
               )}
             </div>
-
+ 
             {/* Check In / Out Dates Box */}
             <div className="p-3.5 rounded-2xl bg-[#0B1D3A] border border-[#D4AF37]/30 hover:border-[#D4AF37] transition flex flex-col justify-center min-w-0">
               <label className="text-[11px] text-[#D4AF37] font-bold uppercase tracking-wider block mb-1.5 flex items-center gap-1.5">
@@ -139,7 +175,8 @@ export default function Home() {
                 <input 
                   type="date" 
                   value={checkIn} 
-                  onChange={(e) => setCheckIn(e.target.value)} 
+                  min={getTodayString()}
+                  onChange={(e) => handleCheckInChange(e.target.value)} 
                   style={{ colorScheme: 'dark' }}
                   className="bg-transparent focus:outline-none min-w-0 w-full sm:max-w-[125px] text-white font-mono cursor-pointer text-xs p-1 sm:p-0 rounded bg-white/5 sm:bg-transparent" 
                 />
@@ -147,7 +184,8 @@ export default function Home() {
                 <input 
                   type="date" 
                   value={checkOut} 
-                  onChange={(e) => setCheckOut(e.target.value)} 
+                  min={getNextDayString(checkIn || getTodayString())}
+                  onChange={(e) => handleCheckOutChange(e.target.value)} 
                   style={{ colorScheme: 'dark' }}
                   className="bg-transparent focus:outline-none min-w-0 w-full sm:max-w-[125px] text-white font-mono cursor-pointer text-xs text-left sm:text-right p-1 sm:p-0 rounded bg-white/5 sm:bg-transparent" 
                 />

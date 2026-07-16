@@ -36,7 +36,9 @@ export default function Auth() {
       } else if (role === 'RECEPTIONIST') {
         navigate('/portal/reception');
       } else {
-        navigate('/');
+        const queryParams = new URLSearchParams(window.location.search);
+        const redirectPath = queryParams.get('redirect') || '/';
+        navigate(redirectPath);
       }
     } catch (err) {
       setErrorMsg(err.message || 'Authentication error occurred.');
@@ -76,7 +78,9 @@ export default function Auth() {
               } else if (role === 'RECEPTIONIST') {
                 navigate('/portal/reception');
               } else {
-                navigate('/');
+                const queryParams = new URLSearchParams(window.location.search);
+                const redirectPath = queryParams.get('redirect') || '/';
+                navigate(redirectPath);
               }
             } catch (err) {
               setErrorMsg(err.message || 'Google Authentication failed on the backend server.');

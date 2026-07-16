@@ -8,6 +8,24 @@ import { getRoomImage } from '../utils/roomImage';
 
 import { FALLBACK_ROOMS } from '../data/fallbackData';
 
+const getTodayString = () => {
+  const today = new Date();
+  const yyyy = today.getFullYear();
+  const mm = String(today.getMonth() + 1).padStart(2, '0');
+  const dd = String(today.getDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
+};
+
+const getNextDayString = (dateStr) => {
+  if (!dateStr) return '';
+  const d = new Date(dateStr);
+  d.setDate(d.getDate() + 1);
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
+};
+
 export default function Checkout() {
   const [searchParams] = useSearchParams();
   const roomTypeId = searchParams.get('roomTypeId') || 1;
@@ -17,8 +35,8 @@ export default function Checkout() {
   const { showAlert } = useModal();
 
   const [roomType, setRoomType] = useState(null);
-  const [checkIn, setCheckIn] = useState(searchParams.get('checkIn') || '2026-07-15');
-  const [checkOut, setCheckOut] = useState(searchParams.get('checkOut') || '2026-07-18');
+  const [checkIn, setCheckIn] = useState(searchParams.get('checkIn') || getTodayString());
+  const [checkOut, setCheckOut] = useState(searchParams.get('checkOut') || getNextDayString(searchParams.get('checkIn') || getTodayString()));
   const [roomsCount, setRoomsCount] = useState(searchParams.get('rooms') || 1);
   const [couponCode, setCouponCode] = useState(searchParams.get('coupon') || '');
   const [specialRequests, setSpecialRequests] = useState('');
@@ -32,6 +50,12 @@ export default function Checkout() {
   // Payment States matching Screenshot 3 requirements
   const [paymentMethod, setPaymentMethod] = useState('UPI'); // Default
   const [upiId, setUpiId] = useState('');
+  const [cardholderName, setCardholderName] = useState('');
+  const [cardNumber, setCardNumber] = useState('');
+  const [cardExpiry, setCardExpiry] = useState('');
+  const [cardCvv, setCardCvv] = useState('');
+  const [bankName, setBankName] = useState('');
+  const [paymentOption, setPaymentOption] = useState('FULL'); // FULL or PARTIAL
   
   // Bill calculation state
   const [calc, setCalc] = useState(null);
@@ -40,11 +64,42 @@ export default function Checkout() {
   const [confirmation, setConfirmation] = useState(null);
 
   useEffect(() => {
+    const draft = sessionStorage.getItem('sapphire_checkout_draft');
+    if (draft) {
+      try {
+        const parsed = JSON.parse(draft);
+        if (parsed.checkIn) setCheckIn(parsed.checkIn);
+        if (parsed.checkOut) setCheckOut(parsed.checkOut);
+        if (parsed.roomsCount) setRoomsCount(parsed.roomsCount);
+        if (parsed.couponCode) setCouponCode(parsed.couponCode);
+        if (parsed.specialRequests) setSpecialRequests(parsed.specialRequests);
+        if (parsed.firstName) setFirstName(parsed.firstName);
+        if (parsed.lastName) setLastName(parsed.lastName);
+        if (parsed.email) setEmail(parsed.email);
+        if (parsed.phone) setPhone(parsed.phone);
+        if (parsed.paymentMethod) setPaymentMethod(parsed.paymentMethod);
+        if (parsed.upiId) setUpiId(parsed.upiId);
+        if (parsed.cardholderName) setCardholderName(parsed.cardholderName);
+        if (parsed.cardNumber) setCardNumber(parsed.cardNumber);
+        if (parsed.cardExpiry) setCardExpiry(parsed.cardExpiry);
+        if (parsed.cardCvv) setCardCvv(parsed.cardCvv);
+        if (parsed.bankName) setBankName(parsed.bankName);
+        if (parsed.paymentOption) setPaymentOption(parsed.paymentOption);
+      } catch (e) {
+        console.error("Failed to parse checkout draft:", e);
+      }
+      sessionStorage.removeItem('sapphire_checkout_draft');
+    }
+  }, []);
+
+  useEffect(() => {
+    const hasDraft = sessionStorage.getItem('sapphire_checkout_draft');
+    if (hasDraft) return;
     if (user) {
-      setFirstName(user.name.split(' ')[0] || '');
-      setLastName(user.name.split(' ')[1] || '');
-      setEmail(user.email || '');
-      setPhone(user.phone || '');
+      setFirstName(prev => prev || user.name.split(' ')[0] || '');
+      setLastName(prev => prev || user.name.split(' ')[1] || '');
+      setEmail(prev => prev || user.email || '');
+      setPhone(prev => prev || user.phone || '');
     }
   }, [user]);
 
@@ -68,6 +123,24 @@ export default function Checkout() {
         }
       });
   }, [roomTypeId]);
+
+  const handleCheckInChange = (val) => {
+    if (!val) return;
+    setCheckIn(val);
+    const tomorrowStr = getNextDayString(val);
+    if (!checkOut || new Date(checkOut) <= new Date(val)) {
+      setCheckOut(tomorrowStr);
+    }
+  };
+
+  const handleCheckOutChange = (val) => {
+    if (!val) return;
+    if (new Date(val) > new Date(checkIn)) {
+      setCheckOut(val);
+    } else {
+      setCheckOut(getNextDayString(checkIn));
+    }
+  };
 
   useEffect(() => {
     if (confirmation) {
@@ -119,10 +192,99 @@ export default function Checkout() {
 
   const handleBooking = async (e) => {
     if (e) e.preventDefault();
-    if (!user) {
-      showAlert('Please sign in or use the Demo Role Switcher before booking.', 'Sign-in Required');
+
+    // Date Validations
+    const todayStr = getTodayString();
+    if (checkIn < todayStr) {
+      showAlert('Check-in date cannot be in the past.', 'Invalid Dates');
       return;
     }
+    if (checkOut <= checkIn) {
+      showAlert('Check-out date must be strictly after the check-in date.', 'Invalid Dates');
+      return;
+    }
+
+    // Guest Details Validation (Every detail is mandatory except special requests)
+    if (!firstName.trim() || !lastName.trim() || !email.trim() || !phone.trim()) {
+      showAlert('Please enter all mandatory guest details (First Name, Last Name, Email, and Phone).', 'Missing Information');
+      return;
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email.trim())) {
+      showAlert('Please enter a valid email address.', 'Invalid Email');
+      return;
+    }
+    if (!/^\+?\d{10,14}$/.test(phone.replace(/[\s-]/g, ''))) {
+      showAlert('Please enter a valid mobile number (at least 10 digits).', 'Invalid Mobile Number');
+      return;
+    }
+
+    // Payment Information Validation
+    if (paymentMethod === 'UPI') {
+      if (!upiId.trim()) {
+        showAlert('Please enter your Virtual Payment Address (VPA / UPI ID).', 'UPI ID Required');
+        return;
+      }
+      if (!upiId.includes('@')) {
+        showAlert('Please enter a valid UPI ID (e.g. username@bank).', 'Invalid UPI ID');
+        return;
+      }
+    } else if (paymentMethod === 'Credit / Debit Card') {
+      if (!cardholderName.trim() || !cardNumber.trim() || !cardExpiry.trim() || !cardCvv.trim()) {
+        showAlert('Please fill in all credit/debit card details.', 'Card Details Required');
+        return;
+      }
+      const cleanedCard = cardNumber.replace(/\D/g, '');
+      if (cleanedCard.length < 15 || cleanedCard.length > 19) {
+        showAlert('Please enter a valid card number (15-19 digits).', 'Invalid Card Number');
+        return;
+      }
+      if (!/^(0[1-9]|1[0-2])\/?([0-9]{2})$/.test(cardExpiry.trim())) {
+        showAlert('Please enter card expiry date in MM/YY format.', 'Invalid Expiry');
+        return;
+      }
+      const cleanedCvv = cardCvv.replace(/\D/g, '');
+      if (cleanedCvv.length < 3 || cleanedCvv.length > 4) {
+        showAlert('Please enter a valid 3 or 4-digit CVV.', 'Invalid CVV');
+        return;
+      }
+    } else if (paymentMethod === 'Net Banking') {
+      if (!bankName) {
+        showAlert('Please select your retail banking partner.', 'Bank Selection Required');
+        return;
+      }
+    }
+
+    if (!user) {
+      // Save draft state
+      const draft = {
+        checkIn,
+        checkOut,
+        roomsCount,
+        couponCode,
+        specialRequests,
+        firstName,
+        lastName,
+        email,
+        phone,
+        paymentMethod,
+        upiId,
+        cardholderName,
+        cardNumber,
+        cardExpiry,
+        cardCvv,
+        bankName,
+        paymentOption
+      };
+      sessionStorage.setItem('sapphire_checkout_draft', JSON.stringify(draft));
+      
+      showAlert('Guest profile saved! Redirecting to sign in/up page to finalize your reservation...', 'Authentication Required');
+      setTimeout(() => {
+        navigate(`/login?redirect=${encodeURIComponent(window.location.pathname + window.location.search)}`);
+      }, 1500);
+      return;
+    }
+
     if (calcError || !calc) {
       showAlert('Cannot proceed with booking: Live price calculation failed. Please check inputs.', 'Calculation Error');
       return;
@@ -153,7 +315,10 @@ export default function Checkout() {
         specialRequests,
         guestDetails: { firstName, lastName, email, phone },
         paymentMethod,
-        upiId
+        upiId: paymentMethod === 'UPI' ? upiId : null,
+        paymentOption,
+        cardDetails: paymentMethod === 'Credit / Debit Card' ? { cardholderName, cardNumber, cardExpiry, cardCvv } : null,
+        bankName: paymentMethod === 'Net Banking' ? bankName : null
       }, {
         headers: {
           Authorization: `Bearer ${token}`
@@ -183,10 +348,20 @@ export default function Checkout() {
             <span className="font-mono font-bold text-base sm:text-lg text-[#0F3D6E] dark:text-amber-300">{confirmation.bookingRef}</span>
           </div>
           <div className="flex justify-between text-sm">
-            <span>Total Paid (incl. India GST)</span>
+            <span>Total Stay Amount (incl. India GST)</span>
             <span className="font-bold">₹{Number(confirmation.totalAmount).toLocaleString('en-IN')}</span>
           </div>
-          <div className="flex justify-between text-sm">
+          <div className="flex justify-between text-sm text-emerald-600 dark:text-emerald-400 font-semibold">
+            <span>Amount Paid Today</span>
+            <span className="font-bold">₹{Number(confirmation.paidAmount || confirmation.totalAmount).toLocaleString('en-IN')}</span>
+          </div>
+          {confirmation.paidAmount && confirmation.paidAmount < confirmation.totalAmount && (
+            <div className="flex justify-between text-xs text-amber-600 dark:text-[#D4AF37] font-semibold border-t border-dashed border-gray-200 dark:border-gray-800 pt-2">
+              <span>Balance Payable at Check-In</span>
+              <span>₹{Number(confirmation.totalAmount - confirmation.paidAmount).toLocaleString('en-IN')}</span>
+            </div>
+          )}
+          <div className="flex justify-between text-sm pt-2 border-t border-gray-100 dark:border-gray-800">
             <span>Payment Mode</span>
             <span className="font-semibold uppercase">{paymentMethod}</span>
           </div>
@@ -225,7 +400,8 @@ export default function Checkout() {
                 <input
                   type="date"
                   value={checkIn || ''}
-                  onChange={e => setCheckIn(e.target.value)}
+                  min={getTodayString()}
+                  onChange={e => handleCheckInChange(e.target.value)}
                   className="w-full max-w-full px-3.5 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-xs sm:text-sm focus:outline-none focus:border-[#D4AF37] box-border text-slate-900 dark:text-slate-100"
                 />
               </div>
@@ -234,7 +410,8 @@ export default function Checkout() {
                 <input
                   type="date"
                   value={checkOut || ''}
-                  onChange={e => setCheckOut(e.target.value)}
+                  min={getNextDayString(checkIn || getTodayString())}
+                  onChange={e => handleCheckOutChange(e.target.value)}
                   className="w-full max-w-full px-3.5 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-xs sm:text-sm focus:outline-none focus:border-[#D4AF37] box-border text-slate-900 dark:text-slate-100"
                 />
               </div>
@@ -271,6 +448,46 @@ export default function Checkout() {
             </div>
           </div>
 
+          {/* Choose Payment Schedule */}
+          <div className="p-4 sm:p-6 rounded-2xl bg-white dark:bg-[#0D1E36] border border-slate-200 dark:border-slate-800 space-y-4 shadow-sm">
+            <div className="flex items-center gap-2 text-sm font-bold font-serif border-b border-gray-200 dark:border-gray-800 pb-3">
+              <CreditCard className="w-4 h-4 text-[#D4AF37]" />
+              <span>Choose Payment Schedule</span>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <button
+                type="button"
+                onClick={() => setPaymentOption('FULL')}
+                className={`p-4 rounded-xl border text-left flex flex-col justify-between transition ${
+                  paymentOption === 'FULL'
+                    ? 'border-[#D4AF37] bg-[#D4AF37]/5 dark:bg-[#D4AF37]/10'
+                    : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
+                }`}
+              >
+                <span className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase">Pay Full Amount</span>
+                <span className="text-lg font-serif font-bold text-[#0F3D6E] dark:text-amber-300 mt-2">
+                  ₹{Number(calc?.totalAmount || 0).toLocaleString('en-IN')}
+                </span>
+                <span className="text-[10px] text-gray-400 mt-1">Complete your luxury stay payment now</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setPaymentOption('PARTIAL')}
+                className={`p-4 rounded-xl border text-left flex flex-col justify-between transition ${
+                  paymentOption === 'PARTIAL'
+                    ? 'border-[#D4AF37] bg-[#D4AF37]/5 dark:bg-[#D4AF37]/10'
+                    : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
+                }`}
+              >
+                <span className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase">Pay Booking Charge (20%)</span>
+                <span className="text-lg font-serif font-bold text-[#0F3D6E] dark:text-amber-300 mt-2">
+                  ₹{Number((calc?.totalAmount || 0) * 0.20).toLocaleString('en-IN')}
+                </span>
+                <span className="text-[10px] text-gray-400 mt-1">Pay 20% to hold the suite, balance at check-in</span>
+              </button>
+            </div>
+          </div>
+
           <div className="p-4 sm:p-6 rounded-2xl bg-white dark:bg-[#0D1E36] border border-slate-200 dark:border-slate-800 space-y-6 shadow-sm">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-gray-200 dark:border-gray-800 pb-4 gap-2">
               <h2 className="font-serif text-2xl sm:text-3xl font-bold">Payment Information (India)</h2>
@@ -295,22 +512,55 @@ export default function Checkout() {
               ))}
             </div>
 
-            {paymentMethod === 'UPI' ? (
+            {paymentMethod === 'UPI' && (
               <div className="p-4 sm:p-5 rounded-xl bg-amber-500/5 border border-amber-500/20 space-y-3 min-w-0 w-full">
                 <label className="text-xs font-semibold text-gray-600 dark:text-gray-300 block">Enter Virtual Payment Address (VPA / UPI ID)</label>
                 <input type="text" value={upiId || ''} onChange={e => setUpiId(e.target.value)} placeholder="username@okaxis or 9876543210@paytm" className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm focus:outline-none focus:border-[#D4AF37] box-border text-slate-900 dark:text-slate-100" />
                 <p className="text-[11px] text-gray-500">Supported apps: Google Pay, PhonePe, Paytm, BHIM UPI.</p>
               </div>
-            ) : (
-              <div className="space-y-4 min-w-0 w-full">
-                <div>
-                  <label className="text-xs font-semibold text-gray-500 uppercase block mb-1">Cardholder Name</label>
-                  <input type="text" defaultValue="Julian Thorne" className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm box-border text-slate-900 dark:text-slate-100" />
+            )}
+            
+            {paymentMethod === 'Credit / Debit Card' && (
+              <div className="space-y-4 min-w-0 w-full animate-fade-in">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs font-semibold text-gray-500 uppercase block mb-1">Cardholder Name</label>
+                    <input type="text" value={cardholderName} onChange={e => setCardholderName(e.target.value)} placeholder="Julian Thorne" className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:outline-none focus:border-[#D4AF37] box-border text-slate-900 dark:text-slate-100" />
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold text-gray-500 uppercase block mb-1">Card Number</label>
+                    <input type="text" value={cardNumber} onChange={e => setCardNumber(e.target.value)} placeholder="4532 9901 2341 8891" className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 font-mono text-sm focus:outline-none focus:border-[#D4AF37] box-border text-slate-900 dark:text-slate-100" />
+                  </div>
                 </div>
-                <div>
-                  <label className="text-xs font-semibold text-gray-500 uppercase block mb-1">Card Number</label>
-                  <input type="text" defaultValue="4532 •••• •••• 8891" className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 font-mono text-sm box-border text-slate-900 dark:text-slate-100" />
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs font-semibold text-gray-500 uppercase block mb-1">Expiry Date (MM/YY)</label>
+                    <input type="text" value={cardExpiry} onChange={e => setCardExpiry(e.target.value)} placeholder="12/28" className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:outline-none focus:border-[#D4AF37] box-border text-slate-900 dark:text-slate-100" />
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold text-gray-500 uppercase block mb-1">CVV Code</label>
+                    <input type="password" maxLength={4} value={cardCvv} onChange={e => setCardCvv(e.target.value)} placeholder="•••" className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:outline-none focus:border-[#D4AF37] box-border text-slate-900 dark:text-slate-100" />
+                  </div>
                 </div>
+              </div>
+            )}
+
+            {paymentMethod === 'Net Banking' && (
+              <div className="p-4 sm:p-5 rounded-xl bg-[#D4AF37]/5 border border-[#D4AF37]/20 space-y-3 min-w-0 w-full animate-fade-in">
+                <label className="text-xs font-semibold text-gray-600 dark:text-gray-300 block">Select Retail Banking Partner</label>
+                <select 
+                  value={bankName} 
+                  onChange={e => setBankName(e.target.value)}
+                  className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm focus:outline-none focus:border-[#D4AF37] box-border text-slate-900 dark:text-slate-100 cursor-pointer"
+                >
+                  <option value="">-- Choose Your Bank --</option>
+                  <option value="State Bank of India">State Bank of India</option>
+                  <option value="HDFC Bank">HDFC Bank</option>
+                  <option value="ICICI Bank">ICICI Bank</option>
+                  <option value="Axis Bank">Axis Bank</option>
+                  <option value="Kotak Mahindra Bank">Kotak Mahindra Bank</option>
+                </select>
+                <p className="text-[11px] text-slate-500">You will be securely redirected to your bank's portal to authenticate the transaction.</p>
               </div>
             )}
 
@@ -363,13 +613,24 @@ export default function Checkout() {
             </div>
           </div>
 
+          {paymentOption === 'PARTIAL' && (
+            <div className="pt-3 pb-1 flex justify-between text-xs text-slate-500 font-medium">
+              <span>Total Stay Amount (incl. GST)</span>
+              <span>₹{Number(calc?.totalAmount || 0).toLocaleString('en-IN')}</span>
+            </div>
+          )}
+
           <div className="pt-4 border-t border-gray-200 dark:border-gray-800 flex items-center justify-between">
-            <span className="font-serif text-base sm:text-lg font-bold">Total Amount</span>
+            <span className="font-serif text-base sm:text-lg font-bold">
+              {paymentOption === 'PARTIAL' ? 'Payable Today' : 'Total Amount'}
+            </span>
             <div className="text-right">
               <span className="font-serif text-xl sm:text-2xl font-bold text-[#0F3D6E] dark:text-amber-300">
-                ₹{Number(calc?.totalAmount || 0).toLocaleString('en-IN')}
+                ₹{Number(paymentOption === 'PARTIAL' ? (calc?.totalAmount || 0) * 0.20 : (calc?.totalAmount || 0)).toLocaleString('en-IN')}
               </span>
-              <span className="block text-[10px] text-gray-600 dark:text-gray-400 font-semibold">All India taxes included</span>
+              <span className="block text-[10px] text-gray-600 dark:text-gray-400 font-semibold">
+                {paymentOption === 'PARTIAL' ? '20% Deposit to secure booking' : 'All India taxes included'}
+              </span>
             </div>
           </div>
 
@@ -379,7 +640,14 @@ export default function Checkout() {
             disabled={loading || !calc || calcError}
             className="w-full py-4 text-xs sm:text-sm font-bold flex items-center justify-center gap-2 bg-[#08203E] hover:bg-[#14355E] text-white border border-[#D4AF37]/40 rounded-xl shadow-xl transition disabled:opacity-50 disabled:cursor-not-allowed uppercase"
           >
-            <span>{loading ? 'Confirming Royal Stay...' : `Confirm & Pay ₹${Number(calc?.totalAmount || 0).toLocaleString('en-IN')}`}</span>
+            <span>
+              {loading 
+                ? 'Confirming Royal Stay...' 
+                : paymentOption === 'PARTIAL'
+                  ? `Confirm & Pay ₹${Number((calc?.totalAmount || 0) * 0.20).toLocaleString('en-IN')} (Booking Charge)`
+                  : `Confirm & Pay ₹${Number(calc?.totalAmount || 0).toLocaleString('en-IN')} (Full Amount)`
+              }
+            </span>
             <ArrowRight className="w-4 h-4 shrink-0" />
           </button>
         </div>
