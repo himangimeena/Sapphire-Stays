@@ -212,7 +212,7 @@ router.post('/', authenticate, async (req, res) => {
 router.get('/my', authenticate, async (req, res) => {
   try {
     const bookings = await query(
-      `SELECT b.*, br.name as branch_name, br.city as branch_city, rt.name as room_type_name, rt.has_breakfast, i.invoice_number, i.gstin, p.payment_method, p.transaction_ref
+      `SELECT b.*, br.name as branch_name, br.city as branch_city, rt.name as room_type_name, rt.has_breakfast, i.invoice_number, i.gstin, p.payment_method, p.transaction_ref, p.amount as amount_paid
        FROM Bookings b
        JOIN Branches br ON b.branch_id = br.id
        JOIN RoomTypes rt ON b.room_type_id = rt.id
@@ -236,13 +236,15 @@ router.get('/', authenticate, requireRoles(['SUPER_ADMIN', 'BRANCH_ADMIN', 'RECE
               COALESCE(NULLIF(bg.first_name || ' ' || bg.last_name, ' '), u.name) as guest_name, 
               COALESCE(bg.email, u.email) as guest_email, 
               COALESCE(bg.phone, u.phone) as guest_phone, 
-              r.room_number as assigned_room_number
+              r.room_number as assigned_room_number,
+              p.amount as amount_paid, p.payment_method
        FROM Bookings b
        JOIN Branches br ON b.branch_id = br.id
        JOIN RoomTypes rt ON b.room_type_id = rt.id
        JOIN Users u ON b.user_id = u.id
        LEFT JOIN BookingGuests bg ON b.id = bg.booking_id
        LEFT JOIN Rooms r ON b.assigned_room_id = r.id
+       LEFT JOIN Payments p ON b.id = p.booking_id
        ORDER BY b.created_at DESC`
     );
     res.json({ bookings });

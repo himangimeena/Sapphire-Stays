@@ -118,9 +118,16 @@ export default function CustomerPortal() {
 
                   <div className="flex flex-col md:items-end gap-3 w-full md:w-auto">
                     <div className="md:text-right">
-                      <span className="text-[10px] uppercase text-slate-600 dark:text-slate-400 font-semibold block">Total Amount Paid</span>
-                      <span className="font-serif font-bold text-xl text-[#0F3D6E] dark:text-amber-300">₹{Number(b.total_amount).toLocaleString('en-IN')}</span>
-                      <span className="text-[10px] text-slate-600 dark:text-slate-400 font-semibold block">Via {b.payment_method || 'UPI'}</span>
+                      <span className="text-[10px] uppercase text-slate-600 dark:text-slate-400 font-semibold block">Amount Paid</span>
+                      <span className="font-serif font-bold text-xl text-[#0F3D6E] dark:text-amber-300">
+                        ₹{Number(b.amount_paid !== undefined && b.amount_paid !== null ? b.amount_paid : b.total_amount).toLocaleString('en-IN')}
+                      </span>
+                      {b.amount_paid !== undefined && b.amount_paid !== null && Number(b.amount_paid) < Number(b.total_amount) && (
+                        <span className="text-[10px] text-amber-600 dark:text-amber-400 font-bold block mt-0.5">
+                          Pending: ₹{Number(b.total_amount - b.amount_paid).toLocaleString('en-IN')} (Pay at Hotel)
+                        </span>
+                      )}
+                      <span className="text-[10px] text-slate-600 dark:text-slate-400 font-semibold block mt-0.5">Via {b.payment_method || 'UPI'}</span>
                     </div>
                     <div className="flex gap-2">
                       <button
@@ -210,6 +217,16 @@ export default function CustomerPortal() {
                 <span>Total INR Amount</span>
                 <span className="text-[#0F3D6E] dark:text-amber-300">₹{Number(selectedInvoice.total_amount).toLocaleString('en-IN')}</span>
               </div>
+              <div className="flex justify-between text-sm font-semibold pt-2 border-t border-gray-100 dark:border-gray-800 text-emerald-600 dark:text-emerald-400">
+                <span>Amount Paid</span>
+                <span>₹{Number(selectedInvoice.amount_paid !== undefined && selectedInvoice.amount_paid !== null ? selectedInvoice.amount_paid : selectedInvoice.total_amount).toLocaleString('en-IN')}</span>
+              </div>
+              {selectedInvoice.amount_paid !== undefined && selectedInvoice.amount_paid !== null && Number(selectedInvoice.amount_paid) < Number(selectedInvoice.total_amount) && (
+                <div className="flex justify-between text-xs font-semibold text-amber-600 dark:text-[#D4AF37] pt-1">
+                  <span>Pending Balance (Pay at Hotel)</span>
+                  <span>₹{Number(selectedInvoice.total_amount - selectedInvoice.amount_paid).toLocaleString('en-IN')}</span>
+                </div>
+              )}
             </div>
 
             <button onClick={() => { window.print(); setSelectedInvoice(null); }} className="btn-gold !py-3 w-full text-xs font-bold flex items-center justify-center gap-2">

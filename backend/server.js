@@ -1,4 +1,5 @@
 require('dotenv').config();
+const path = require('path');
 const express = require('express');
 const cors = require('cors');
 const { initDB } = require('./src/db/index');
@@ -32,6 +33,17 @@ app.use('/api/analytics', analyticsRoutes);
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', brand: 'Sapphire Stays India Luxury Chain', timestamp: new Date() });
+});
+
+// Serve static assets from frontend build
+app.use(express.static(path.join(__dirname, '../frontend/dist')));
+
+// Fallback all other GET requests to index.html for SPA client-side routing
+app.get('*', (req, res, next) => {
+  if (req.path.startsWith('/api')) {
+    return next();
+  }
+  res.sendFile(path.join(__dirname, '../frontend/dist/index.html'));
 });
 
 async function startServer() {
